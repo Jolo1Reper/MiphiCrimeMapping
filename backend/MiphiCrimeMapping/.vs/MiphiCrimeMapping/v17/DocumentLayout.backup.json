@@ -1,0 +1,104 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\VSProjects\\MiphiCrimeMapping\\backend\\MiphiCrimeMapping\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{BD827BBF-DE65-449F-B885-8E1886E55228}|Web\\Web.csproj|d:\\vsprojects\\miphicrimemapping\\backend\\miphicrimemapping\\web\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BD827BBF-DE65-449F-B885-8E1886E55228}|Web\\Web.csproj|solutionrelative:web\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5D5987A6-4F13-40C8-B373-23A59C3EEB80}|Infrastructure\\Infrastructure.csproj|d:\\vsprojects\\miphicrimemapping\\backend\\miphicrimemapping\\infrastructure\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5D5987A6-4F13-40C8-B373-23A59C3EEB80}|Infrastructure\\Infrastructure.csproj|solutionrelative:infrastructure\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{24F82E33-BC03-45DF-B687-C02C8ACADC1F}|Application\\Application.csproj|d:\\vsprojects\\miphicrimemapping\\backend\\miphicrimemapping\\application\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{24F82E33-BC03-45DF-B687-C02C8ACADC1F}|Application\\Application.csproj|solutionrelative:application\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CDF01C19-79B0-4D43-9BB0-15A6E39120E8}|Domain\\Domain.csproj|d:\\vsprojects\\miphicrimemapping\\backend\\miphicrimemapping\\domain\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CDF01C19-79B0-4D43-9BB0-15A6E39120E8}|Domain\\Domain.csproj|solutionrelative:domain\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\VSProjects\\MiphiCrimeMapping\\backend\\MiphiCrimeMapping\\Web\\Program.cs",
+              "RelativeDocumentMoniker": "Web\\Program.cs",
+              "ToolTip": "D:\\VSProjects\\MiphiCrimeMapping\\backend\\MiphiCrimeMapping\\Web\\Program.cs",
+              "RelativeToolTip": "Web\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-20T22:12:47.967Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "D:\\VSProjects\\MiphiCrimeMapping\\backend\\MiphiCrimeMapping\\Infrastructure\\Class1.cs",
+              "RelativeDocumentMoniker": "Infrastructure\\Class1.cs",
+              "ToolTip": "D:\\VSProjects\\MiphiCrimeMapping\\backend\\MiphiCrimeMapping\\Infrastructure\\Class1.cs",
+              "RelativeToolTip": "Infrastructure\\Class1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-20T22:11:36.705Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "D:\\VSProjects\\MiphiCrimeMapping\\backend\\MiphiCrimeMapping\\Application\\Class1.cs",
+              "RelativeDocumentMoniker": "Application\\Class1.cs",
+              "ToolTip": "D:\\VSProjects\\MiphiCrimeMapping\\backend\\MiphiCrimeMapping\\Application\\Class1.cs",
+              "RelativeToolTip": "Application\\Class1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-20T22:09:56.878Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "D:\\VSProjects\\MiphiCrimeMapping\\backend\\MiphiCrimeMapping\\Domain\\Class1.cs",
+              "RelativeDocumentMoniker": "Domain\\Class1.cs",
+              "ToolTip": "D:\\VSProjects\\MiphiCrimeMapping\\backend\\MiphiCrimeMapping\\Domain\\Class1.cs",
+              "RelativeToolTip": "Domain\\Class1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-20T22:09:35.332Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
