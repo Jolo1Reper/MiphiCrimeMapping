@@ -1,3 +1,8 @@
+using Application.Interfaces;
+using Application.Services;
+using Infrastructure.Data;
+using Infrastructure.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -7,7 +12,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSingleton(new DemoDb());
+builder.Services.AddScoped<IWordRepository, FanRepository>();
+builder.Services.AddScoped<IWordService, MergeWordService>();
+
 var app = builder.Build();
+
+app.UseCors(builder => builder.WithOrigins("http://localhost:3000")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod());
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
