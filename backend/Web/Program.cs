@@ -2,19 +2,21 @@ using Application.Interfaces;
 using Application.Services;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+string connection = builder.Configuration.GetConnectionString("DefaultConnection")!;
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton(new DemoDb());
-builder.Services.AddScoped<IWordRepository, FanRepository>();
-builder.Services.AddScoped<IWordService, MergeWordService>();
+builder.Services.AddDbContext<AppCrimeMapContext>(
+    options => options.UseNpgsql(connection)
+);
+builder.Services.AddScoped<ICrimeRepository, CrimeRepository>();
+builder.Services.AddScoped<ICrimeService, CrimeService>();
 
 var app = builder.Build();
 
@@ -22,7 +24,6 @@ app.UseCors(builder => builder.WithOrigins("http://localhost:3000")
                             .AllowAnyHeader()
                             .AllowAnyMethod());
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

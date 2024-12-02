@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class Word
+    public abstract class BaseEntity
     {
-        public int Id { get; set; }
-        public string Text { get; set; } = string.Empty;
+        public virtual int Id { get; protected set; }
     }
 }
