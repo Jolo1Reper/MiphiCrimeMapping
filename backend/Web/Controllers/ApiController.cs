@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces;
+using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Web.Contracts;
+using Web.Dto;
 
 namespace Web.Controllers
 {
@@ -15,15 +16,28 @@ namespace Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateCrime([FromBody] CrimeDto request)
+        public async Task<IActionResult> CreateCrime([FromBody] CreateCrimeDto request)
         {
-            throw new NotImplementedException();
+            var crime = new Crime()
+            {
+                Type = new() { Title = request.CrimeTypeTitle },
+                Location = request.Location,
+                WantedPerson = new() { Name = request.WantedPersonName, Surname = request.WantedPersonSurname, BirthDate = DateTime.SpecifyKind(request.WantedPersonBirthDate, DateTimeKind.Utc) },
+                Point = new() { X = request.XPoint, Y = request.YPoint },
+            };
+
+            await _service.CreateCrime(crime);
+
+            return Ok();
         }
 
         [HttpGet]
-        public IActionResult ShowCrimes()
+        public IActionResult ShowAllCrimes()
         {
-            throw new NotImplementedException();
+            IEnumerable<ShowOnMapCrimeDto> crimes = _service.GetAllCrimes()
+                .Select(c => new ShowOnMapCrimeDto(c.Type.Title, c.Location, c.Point.X, c.Point.Y));
+
+            return Ok(crimes);
         }
 
         [HttpGet]
@@ -34,7 +48,7 @@ namespace Web.Controllers
         }
 
         [HttpPatch]
-        public IActionResult UpdateCrime([FromBody] CrimeDto request)
+        public IActionResult UpdateCrime([FromBody] ShowOnMapCrimeDto request)
         {
             throw new NotImplementedException();
         }
