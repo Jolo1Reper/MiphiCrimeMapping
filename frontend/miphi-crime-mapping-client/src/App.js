@@ -10,7 +10,6 @@ const App = () => {
   const handleAddPoint = (newPoint) => {
     setPoints((prevPoints) => [...prevPoints, newPoint]);
   };
-
   return (
     <div>
       <Header />
