@@ -1,25 +1,31 @@
-import logo from './logo.svg';
-import './App.css';
+// src/App.js
+import React, { useState } from "react";
+import Header from "./components/Header";
+import MapComponent from "./components/Map";
+import Sidebar from "./components/Sidebar";
 
-function App() {
+const App = () => {
+  const [points, setPoints] = useState([]);
+
+  const handleAddPoint = (newPoint) => {
+    setPoints((prevPoints) => [...prevPoints, newPoint]);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <Header />
+      <div className="container-fluid mt-3">
+        <div className="row">
+          <div className="col-md-8">
+          <MapComponent points={points} onAddPoint={handleAddPoint} />
+          </div>
+          <div className="col-md-4">
+            <Sidebar points={points} />
+          </div>
+        </div>
+      </div>
     </div>
   );
-}
+};
 
 export default App;
