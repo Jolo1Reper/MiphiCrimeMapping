@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Numerics;
 
 namespace Infrastructure.Data
 {
@@ -8,5 +9,6 @@ namespace Infrastructure.Data
         public DbSet<Crime> Crimes { get; set; } = null!;
         public DbSet<CrimeType> CrimeTypes { get; set; } = null!;
         public DbSet<WantedPerson> WantedPersons { get; set; } = null!;
+        public DbSet<Lawsuit> Lawsuits { get; set; } = null!;
     }
 }

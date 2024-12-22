@@ -1,13 +1,12 @@
-﻿namespace Web.Dto
+﻿namespace Application.DTOs.Requests
 {
-    public record CreateCrimeDto
-    (
+    public record CreateCrimeRequest(
         string CrimeTypeTitle,
         string WantedPersonName,
         string WantedPersonSurname,
         DateTime WantedPersonBirthDate,
+        DateTime CrimeDate,
         string Location,
-        double XPoint,
-        double YPoint
-    );
+        double PointLatitude,
+        double PointLongitude);
 }

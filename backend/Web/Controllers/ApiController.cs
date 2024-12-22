@@ -1,61 +1,75 @@
-﻿using Application.Interfaces;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Web.Dto;
+using Application.DTOs.Requests;
+using Application.DTOs.Responses;
+using Application.UseCases.Interfaces;
+using Application.UseCases;
 
 namespace Web.Controllers
 {
     [ApiController]
-    [Route("api/crimes")]
-    public class ApiWordController : ControllerBase
+    [Route("api/crime-marks")]
+    public class MephiApiController : ControllerBase
     {
-        ICrimeService _service;
-        public ApiWordController(ICrimeService service)
+        private readonly IGetAllCrimeUseCase _getAllUseCase;
+        private readonly ICreateCrimeUseCase _createCrimeUseCase;
+        private readonly IGetCrimeUseCase _getCrimeUseCase;
+        private readonly IUpdateCrimeUseCase _updateCrimeUseCase;
+        public MephiApiController(IGetAllCrimeUseCase getAllCrimeUseCase, ICreateCrimeUseCase createCrimeUseCase, IGetCrimeUseCase getCrimeUseCase, IUpdateCrimeUseCase updateCrimeUseCase)
         {
-            _service = service; 
+            _getAllUseCase = getAllCrimeUseCase; 
+            _createCrimeUseCase = createCrimeUseCase;
+            _getCrimeUseCase = getCrimeUseCase;
+            _updateCrimeUseCase = updateCrimeUseCase;
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateCrime([FromBody] CreateCrimeDto request)
+        public async Task<IActionResult> AddCrimeMark([FromBody] CreateCrimeRequest request)
         {
-            var crime = new Crime()
-            {
-                Type = new() { Title = request.CrimeTypeTitle },
-                Location = request.Location,
-                WantedPerson = new() { Name = request.WantedPersonName, Surname = request.WantedPersonSurname, BirthDate = DateTime.SpecifyKind(request.WantedPersonBirthDate, DateTimeKind.Utc) },
-                Point = new() { X = request.XPoint, Y = request.YPoint },
-            };
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            await _service.CreateCrime(crime);
+            var response = await _createCrimeUseCase.Handle(request);
 
-            return Ok();
+            return CreatedAtAction(nameof(ShowCrimeMark), new { id = response.Id }, response);
         }
 
         [HttpGet]
-        public IActionResult ShowAllCrimes()
+        public async Task<IActionResult> ShowAllCrimeMarks()
         {
-            IEnumerable<ShowOnMapCrimeDto> crimes = _service.GetAllCrimes()
-                .Select(c => new ShowOnMapCrimeDto(c.Type.Title, c.Location, c.Point.X, c.Point.Y));
+            IEnumerable<ShowOnMapCrimeResponse> response = await _getAllUseCase.Handle();
 
-            return Ok(crimes);
+            return Ok(response);
         }
 
         [HttpGet]
         [Route("{id}")]
-        public IActionResult GetCrime(int id)
+        public async Task<IActionResult> ShowCrimeMark(Guid id)
         {
-            throw new NotImplementedException();
+            var crimeDto = await _getCrimeUseCase.Handle(id);
+
+            if(crimeDto == null)
+            {
+                return NotFound(new { Message = $"Crime with ID {id} not found." });
+            }
+
+            return Ok(crimeDto);
         }
 
         [HttpPatch]
-        public IActionResult UpdateCrime([FromBody] ShowOnMapCrimeDto request)
+        public async Task<IActionResult> UpdateCrimeMark([FromBody] UpdateCrimeRequest request)
         {
-            throw new NotImplementedException();
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var response = await _updateCrimeUseCase.Handle(request);
+
+            return Ok(response);
         }
 
         [HttpDelete]
         [Route("{id}")]
-        public IActionResult RemoveCrime(int id) 
+        public IActionResult RemoveCrimeMark(Guid id) 
         {
             throw new NotImplementedException();
         }

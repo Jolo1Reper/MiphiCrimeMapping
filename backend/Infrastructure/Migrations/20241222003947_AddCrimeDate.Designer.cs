@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppCrimeMapContext))]
-    [Migration("20241209214151_MinDataAndSetNull")]
-    partial class MinDataAndSetNull
+    [Migration("20241222003947_AddCrimeDate")]
+    partial class AddCrimeDate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,38 +28,39 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Crime", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Applicant")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("CreateDate")
+                    b.Property<DateTime>("CreateAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("LawsuitId")
-                        .HasColumnType("integer");
+                    b.Property<DateTime>("CrimeDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("LawsuitId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Location")
                         .HasColumnType("text");
 
-                    b.Property<int>("TypeId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("TypeId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("WantedPersonId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("WantedPersonId")
+                        .HasColumnType("uuid");
 
                     b.ComplexProperty<Dictionary<string, object>>("Point", "Domain.Entities.Crime.Point#Point", b1 =>
                         {
                             b1.IsRequired();
 
-                            b1.Property<double>("X")
+                            b1.Property<double>("Latitude")
                                 .HasColumnType("double precision");
 
-                            b1.Property<double>("Y")
+                            b1.Property<double>("Longitude")
                                 .HasColumnType("double precision");
                         });
 
@@ -76,11 +77,9 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.CrimeType", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
@@ -96,11 +95,9 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Lawsuit", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Decision")
                         .IsRequired()
@@ -124,8 +121,8 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("PersonId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("ReceiptDate")
                         .HasColumnType("timestamp with time zone");
@@ -134,16 +131,14 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.ToTable("Lawsuit");
+                    b.ToTable("Lawsuits");
                 });
 
             modelBuilder.Entity("Domain.Entities.WantedPerson", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("AddInfo")
                         .HasColumnType("text");

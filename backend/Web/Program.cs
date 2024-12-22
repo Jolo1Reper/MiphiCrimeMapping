@@ -1,8 +1,9 @@
-using Application.Interfaces;
-using Application.Services;
+using Domain.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Application.UseCases.Interfaces;
+using Application.UseCases;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,8 +16,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppCrimeMapContext>(
     options => options.UseNpgsql(connection)
 );
-builder.Services.AddScoped<ICrimeRepository, CrimeRepository>();
-builder.Services.AddScoped<ICrimeService, CrimeService>();
+builder.Services.AddScoped<ICrimeReportRepository, CrimeReportRepository>();
+builder.Services.AddScoped<ICreateCrimeUseCase, CreateCrimeUseCase>();
+builder.Services.AddScoped<IGetAllCrimeUseCase, GetAllCrimeUseCase>();
+builder.Services.AddScoped<IGetCrimeUseCase, GetCrimeUseCase>();
+builder.Services.AddScoped<IUpdateCrimeUseCase, UpdateCrimeUseCase>();
 
 var app = builder.Build();
 
