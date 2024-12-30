@@ -286,4 +286,7 @@ psd
 thumb
 sketch
 
+# data
+postgres_data/
+
 # End of https://www.toptal.com/developers/gitignore/api/react,aspnetcore

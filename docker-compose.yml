@@ -1,0 +1,47 @@
+services:
+  database:
+    image: postgres:16
+    container_name: crime_map_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: crimemapdb
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./crimemapdb_dump.sql:/docker-entrypoint-initdb.d/crimemapdb_dump.sql
+    ports:
+      - "5432:5432"
+
+  api:
+    image: ${DOCKER_REGISTRY-}api
+    build:
+      context: ./backend
+      dockerfile: Web/Dockerfile
+    container_name: crime_map_api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ALLOWED_ORIGINS=http://localhost:3000
+      - CONNECTION_STRING=Host=database;Port=5432;Database=crimemapdb;Username=postgres;Password=postgres
+    depends_on:
+      - database
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+     
+  client:
+    image: ${DOCKER_REGISTRY-}client
+    build:
+      context: ./frontend/miphi-crime-mapping-client
+      dockerfile: Dockerfile
+    container_name: crime_map_client
+    environment:
+      - WATCHPACK_POLLING=true
+      - REACT_APP_API_URL=http://localhost:8080/api/crime-marks
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/miphi-crime-mapping-client:/app
+      - /app/node_modules
+    stdin_open: true

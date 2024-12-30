@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppCrimeMapContext))]
-    partial class AppCrimeMapContextModelSnapshot : ModelSnapshot
+    [Migration("20241221235950_DelPointId")]
+    partial class DelPointId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,9 +36,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreateAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("CrimeDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("LawsuitId")

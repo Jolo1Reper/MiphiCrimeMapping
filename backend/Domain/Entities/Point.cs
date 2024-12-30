@@ -5,7 +5,7 @@ namespace Domain.Entities
     [ComplexType]
     public class Point
     {
-        public double X { get; set; }
-        public double Y { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
     }
 }

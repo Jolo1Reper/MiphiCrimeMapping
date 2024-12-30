@@ -1,13 +1,12 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitMigration : Migration
+    public partial class AddIdRelashionshipsAndLawsuits : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,10 +15,9 @@ namespace Infrastructure.Migrations
                 name: "CrimeTypes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false)
+                    Description = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -30,14 +28,13 @@ namespace Infrastructure.Migrations
                 name: "WantedPersons",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Surname = table.Column<string>(type: "text", nullable: false),
-                    Patronymic = table.Column<string>(type: "text", nullable: false),
+                    Patronymic = table.Column<string>(type: "text", nullable: true),
                     BirthDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    RegistrationAddress = table.Column<string>(type: "text", nullable: false),
-                    AddInfo = table.Column<string>(type: "text", nullable: false)
+                    RegistrationAddress = table.Column<string>(type: "text", nullable: true),
+                    AddInfo = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -45,14 +42,13 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Lawsuit",
+                name: "Lawsuits",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Number = table.Column<string>(type: "text", nullable: false),
                     ReceiptDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    PersonId = table.Column<int>(type: "integer", nullable: false),
+                    PersonId = table.Column<Guid>(type: "uuid", nullable: false),
                     Judge = table.Column<string>(type: "text", nullable: false),
                     DecisionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Decision = table.Column<string>(type: "text", nullable: false),
@@ -61,9 +57,9 @@ namespace Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Lawsuit", x => x.Id);
+                    table.PrimaryKey("PK_Lawsuits", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Lawsuit_WantedPersons_PersonId",
+                        name: "FK_Lawsuits_WantedPersons_PersonId",
                         column: x => x.PersonId,
                         principalTable: "WantedPersons",
                         principalColumn: "Id",
@@ -74,15 +70,16 @@ namespace Infrastructure.Migrations
                 name: "Crimes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Applicant = table.Column<string>(type: "text", nullable: false),
-                    TypeId = table.Column<int>(type: "integer", nullable: false),
-                    WantedPersonId = table.Column<int>(type: "integer", nullable: false),
-                    Location = table.Column<string>(type: "text", nullable: false),
-                    LawsuitId = table.Column<int>(type: "integer", nullable: true),
-                    Point_X = table.Column<double>(type: "double precision", nullable: false),
-                    Point_Y = table.Column<double>(type: "double precision", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Applicant = table.Column<string>(type: "text", nullable: true),
+                    TypeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    WantedPersonId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Location = table.Column<string>(type: "text", nullable: true),
+                    CreateAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LawsuitId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Point_Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Point_Latitude = table.Column<double>(type: "double precision", nullable: false),
+                    Point_Longitude = table.Column<double>(type: "double precision", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -94,9 +91,9 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Crimes_Lawsuit_LawsuitId",
+                        name: "FK_Crimes_Lawsuits_LawsuitId",
                         column: x => x.LawsuitId,
-                        principalTable: "Lawsuit",
+                        principalTable: "Lawsuits",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Crimes_WantedPersons_WantedPersonId",
@@ -122,8 +119,8 @@ namespace Infrastructure.Migrations
                 column: "WantedPersonId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Lawsuit_PersonId",
-                table: "Lawsuit",
+                name: "IX_Lawsuits_PersonId",
+                table: "Lawsuits",
                 column: "PersonId");
         }
 
@@ -137,7 +134,7 @@ namespace Infrastructure.Migrations
                 name: "CrimeTypes");
 
             migrationBuilder.DropTable(
-                name: "Lawsuit");
+                name: "Lawsuits");
 
             migrationBuilder.DropTable(
                 name: "WantedPersons");

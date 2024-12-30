@@ -4,3 +4,29 @@ GET {{Web_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+POST
+# {
+#     "crimeTypeTitle": "кража",
+#   "wantedPersonName": "Сергей",
+#   "wantedPersonSurname": "Петров",
+#   "wantedPersonBirthDate": "2000-12-21",
+#   "crimeDate": "2024-12-20",
+#   "location": "Улица Гагарина",
+#   "pointLatitude": 54.3214,
+#   "pointLatitude": 43.6629
+# }
+
+
+PATCH
+# {
+# "id": "f17e9dd0-5824-4f60-affc-d72d5d43dfb8",
+#     "crimeTypeTitle": "ограбление",
+#   "wantedPersonName": "Сергей",
+#   "wantedPersonSurname": "Петров",
+#   "wantedPersonBirthDate": "2000-12-21",
+#   "crimeDate": "2024-12-20",
+#   "location": "Улица Ленина",
+#   "pointLatitude": 100.3214,
+#   "pointLatitude": 43.6629
+# }

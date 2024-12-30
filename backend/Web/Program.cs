@@ -1,28 +1,41 @@
-using Application.Interfaces;
-using Application.Services;
+using Domain.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Application.UseCases.Interfaces;
+using Application.UseCases;
 
 var builder = WebApplication.CreateBuilder(args);
 
-string connection = builder.Configuration.GetConnectionString("DefaultConnection")!;
+string connection = Environment.GetEnvironmentVariable("CONNECTION_STRING") ?? builder.Configuration.GetConnectionString("DefaultConnection")!;
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowClientCrimeMapApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddDbContext<AppCrimeMapContext>(
     options => options.UseNpgsql(connection)
 );
-builder.Services.AddScoped<ICrimeRepository, CrimeRepository>();
-builder.Services.AddScoped<ICrimeService, CrimeService>();
+builder.Services.AddScoped<ICrimeReportRepository, CrimeReportRepository>();
+builder.Services.AddScoped<ICreateCrimeUseCase, CreateCrimeUseCase>();
+builder.Services.AddScoped<IGetAllCrimeUseCase, GetAllCrimeUseCase>();
+builder.Services.AddScoped<IGetCrimeUseCase, GetCrimeUseCase>();
+builder.Services.AddScoped<IUpdateCrimeUseCase, UpdateCrimeUseCase>();
 
 var app = builder.Build();
 
-app.UseCors(builder => builder.WithOrigins("http://localhost:3000")
-                            .AllowAnyHeader()
-                            .AllowAnyMethod());
+app.UseCors("AllowClientCrimeMapApp");
 
 if (app.Environment.IsDevelopment())
 {
@@ -30,8 +43,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

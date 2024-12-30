@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddCreateDate : Migration
+    public partial class AddCrimeDate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTime>(
-                name: "CreateDate",
+                name: "CrimeDate",
                 table: "Crimes",
                 type: "timestamp with time zone",
                 nullable: false,
@@ -23,7 +23,7 @@ namespace Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "CreateDate",
+                name: "CrimeDate",
                 table: "Crimes");
         }
     }
