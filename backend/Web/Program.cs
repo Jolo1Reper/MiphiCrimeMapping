@@ -43,7 +43,7 @@ builder.Services.AddScoped<ICreateCrimeService, CreateCrimeService>();
 builder.Services.AddScoped<IGetAllCrimeTypesUseCase, GetAllCrimeTypesUseCase>();
 builder.Services.AddScoped<IGetCrimeTypeUseCase, GetCrimeTypeUseCase>();
 builder.Services.AddScoped<IGetAllWantedPersonsUseCase, GetAllWantedPersonsUseCase>();
-// builder.Services.AddScoped<IGetWantedPersonUseCase, GetWantedPersonUseCase>();
+builder.Services.AddScoped<IGetWantedPersonUseCase, GetWantedPersonUseCase>();
 
 var app = builder.Build();
 

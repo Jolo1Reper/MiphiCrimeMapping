@@ -16,5 +16,6 @@ namespace Domain.Interfaces
         Task<Guid> GetWantedPersonIdByData(string name, string surname, DateTime birthDate);
         bool ContainCrimeType(Guid id);
         Task<CrimeType?> GetCrimeTypeById(Guid id);
+        Task<WantedPerson?> GetWantedPersonById(Guid id);
     }
 }

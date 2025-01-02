@@ -20,7 +20,7 @@ namespace Application.UseCases
                 return null;
             }
 
-            return new GetCrimeTypeResponse(crimeType.Title);
+            return new GetCrimeTypeResponse(crimeType.Id, crimeType.Title);
         }
     }
 }

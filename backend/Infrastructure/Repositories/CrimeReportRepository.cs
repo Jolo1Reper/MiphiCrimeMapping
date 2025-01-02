@@ -100,5 +100,11 @@ namespace Infrastructure.Repositories
             CrimeType? crimeType = await _db.CrimeTypes.FirstOrDefaultAsync(t => t.Id == id);
             return crimeType;
         }
+
+        public async Task<WantedPerson?> GetWantedPersonById(Guid id)
+        {
+            var person = await _db.WantedPersons.FirstOrDefaultAsync(p => p.Id == id);
+            return person;
+        }
     }
 }

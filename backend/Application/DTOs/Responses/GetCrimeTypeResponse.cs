@@ -1,4 +1,4 @@
 ﻿namespace Application.DTOs.Responses
 {
-    public record GetCrimeTypeResponse(string Title);
+    public record GetCrimeTypeResponse(Guid Id, string Title);
 }
