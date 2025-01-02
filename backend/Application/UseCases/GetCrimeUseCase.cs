@@ -7,9 +7,9 @@ namespace Application.UseCases
     public class GetCrimeUseCase : IGetCrimeUseCase
     {
         private ICrimeReportRepository _repo;
-        public GetCrimeUseCase(ICrimeReportRepository crimeReportRepository)
+        public GetCrimeUseCase(ICrimeReportRepository repository)
         {
-            _repo = crimeReportRepository;
+            _repo = repository;
         }
         public async Task<GetCrimeResponse?> Handle(Guid id)
         {
@@ -22,8 +22,10 @@ namespace Application.UseCases
 
             return new GetCrimeResponse
             (
-                crime.Id, 
+                crime.Id,
+                crime.TypeId,
                 crime.Type.Title,
+                crime.WantedPersonId,
                 crime.WantedPerson.Name,
                 crime.WantedPerson.Surname,
                 crime.WantedPerson.BirthDate,

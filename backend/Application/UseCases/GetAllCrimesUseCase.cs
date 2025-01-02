@@ -5,10 +5,10 @@ using Application.DTOs.Responses;
 
 namespace Application.UseCases
 {
-    public class GetAllCrimeUseCase : IGetAllCrimeUseCase
+    public class GetAllCrimesUseCase : IGetAllCrimesUseCase
     {
         ICrimeReportRepository _repo;
-        public GetAllCrimeUseCase(ICrimeReportRepository repository)
+        public GetAllCrimesUseCase(ICrimeReportRepository repository)
         {
             _repo = repository;
         }
@@ -19,7 +19,8 @@ namespace Application.UseCases
             IEnumerable<ShowOnMapCrimeResponse> crimeDtos = crimes.Select(c => new ShowOnMapCrimeResponse(
                     c.Id, c.Type.Title, 
                     c.Location, c.Point.Latitude, 
-                    c.Point.Longitude));
+                    c.Point.Longitude)
+            );
 
             return crimeDtos;
         }

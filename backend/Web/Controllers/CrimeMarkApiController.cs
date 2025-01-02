@@ -1,37 +1,31 @@
-﻿using Domain.Entities;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Application.DTOs.Requests;
 using Application.DTOs.Responses;
 using Application.UseCases.Interfaces;
-using Application.UseCases;
 
 namespace Web.Controllers
 {
     [ApiController]
     [Route("api/crime-marks")]
-    public class MephiApiController : ControllerBase
+    public class CrimeMarkApiController : ControllerBase
     {
-        private readonly IGetAllCrimeUseCase _getAllUseCase;
+        private readonly IGetAllCrimesUseCase _getAllUseCase;
         private readonly ICreateCrimeUseCase _createCrimeUseCase;
         private readonly IGetCrimeUseCase _getCrimeUseCase;
         private readonly IUpdateCrimeUseCase _updateCrimeUseCase;
-        public MephiApiController(IGetAllCrimeUseCase getAllCrimeUseCase, ICreateCrimeUseCase createCrimeUseCase, IGetCrimeUseCase getCrimeUseCase, IUpdateCrimeUseCase updateCrimeUseCase)
+        private readonly IDeleteCrimeUseCase _deleteCrimeUseCase;
+        public CrimeMarkApiController(
+            IGetAllCrimesUseCase getAllCrimeUseCase, 
+            ICreateCrimeUseCase createCrimeUseCase, 
+            IGetCrimeUseCase getCrimeUseCase, 
+            IUpdateCrimeUseCase updateCrimeUseCase,
+            IDeleteCrimeUseCase deleteCrimeUseCase)
         {
             _getAllUseCase = getAllCrimeUseCase; 
             _createCrimeUseCase = createCrimeUseCase;
             _getCrimeUseCase = getCrimeUseCase;
             _updateCrimeUseCase = updateCrimeUseCase;
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AddCrimeMark([FromBody] CreateCrimeRequest request)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var response = await _createCrimeUseCase.Handle(request);
-
-            return CreatedAtAction(nameof(ShowCrimeMark), new { id = response.Id }, response);
+            _deleteCrimeUseCase = deleteCrimeUseCase;
         }
 
         [HttpGet]
@@ -48,12 +42,27 @@ namespace Web.Controllers
         {
             var crimeDto = await _getCrimeUseCase.Handle(id);
 
-            if(crimeDto == null)
+            if (crimeDto == null)
             {
                 return NotFound(new { Message = $"Crime with ID {id} not found." });
             }
 
             return Ok(crimeDto);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddCrimeMark([FromBody] CreateCrimeRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var response = await _createCrimeUseCase.Handle(request);
+            if (response is null)
+            {
+                return BadRequest(response);
+            }
+
+            return CreatedAtAction(nameof(ShowCrimeMark), new { id = response.Id }, response);
         }
 
         [HttpPatch]
@@ -69,9 +78,10 @@ namespace Web.Controllers
 
         [HttpDelete]
         [Route("{id}")]
-        public IActionResult RemoveCrimeMark(Guid id) 
+        public async Task<IActionResult> RemoveCrimeMark(Guid id) 
         {
-            throw new NotImplementedException();
+            await _deleteCrimeUseCase.Handle(id);
+            return Ok();
         }
     }
 }

@@ -5,6 +5,6 @@ namespace Application.UseCases.Interfaces
 {
     public interface ICreateCrimeUseCase
     {
-        Task<CreateCrimeResponse> Handle(CreateCrimeRequest request);
+        Task<CreateCrimeResponse?> Handle(CreateCrimeRequest request);
     }
 }

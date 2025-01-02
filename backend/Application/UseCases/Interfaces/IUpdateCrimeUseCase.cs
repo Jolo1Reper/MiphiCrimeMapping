@@ -10,6 +10,6 @@ namespace Application.UseCases.Interfaces
 {
     public interface IUpdateCrimeUseCase
     {
-        Task<UpdateCrimeResponse> Handle(UpdateCrimeRequest request);
+        Task<UpdateCrimeResponse?> Handle(UpdateCrimeRequest request);
     }
 }

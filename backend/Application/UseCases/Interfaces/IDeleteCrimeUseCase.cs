@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Entities
+namespace Application.UseCases.Interfaces
 {
-    public abstract class BaseEntity
+    public interface IDeleteCrimeUseCase
     {
-        public virtual Guid Id { get; set; }
+        Task Handle(Guid id);
     }
 }
