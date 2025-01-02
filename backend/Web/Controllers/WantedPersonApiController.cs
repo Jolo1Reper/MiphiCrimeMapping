@@ -8,9 +8,11 @@ namespace Web.Controllers
     public class WantedPersonApiController : ControllerBase
     {
         IGetAllWantedPersonsUseCase _getAllWantedPersons;
-        public WantedPersonApiController(IGetAllWantedPersonsUseCase getAllWantedPersons)
+        IGetWantedPersonUseCase _getWantedPerson;
+        public WantedPersonApiController(IGetAllWantedPersonsUseCase getAllWantedPersons, IGetWantedPersonUseCase getWantedPerson)
         {
             _getAllWantedPersons = getAllWantedPersons;
+            _getWantedPerson = getWantedPerson;
         }
 
         [HttpGet]
@@ -25,7 +27,14 @@ namespace Web.Controllers
         [Route("{id}")]
         public async Task<IActionResult> GetWantedPerson(Guid id)
         {
-            throw new NotImplementedException();
+            var response = await _getWantedPerson.Handle(id);
+
+            if (response == null)
+            {
+                return NotFound(new { Message = $"Wanted person with ID {id} not found." });
+            }
+
+            return Ok(response);
         }
     }
 }

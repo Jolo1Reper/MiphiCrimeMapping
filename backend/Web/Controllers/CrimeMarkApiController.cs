@@ -9,29 +9,29 @@ namespace Web.Controllers
     [Route("api/crime-marks")]
     public class CrimeMarkApiController : ControllerBase
     {
-        private readonly IGetAllCrimesUseCase _getAllUseCase;
-        private readonly ICreateCrimeUseCase _createCrimeUseCase;
-        private readonly IGetCrimeUseCase _getCrimeUseCase;
-        private readonly IUpdateCrimeUseCase _updateCrimeUseCase;
-        private readonly IDeleteCrimeUseCase _deleteCrimeUseCase;
+        private readonly IGetAllCrimesUseCase _getAllCrimes;
+        private readonly ICreateCrimeUseCase _createCrime;
+        private readonly IGetCrimeUseCase _getCrime;
+        private readonly IUpdateCrimeUseCase _updateCrime;
+        private readonly IDeleteCrimeUseCase _deleteCrime;
         public CrimeMarkApiController(
-            IGetAllCrimesUseCase getAllCrimeUseCase, 
-            ICreateCrimeUseCase createCrimeUseCase, 
-            IGetCrimeUseCase getCrimeUseCase, 
-            IUpdateCrimeUseCase updateCrimeUseCase,
-            IDeleteCrimeUseCase deleteCrimeUseCase)
+            IGetAllCrimesUseCase getAllCrime, 
+            ICreateCrimeUseCase createCrime, 
+            IGetCrimeUseCase getCrime, 
+            IUpdateCrimeUseCase updateCrime,
+            IDeleteCrimeUseCase deleteCrime)
         {
-            _getAllUseCase = getAllCrimeUseCase; 
-            _createCrimeUseCase = createCrimeUseCase;
-            _getCrimeUseCase = getCrimeUseCase;
-            _updateCrimeUseCase = updateCrimeUseCase;
-            _deleteCrimeUseCase = deleteCrimeUseCase;
+            _getAllCrimes = getAllCrime; 
+            _createCrime = createCrime;
+            _getCrime = getCrime;
+            _updateCrime = updateCrime;
+            _deleteCrime = deleteCrime;
         }
 
         [HttpGet]
         public async Task<IActionResult> ShowAllCrimeMarks()
         {
-            IEnumerable<ShowOnMapCrimeResponse> response = await _getAllUseCase.Handle();
+            IEnumerable<ShowOnMapCrimeResponse> response = await _getAllCrimes.Handle();
 
             return Ok(response);
         }
@@ -40,7 +40,7 @@ namespace Web.Controllers
         [Route("{id}")]
         public async Task<IActionResult> ShowCrimeMark(Guid id)
         {
-            var crimeDto = await _getCrimeUseCase.Handle(id);
+            var crimeDto = await _getCrime.Handle(id);
 
             if (crimeDto == null)
             {
@@ -56,7 +56,7 @@ namespace Web.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var response = await _createCrimeUseCase.Handle(request);
+            var response = await _createCrime.Handle(request);
             if (response is null)
             {
                 return BadRequest(response);
@@ -71,7 +71,7 @@ namespace Web.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var response = await _updateCrimeUseCase.Handle(request);
+            var response = await _updateCrime.Handle(request);
 
             return Ok(response);
         }
@@ -80,7 +80,7 @@ namespace Web.Controllers
         [Route("{id}")]
         public async Task<IActionResult> RemoveCrimeMark(Guid id) 
         {
-            await _deleteCrimeUseCase.Handle(id);
+            await _deleteCrime.Handle(id);
             return Ok();
         }
     }
