@@ -3,7 +3,7 @@ using Domain.Entities;
 
 namespace Application.UseCases.Interfaces
 {
-    public interface IGetAllCrimeUseCase
+    public interface IGetAllCrimesUseCase
     {
         Task<IEnumerable<ShowOnMapCrimeResponse>> Handle();
     }

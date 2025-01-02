@@ -2,6 +2,7 @@
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Numerics;
 
 namespace Infrastructure.Repositories
 {
@@ -15,7 +16,7 @@ namespace Infrastructure.Repositories
 
         public async Task CreateCrime(Crime crime)
         {
-            _db.Crimes.Add(crime);
+            await _db.Crimes.AddAsync(crime);
             await _db.SaveChangesAsync();
         }
 
@@ -33,19 +34,71 @@ namespace Infrastructure.Repositories
 
         public async Task UpdateCrime(Guid id, Crime data)
         {
-            Crime? crime = await _db.Crimes.Include(c => c.WantedPerson).Include(c => c.Type).Include(c => c.Lawsuit).FirstOrDefaultAsync(c => c.Id == id);
-            if (crime == null)
+
+            if (_db.Entry(data).State == EntityState.Detached)
             {
-                return;
+                _db.Crimes.Attach(data);
             }
 
-            crime.Type.Title = data.Type.Title;
-            crime.Location = data.Location;
-            crime.CrimeDate = data.CrimeDate;
-            crime.WantedPerson = data.WantedPerson;
-            crime.Point = data.Point;
-
+            _db.Crimes.Update(data);
             await _db.SaveChangesAsync();
+
+            Crime? updatePlayer = await GetCrimeById(data.Id);
+        }
+
+        public async Task DeleteCrime(Guid id)
+        {
+            var crime = await _db.Crimes.FirstOrDefaultAsync(c => c.Id == id);
+            if (crime is not null)
+            {
+                _db.Crimes.Remove(crime);
+                await _db.SaveChangesAsync();
+            }
+        }
+
+        public async Task<IEnumerable<CrimeType>> GetAllCrimeTypes()
+        {
+            return await _db.CrimeTypes.AsNoTracking().ToListAsync();
+        }
+
+        public async Task<IEnumerable<WantedPerson>> GetAllWantedPersons()
+        {
+            return await _db.WantedPersons.AsNoTracking().ToListAsync();
+        }
+
+        public bool ContainWantedPerson(string name, string surname, DateTime birthDate)
+        {
+            return _db.WantedPersons.Any(p => p.Name == name && p.Surname == surname && p.BirthDate == birthDate);
+        }
+
+        public async Task AddWantedPerson(WantedPerson person)
+        {
+            await _db.AddAsync(person);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task<Guid> GetWantedPersonIdByData(string name, string surname, DateTime birthDate)
+        {
+            var person = await _db.WantedPersons.FirstOrDefaultAsync(p => p.Name == name && p.Surname == surname && p.BirthDate == birthDate);
+            if (person is not null)
+            {
+                return person.Id;
+            }
+            else
+            {
+                throw new Exception("Not wanted person with data");
+            }
+        }
+
+        public bool ContainCrimeType(Guid id)
+        {
+            return _db.CrimeTypes.Any(c => c.Id == id);
+        }
+
+        public async Task<CrimeType?> GetCrimeTypeById(Guid id)
+        {
+            CrimeType? crimeType = await _db.CrimeTypes.FirstOrDefaultAsync(t => t.Id == id);
+            return crimeType;
         }
     }
 }

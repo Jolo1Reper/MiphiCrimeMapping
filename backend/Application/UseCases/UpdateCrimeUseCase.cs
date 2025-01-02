@@ -1,33 +1,38 @@
 ﻿using Application.DTOs.Requests;
 using Application.DTOs.Responses;
+using Application.Services.Interfaces;
 using Application.UseCases.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.UseCases
 {
     public class UpdateCrimeUseCase : IUpdateCrimeUseCase
     {
-        private ICrimeReportRepository _repo;
-        public UpdateCrimeUseCase(ICrimeReportRepository _crimeRepository)
+        private readonly ICrimeReportRepository _repo;
+        private readonly ICreateCrimeService _createCrimeService;
+        public UpdateCrimeUseCase(ICrimeReportRepository repository, ICreateCrimeService createCrimeService)
         {
-            _repo = _crimeRepository;
+            _repo = repository;
+            _createCrimeService = createCrimeService;
         }
-        public async Task<UpdateCrimeResponse> Handle(UpdateCrimeRequest request)
+        public async Task<UpdateCrimeResponse?> Handle(UpdateCrimeRequest request)
         {
-            var crime = new Crime()
+            CreateCrimeRequest createRequest = new CreateCrimeRequest(
+                request.CrimeTypeId, 
+                request.WantedPersonId, request.WantedPersonName, request.WantedPersonSurname,request.WantedPersonBirthDate, 
+                request.CrimeDate, request.Location, request.PointLatitude, request.PointLongitude
+            );
+
+            Crime? crime = await _createCrimeService.CreateCrime(createRequest); ;
+
+            if (crime is null)
             {
-                Type = new() { Title = request.CrimeTypeTitle },
-                Location = request.Location,
-                CrimeDate = request.CrimeDate,
-                WantedPerson = new() { Name = request.WantedPersonName, Surname = request.WantedPersonSurname, BirthDate = DateTime.SpecifyKind(request.WantedPersonBirthDate, DateTimeKind.Utc) },
-                Point = new() { Latitude = request.PointLatitude, Longitude = request.PointLongitude },
-            };
+                return null;
+            }
+
+            crime.Id = request.Id;
+
             await _repo.UpdateCrime(request.Id, crime);
 
             return new UpdateCrimeResponse(crime.Id, "Crime report successfully edited.");

@@ -4,6 +4,8 @@ using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Application.UseCases.Interfaces;
 using Application.UseCases;
+using Application.Services.Interfaces;
+using Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,11 +29,21 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<AppCrimeMapContext>(
     options => options.UseNpgsql(connection)
 );
+
 builder.Services.AddScoped<ICrimeReportRepository, CrimeReportRepository>();
-builder.Services.AddScoped<ICreateCrimeUseCase, CreateCrimeUseCase>();
-builder.Services.AddScoped<IGetAllCrimeUseCase, GetAllCrimeUseCase>();
+
+builder.Services.AddScoped<IGetAllCrimesUseCase, GetAllCrimesUseCase>();
 builder.Services.AddScoped<IGetCrimeUseCase, GetCrimeUseCase>();
+builder.Services.AddScoped<ICreateCrimeUseCase, CreateCrimeUseCase>();
 builder.Services.AddScoped<IUpdateCrimeUseCase, UpdateCrimeUseCase>();
+builder.Services.AddScoped<IDeleteCrimeUseCase, DeleteCrimeUseCase>();
+
+builder.Services.AddScoped<ICreateCrimeService, CreateCrimeService>();
+
+builder.Services.AddScoped<IGetAllCrimeTypesUseCase, GetAllCrimeTypesUseCase>();
+builder.Services.AddScoped<IGetCrimeTypeUseCase, GetCrimeTypeUseCase>();
+builder.Services.AddScoped<IGetAllWantedPersonsUseCase, GetAllWantedPersonsUseCase>();
+// builder.Services.AddScoped<IGetWantedPersonUseCase, GetWantedPersonUseCase>();
 
 var app = builder.Build();
 
@@ -43,7 +55,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
