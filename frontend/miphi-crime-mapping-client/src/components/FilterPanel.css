@@ -1,0 +1,26 @@
+.filter-panel {
+  width: 300px;
+  background-color: #f4f4f4;
+  border-left: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  background-color: #ddd;
+}
+
+.filter-panel label {
+  margin: 5px 0;
+}
+
+.filter-content {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  overflow-y: auto;
+}
