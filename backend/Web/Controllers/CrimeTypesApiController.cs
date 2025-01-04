@@ -1,4 +1,5 @@
-﻿using Application.UseCases.Interfaces;
+﻿using Application.UseCases.GetAllCrimeTypes;
+using Application.UseCases.GetCrimeType;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Controllers
@@ -9,6 +10,7 @@ namespace Web.Controllers
     {
         private readonly IGetAllCrimeTypesUseCase _getAllCrimeTypes;
         private readonly IGetCrimeTypeUseCase _getCrimeType;
+
         public CrimeTypesApiController(IGetAllCrimeTypesUseCase getAllCrimeTypes, IGetCrimeTypeUseCase getCrimeType)
         {
             _getAllCrimeTypes = getAllCrimeTypes;

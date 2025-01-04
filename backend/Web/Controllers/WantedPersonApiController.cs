@@ -1,4 +1,5 @@
-﻿using Application.UseCases.Interfaces;
+﻿using Application.UseCases.GetAllWantedPersons;
+using Application.UseCases.GetWantedPerson;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Controllers
@@ -9,6 +10,7 @@ namespace Web.Controllers
     {
         IGetAllWantedPersonsUseCase _getAllWantedPersons;
         IGetWantedPersonUseCase _getWantedPerson;
+
         public WantedPersonApiController(IGetAllWantedPersonsUseCase getAllWantedPersons, IGetWantedPersonUseCase getWantedPerson)
         {
             _getAllWantedPersons = getAllWantedPersons;

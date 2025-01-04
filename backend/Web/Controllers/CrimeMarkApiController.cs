@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Application.DTOs.Requests;
-using Application.DTOs.Responses;
-using Application.UseCases.Interfaces;
+using Application.UseCases.GetAllCrimes;
+using Application.UseCases.GetCrime;
+using Application.UseCases.CreateCrime;
+using Application.UseCases.UpdateCrime;
+using Application.UseCases.DeleteCrime;
 
 namespace Web.Controllers
 {
@@ -14,6 +16,7 @@ namespace Web.Controllers
         private readonly IGetCrimeUseCase _getCrime;
         private readonly IUpdateCrimeUseCase _updateCrime;
         private readonly IDeleteCrimeUseCase _deleteCrime;
+
         public CrimeMarkApiController(
             IGetAllCrimesUseCase getAllCrime, 
             ICreateCrimeUseCase createCrime, 

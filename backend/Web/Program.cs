@@ -2,10 +2,17 @@ using Domain.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Application.UseCases.Interfaces;
-using Application.UseCases;
 using Application.Services.Interfaces;
 using Application.Services;
+using Application.UseCases.GetAllCrimes;
+using Application.UseCases.GetCrime;
+using Application.UseCases.CreateCrime;
+using Application.UseCases.UpdateCrime;
+using Application.UseCases.DeleteCrime;
+using Application.UseCases.GetAllCrimeTypes;
+using Application.UseCases.GetCrimeType;
+using Application.UseCases.GetAllWantedPersons;
+using Application.UseCases.GetWantedPerson;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Requests;
+﻿using Application.UseCases.CreateCrime;
 using Domain.Entities;
 
 namespace Application.Services.Interfaces
