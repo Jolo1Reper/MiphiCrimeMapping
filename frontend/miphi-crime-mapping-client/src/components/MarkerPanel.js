@@ -31,6 +31,7 @@ const MarkerPanel = ({
       if (currentPoint) {
         const payload = {
           ...formData,
+          wantedPersonId: formData.wantedPersonId == "" ? null : formData.wantedPersonId,
           wantedPersonBirthDate: formData.wantedPersonBirthDate
             ? new Date(formData.wantedPersonBirthDate).toISOString()
             : null,

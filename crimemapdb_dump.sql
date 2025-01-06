@@ -306,3 +306,45 @@ ALTER TABLE ONLY public."Lawsuits"
 -- PostgreSQL database dump complete
 --
 
+-- Чистая вставка в таблицы!!!
+-- -- Вставка данных в таблицу CrimeTypes
+-- INSERT INTO public."CrimeTypes" ("Id", "Title", "Description") VALUES
+-- ('0f5a55fd-ca82-4f00-99c5-3ef13cdd3648', 'насилие', NULL),
+-- ('9cd0be1a-3952-40c9-a93a-bff647ec85e6', 'кража', NULL),
+-- ('a8af18d1-9a18-4739-9cbf-69e1fac3c329', 'ограбление', NULL),
+-- ('8fdfcea4-ddb1-46fd-ad0c-66be6156d550', 'убийство', NULL);
+
+-- -- Вставка данных в таблицу WantedPersons
+-- INSERT INTO public."WantedPersons" ("Id", "Name", "Surname", "Patronymic", "BirthDate", "RegistrationAddress", "AddInfo") VALUES
+-- ('3559cdf1-e821-484a-aa10-83962847d6c1', 'Сергей', 'Петров', NULL, '2000-12-21 03:00:00+03', NULL, NULL),
+-- ('345e254f-7869-4d1a-bbd1-bee9fc0b5102', 'Егор', 'Верин', NULL, '1984-10-04 03:00:00+03', NULL, NULL),
+-- ('7f4f062f-8da3-47e6-b8be-4759e48edb9b', 'Иван', 'Иванов', NULL, '1999-01-01 03:00:00+03', NULL, NULL),
+-- ('81e9e469-4c14-4f06-8cec-a901240c6ce3', 'Иван', 'Иванов', NULL, '2000-01-01 03:00:00+03', NULL, NULL),
+-- ('12654663-c462-44cf-847e-a626d4313b1c', 'Василий', 'Васильев', NULL, '1965-01-02 03:00:00+03', NULL, NULL),
+-- ('019424ab-4a2d-7839-9e66-3d2b153b01a4', 'Виктор', 'Миронов', NULL, '1988-02-13 03:00:00+03', NULL, NULL),
+-- ('0194295c-ab01-7f16-9b60-8d186431f90f', 'Иван', 'Иванов', NULL, '1984-01-10 03:00:00+03', NULL, NULL);
+
+-- -- Вставка данных в таблицу Crimes
+-- INSERT INTO public."Crimes" ("Id", "Applicant", "TypeId", "WantedPersonId", "Location", "CreateAt", "LawsuitId", "Point_Latitude", "Point_Longitude", "CrimeDate") VALUES
+-- ('0194295c-abba-7995-975c-ec940f876871', NULL, '0f5a55fd-ca82-4f00-99c5-3ef13cdd3648', '0194295c-ab01-7f16-9b60-8d186431f90f', 'ул. Горького', '2025-01-03 02:32:06.483077+03', NULL, 32.513252, 74.321578, '2025-01-03 02:30:55.015+03'),
+-- ('0194295d-9925-76f3-9bcb-5ef00bafa218', NULL, 'a8af18d1-9a18-4739-9cbf-69e1fac3c329', '0194295c-ab01-7f16-9b60-8d186431f90f', 'ул. Морская', '2025-01-03 02:33:07.48584+03', NULL, 33.515299, 67.749538, '2024-12-31 03:00:00+03'),
+-- ('0194295f-85bc-74c7-9f48-3c16043fce55', NULL, '0f5a55fd-ca82-4f00-99c5-3ef13cdd3648', '3559cdf1-e821-484a-aa10-83962847d6c1', 'ул. Московская', '2025-01-03 02:35:13.595787+03', NULL, 44.515299, 38.333538, '2024-10-05 03:00:00+03'),
+-- ('01942960-c240-72bb-b213-7d3299dcfae7', NULL, '9cd0be1a-3952-40c9-a93a-bff647ec85e6', '12654663-c462-44cf-847e-a626d4313b1c', 'ул. Матросова', '2025-01-03 02:36:34.62449+03', NULL, 32.510009, 45.330038, '2024-11-23 03:00:00+03'),
+-- ('01942963-c7b9-756a-9276-61da270ca0af', NULL, 'a8af18d1-9a18-4739-9cbf-69e1fac3c329', '345e254f-7869-4d1a-bbd1-bee9fc0b5102', 'ул. Висока', '2025-01-03 02:39:51.217515+03', NULL, 33.510009, 40.330038, '2024-11-23 03:00:00+03');
+
+
+-- -- Вставка данных в таблицу __EFMigrationsHistory
+-- INSERT INTO public."__EFMigrationsHistory" ("MigrationId", "ProductVersion") VALUES
+-- ('20241202211243_InitMigration', '8.0.11'),
+-- ('20241202212210_AddCreateDate', '8.0.11'),
+-- ('20241209213930_MinimalData', '8.0.11'),
+-- ('20241209214151_MinDataAndSetNull', '8.0.11'),
+-- ('20241209220600_DateTimeWithoutTimeZone', '8.0.11'),
+-- ('20241209222708_DateTimeWithTimeZone', '8.0.11'),
+-- ('20241221232611_RenamePointAndCreateDate', '8.0.11'),
+-- ('20241221234449_RenamePointAndChangeIdType', '8.0.11'),
+-- ('20241221234934_RenamePointAndChangeIdType', '8.0.11'),
+-- ('20241221235734_AddIdRelashionshipsAndLawsuits', '8.0.11'),
+-- ('20241221235950_DelPointId', '8.0.11'),
+-- ('20241222003947_AddCrimeDate', '8.0.11'),
+-- ('20250101215144_ChangePointTypeToDecimal', '9.0.0');
