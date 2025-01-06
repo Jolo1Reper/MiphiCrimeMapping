@@ -1,11 +1,20 @@
 import React, { useState } from "react";
 import "./MarkerPanel.css";
+import { Button, Form } from "react-bootstrap";
 
-const MarkerPanel = ({ points, currentPoint, onSavePoint, onCancelPoint }) => {
-  
+const MarkerPanel = ({
+  points = [],
+  crimeTypes = [],
+  wantedPersons = [],
+  currentPoint,
+  onSavePoint,
+  onCancelPoint,
+}) => {
+  const [isSaving, setIsSaving] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
   const [formData, setFormData] = useState({
-    crimeTypeId: "9cd0be1a-3952-40c9-a93a-bff647ec85e6",
-    wantedPersonId: null,
+    crimeTypeId: "",
+    wantedPersonId: "",
     wantedPersonName: "",
     wantedPersonSurname: "",
     wantedPersonBirthDate: "",
@@ -15,38 +24,47 @@ const MarkerPanel = ({ points, currentPoint, onSavePoint, onCancelPoint }) => {
     pointLongitude: "",
   });
 
-  const handleSave = () => {
-    if (currentPoint) {
-      const payload = {
-        crimeTypeId: formData.crimeTypeId,
-        wantedPersonId: formData.wantedPersonId,
-        wantedPersonName: formData.wantedPersonName || null,
-        wantedPersonSurname: formData.wantedPersonSurname || null,
-        wantedPersonBirthDate: formData.wantedPersonBirthDate
-          ? new Date(formData.wantedPersonBirthDate).toISOString()
-          : null,
-        crimeDate: new Date(formData.crimeDate).toISOString(),
-        location: formData.location,
-        pointLatitude: currentPoint.coords[0],
-        pointLongitude: currentPoint.coords[1],
-      };
-      onSavePoint(payload);
-      setFormData({
-        crimeTypeId: "9cd0be1a-3952-40c9-a93a-bff647ec85e6",
-        wantedPersonId: null,
-        wantedPersonName: "",
-        wantedPersonSurname: "",
-        wantedPersonBirthDate: null,
-        crimeDate: null,
-        location: ""
-      });
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+
+      if (currentPoint) {
+        const payload = {
+          ...formData,
+          wantedPersonBirthDate: formData.wantedPersonBirthDate
+            ? new Date(formData.wantedPersonBirthDate).toISOString()
+            : null,
+          crimeDate: new Date(formData.crimeDate).toISOString(),
+          pointLatitude: currentPoint.coords[0],
+          pointLongitude: currentPoint.coords[1],
+        };
+
+        onSavePoint(payload);
+
+        setFormData({
+          crimeTypeId: "",
+          wantedPersonId: "",
+          wantedPersonName: "",
+          wantedPersonSurname: "",
+          wantedPersonBirthDate: "",
+          crimeDate: "",
+          location: "",
+          pointLatitude: "",
+          pointLongitude: "",
+        });
+      }
+    } catch (validationError) {
+      console.log(validationError);
+      } finally {
+      setIsSaving(false);
     }
   };
 
   const handleCancel = () => {
+    setIsCanceling(true);
     setFormData({
-      crimeTypeId: "9cd0be1a-3952-40c9-a93a-bff647ec85e6",
-      wantedPersonId: null,
+      crimeTypeId: "",
+      wantedPersonId: "",
       wantedPersonName: "",
       wantedPersonSurname: "",
       wantedPersonBirthDate: "",
@@ -56,6 +74,7 @@ const MarkerPanel = ({ points, currentPoint, onSavePoint, onCancelPoint }) => {
       pointLongitude: "",
     });
     onCancelPoint();
+    setIsCanceling(false);
   };
 
   return (
@@ -67,55 +86,138 @@ const MarkerPanel = ({ points, currentPoint, onSavePoint, onCancelPoint }) => {
         {currentPoint && (
           <div className="marker-form">
             <h4>Добавление метки</h4>
-            <input
-              type="text"
-              className="form-control mb-2"
-              placeholder="Id типа преступления"
-              value={formData.crimeTypeId}
-              onChange={(e) => setFormData({ ...formData, crimeTypeId: e.target.value })}
-            />
-            <input
-              type="text"
-              className="form-control mb-2"
-              placeholder="Имя преступника"
-              value={formData.wantedPersonName}
-              onChange={(e) => setFormData({ ...formData, wantedPersonName: e.target.value })}
-            />
-            <input
-              type="text"
-              className="form-control mb-2"
-              placeholder="Фамилия преступника"
-              value={formData.wantedPersonSurname}
-              onChange={(e) => setFormData({ ...formData, wantedPersonSurname: e.target.value })}
-            />
-            <input
-              type="date"
-              className="form-control mb-2"
-              placeholder="Дата рождения преступника"
-              value={formData.wantedPersonBirthDate}
-              onChange={(e) => setFormData({ ...formData, wantedPersonBirthDate: e.target.value })}
-            />
-            <input
-              type="date"
-              className="form-control mb-2"
-              placeholder="Дата совершения преступления"
-              value={formData.crimeDate}
-              onChange={(e) => setFormData({ ...formData, crimeDate: e.target.value })}
-            />
-            <input
-              type="text"
-              className="form-control mb-2"
-              placeholder="Место совершения преступления"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-            />
+
             <div className="d-flex justify-content-end">
-              <button className="btn btn-secondary me-2" onClick={handleCancel}>
-                Отмена
-              </button>
-              <button className="btn btn-primary" onClick={handleSave}>
-                Сохранить
-              </button>
+              <Form>
+                <Form.Group className="form-control mb-2">
+                  <Form.Label>Типы преступлений</Form.Label>
+                  <Form.Select
+                    value={formData.crimeTypeId}
+                    onChange={(e) =>
+                      setFormData({ ...formData, crimeTypeId: e.target.value })
+                    }
+                  >
+                    <option value="">Выберите тип преступления</option>
+                    {crimeTypes.map((crimeType, index) => (
+                      <option key={index} value={crimeType.id}>
+                        {crimeType.title}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+
+                <Form.Group className="form-control mb-2">
+                  <Form.Label>Преступник</Form.Label>
+                  <Form.Select
+                    value={formData.wantedPersonId}
+                    onChange={(e) => {
+                      const selectedPersonId = e.target.value;
+                      const selectedPerson = wantedPersons.find(
+                        (person) => person.id === selectedPersonId
+                      );
+                      setFormData({
+                        ...formData,
+                        wantedPersonId: selectedPersonId,
+                        wantedPersonName: selectedPerson
+                          ? selectedPerson.name
+                          : "",
+                        wantedPersonSurname: selectedPerson
+                          ? selectedPerson.surname
+                          : "",
+                        wantedPersonBirthDate: selectedPerson
+                          ? selectedPerson.birthDate
+                          : "",
+                      });
+                    }}
+                  >
+                    <option value="">Выберите преступника</option>
+                    {wantedPersons.map((person, index) => (
+                      <option key={index} value={person.id}>
+                        {person.surname} {person.name} {person.birthDate}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+
+                <Form.Group className="form-control mb-2">
+                  <Form.Label>Имя</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={formData.wantedPersonName}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        wantedPersonName: e.target.value,
+                        wantedPersonId: "",
+                      })
+                    }
+                    placeholder="Введите имя преступника"
+                  />
+                  <Form.Label>Фамилия</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={formData.wantedPersonSurname}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        wantedPersonSurname: e.target.value,
+                        wantedPersonId: "",
+                      })
+                    }
+                    placeholder="Введите фамилию преступника"
+                  />
+                  <Form.Label>Дата рождения</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={formData.wantedPersonBirthDate?.split("T")[0] || ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        wantedPersonBirthDate: e.target.value,
+                        wantedPersonId: "",
+                      })
+                    }
+                    placeholder="Введите дату рождения преступника"
+                  />
+                </Form.Group>
+                <Form.Group className="form-control mb-2">
+                  <Form.Label>Дата совершения преступления</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={formData.crimeDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, crimeDate: e.target.value })
+                    }
+                    placeholder="Введите дату совершения преступления"
+                  />
+                </Form.Group>
+                <Form.Group className="form-control mb-2">
+                  <Form.Label>Место совершения преступления</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={formData.location}
+                    onChange={(e) =>
+                      setFormData({ ...formData, location: e.target.value })
+                    }
+                    placeholder="Введите место совершения преступления"
+                  />
+                </Form.Group>
+
+                <Button
+                  className="btn btn-primary"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                >
+                  {isSaving ? "Сохранение..." : "Сохранить"}
+                </Button>
+                <Button
+                  className="btn btn-secondary me-2"
+                  onClick={handleCancel}
+                  disabled={isCanceling}
+                >
+                  {isCanceling ? "Отмена..." : "Отменить"}
+                </Button>
+              </Form>
             </div>
           </div>
         )}

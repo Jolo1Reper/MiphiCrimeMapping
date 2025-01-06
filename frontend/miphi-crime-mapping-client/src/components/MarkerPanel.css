@@ -1,9 +1,11 @@
 .marker-panel {
   width: 300px;
+  height: 95vh; /* Займет всю высоту окна браузера */
   background-color: #f4f4f4;
   border-left: 1px solid #ccc;
   display: flex;
   flex-direction: column;
+  overflow-y: auto; /* Добавляет прокрутку, если контент выходит за границы */
 }
 
 .marker-header {
@@ -12,14 +14,14 @@
   padding: 10px;
   border-bottom: 1px solid #ccc;
   background-color: #ddd;
+  position: sticky; /* Заголовок будет фиксирован при прокрутке */
+  top: 0;
+  z-index: 10; /* Чтобы оставаться поверх прокручиваемого контента */
 }
 
 .marker-content {
   padding: 10px;
-  overflow-y: auto;
 }
-
-
 
 .marker-list {
   list-style: none;
