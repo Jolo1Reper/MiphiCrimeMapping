@@ -1,0 +1,39 @@
+.wanted-persons-page {
+  padding: 20px;
+}
+  
+.wanted-persons-header {
+  background-color: #2c3e50;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+  margin-bottom: 20px;
+}
+
+.wanted-persons-content {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+}
+
+.wanted-count {
+  color: #6c757d;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.add-new-wanted-person {
+  margin-top: 30px;
+}
+
+.add-new-wanted-person h3 {
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+  

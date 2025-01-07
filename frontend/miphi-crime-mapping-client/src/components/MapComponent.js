@@ -4,7 +4,7 @@ import "./MapComponent.css";
 const MapComponent = ({ onAddPoint = () => {}, points = [], currentPoint = null }) => {
   const defaultState = {
     center: [47.517641, 42.160875],
-    zoom: 13,
+    zoom: 14,
   };
 
   const handleMapClick = (e) => {
