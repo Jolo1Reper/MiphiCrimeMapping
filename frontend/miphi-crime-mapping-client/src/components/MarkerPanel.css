@@ -1,6 +1,6 @@
 .marker-panel {
   width: 300px;
-  height: 95vh; /* Займет всю высоту окна браузера */
+  height: 91vh; /* Займет всю высоту окна браузера */
   background-color: #f4f4f4;
   border-left: 1px solid #ccc;
   display: flex;
