@@ -13,6 +13,12 @@ using Application.UseCases.GetAllCrimeTypes;
 using Application.UseCases.GetCrimeType;
 using Application.UseCases.GetAllWantedPersons;
 using Application.UseCases.GetWantedPerson;
+using Application.UseCases.CreateCrimeType;
+using Application.UseCases.UpdateCrimeType;
+using Application.UseCases.DeleteCrimeType;
+using Application.UseCases.CreateWantedPerson;
+using Application.UseCases.UpdateWantedPerson;
+using Application.UseCases.DeleteWantedPerson;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,8 +55,15 @@ builder.Services.AddScoped<ICreateCrimeService, CreateCrimeService>();
 
 builder.Services.AddScoped<IGetAllCrimeTypesUseCase, GetAllCrimeTypesUseCase>();
 builder.Services.AddScoped<IGetCrimeTypeUseCase, GetCrimeTypeUseCase>();
+builder.Services.AddScoped<ICreateCrimeTypeUseCase, CreateCrimeTypeUseCase>();
+builder.Services.AddScoped<IUpdateCrimeTypeUseCase, UpdateCrimeTypeUseCase>();
+builder.Services.AddScoped<IDeleteCrimeTypeUseCase, DeleteCrimeTypeUseCase>();
+
 builder.Services.AddScoped<IGetAllWantedPersonsUseCase, GetAllWantedPersonsUseCase>();
 builder.Services.AddScoped<IGetWantedPersonUseCase, GetWantedPersonUseCase>();
+builder.Services.AddScoped<ICreateWantedPersonUseCase, CreateWantedPersonUseCase>();
+builder.Services.AddScoped<IUpdateWantedPersonUseCase, UpdateWantedPersonUseCase>();
+builder.Services.AddScoped<IDeleteWantedPersonUseCase, DeleteWantedPersonUseCase>();
 
 var app = builder.Build();
 

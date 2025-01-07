@@ -14,8 +14,11 @@ namespace Application.UseCases.UpdateCrime
             _repo = repository;
             _createCrimeService = createCrimeService;
         }
-        public async Task<UpdateCrimeResponse?> Handle(UpdateCrimeRequest request)
+        public async Task<CrimeReportResponse?> Handle(UpdateCrimeRequest request)
         {
+            if(!_repo.ContainCrimeType(request.CrimeTypeId))
+                return null;
+
             CreateCrimeRequest createRequest = new CreateCrimeRequest(
                 request.CrimeTypeId,
                 request.WantedPersonId, request.WantedPersonName, request.WantedPersonSurname, request.WantedPersonBirthDate,
@@ -33,7 +36,7 @@ namespace Application.UseCases.UpdateCrime
 
             await _repo.UpdateCrime(request.Id, crime);
 
-            return new UpdateCrimeResponse(crime.Id, "Crime report successfully edited.");
+            return new CrimeReportResponse(crime.Id, "Crime report successfully edited.");
         }
     }
 }

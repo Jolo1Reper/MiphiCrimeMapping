@@ -14,7 +14,7 @@ namespace Application.UseCases.CreateCrime
             _createCrimeService = createCrimeService;
         }
 
-        public async Task<CreateCrimeResponse?> Handle(CreateCrimeRequest request)
+        public async Task<CrimeReportResponse?> Handle(CreateCrimeRequest request)
         {
             Crime? crime = await _createCrimeService.CreateCrime(request);
 
@@ -23,8 +23,8 @@ namespace Application.UseCases.CreateCrime
                 return null;
             }
 
-            await _repo.CreateCrime(crime);
-            return new CreateCrimeResponse(crime.Id, "Crime report successfully created.");
+            await _repo.AddCrime(crime);
+            return new CrimeReportResponse(crime.Id, "Crime report successfully created.");
         }
     }
 }

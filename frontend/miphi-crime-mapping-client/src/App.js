@@ -9,14 +9,47 @@ import api from "./api";
 const App = () => {
   const [points, setPoints] = useState([]);
   const [currentPoint, setCurrentPoint] = useState(null);
+  const [crimeTypes, setCrimeTypes] = useState([]);
+  const [wantedPersons, setWantedPersons] = useState([]);
+  const [selectedPoint, setSelectedPoint] = useState(null);
 
-  const fetchAll = async () => {
+  const fetchAllCrimeTypes = async () => {
+    try {
+      const response = await api.get("/api/crime-types");
+      const loadedCrimeTypes = response.data.map((item) => ({
+        id: item.id,
+        title: item.title
+      }));
+
+      setCrimeTypes(loadedCrimeTypes);
+    } catch(error) {
+      console.error("Ошибка при загрузке типов преступлений:", error.response);
+    }
+  }
+
+  const fetchAllWantedPersons = async () => {
+    try {
+      const response = await api.get("api/wanted-persons");
+      const loadedWantedPersons = response.data.map((item) => ({
+        id: item.id,
+        name: item.name,
+        surname: item.surname,
+        birthDate: item.birthDate
+      }));
+
+      setWantedPersons(loadedWantedPersons);
+    } catch(error) {
+      console.error("Ошибка при загрузке преступников:", error.response);
+    }
+  }
+
+  const fetchAllCrimeMarks = async () => {
     try {
       const response = await api.get("/api/crime-marks");
       const loadedPoints = response.data.map((item) => ({
         title: item.crimeTypeTitle,
         location: item.location,
-        coords: [item.xPoint, item.yPoint],
+        coords: [item.pointLatitude, item.pointLongitude],
       }));
 
       setPoints(loadedPoints);
@@ -27,8 +60,9 @@ const App = () => {
 
   useEffect(() => {
     let isMounted = true; // Добавляем флаг
-
-    fetchAll().then(() => {
+    fetchAllCrimeTypes();
+    fetchAllWantedPersons();
+    fetchAllCrimeMarks().then(() => {
         // Проверяем, смонтирован ли компонент
         if (!isMounted) return; // Если компонент не смонтирован, ничего не делаем
     });
@@ -74,7 +108,9 @@ const App = () => {
         <MapComponent points={points} onAddPoint={handleAddPoint} currentPoint={currentPoint} />
         <MarkerPanel
           points={points}
+          crimeTypes={crimeTypes}
           currentPoint={currentPoint}
+          wantedPersons={wantedPersons}
           onSavePoint={handleSavePoint}
           onCancelPoint={handleCancelPoint}
         />

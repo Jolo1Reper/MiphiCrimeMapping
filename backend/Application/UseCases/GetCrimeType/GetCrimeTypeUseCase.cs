@@ -18,7 +18,7 @@ namespace Application.UseCases.GetCrimeType
                 return null;
             }
 
-            return new GetCrimeTypeResponse(crimeType.Id, crimeType.Title);
+            return new GetCrimeTypeResponse(crimeType.Id, crimeType.Title, crimeType.Description);
         }
     }
 }
