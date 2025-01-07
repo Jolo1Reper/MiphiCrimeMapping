@@ -11,9 +11,9 @@ namespace Application.UseCases.DeleteCrime
             _repo = crimeRepository;
         }
 
-        public async Task Handle(Guid id)
+        public async Task<bool> Handle(Guid id)
         {
-            await _repo.DeleteCrime(id);
+            return await _repo.DeleteCrime(id);
         }
     }
 }

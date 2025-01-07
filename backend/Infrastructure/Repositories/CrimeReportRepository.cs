@@ -3,6 +3,7 @@ using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Numerics;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Infrastructure.Repositories
 {
@@ -14,7 +15,7 @@ namespace Infrastructure.Repositories
             _db = db;
         }
 
-        public async Task CreateCrime(Crime crime)
+        public async Task AddCrime(Crime crime)
         {
             await _db.Crimes.AddAsync(crime);
             await _db.SaveChangesAsync();
@@ -34,7 +35,6 @@ namespace Infrastructure.Repositories
 
         public async Task UpdateCrime(Guid id, Crime data)
         {
-
             if (_db.Entry(data).State == EntityState.Detached)
             {
                 _db.Crimes.Attach(data);
@@ -42,18 +42,17 @@ namespace Infrastructure.Repositories
 
             _db.Crimes.Update(data);
             await _db.SaveChangesAsync();
-
-            Crime? updatePlayer = await GetCrimeById(data.Id);
         }
 
-        public async Task DeleteCrime(Guid id)
+        public async Task<bool> DeleteCrime(Guid id)
         {
             var crime = await _db.Crimes.FirstOrDefaultAsync(c => c.Id == id);
-            if (crime is not null)
-            {
-                _db.Crimes.Remove(crime);
-                await _db.SaveChangesAsync();
-            }
+            if (crime is null)
+                return false;
+
+            _db.Crimes.Remove(crime);
+            await _db.SaveChangesAsync();
+            return true;
         }
 
         public async Task<IEnumerable<CrimeType>> GetAllCrimeTypes()
@@ -73,7 +72,7 @@ namespace Infrastructure.Repositories
 
         public async Task AddWantedPerson(WantedPerson person)
         {
-            await _db.AddAsync(person);
+            await _db.WantedPersons.AddAsync(person);
             await _db.SaveChangesAsync();
         }
 
@@ -90,9 +89,42 @@ namespace Infrastructure.Repositories
             }
         }
 
+        public async Task<WantedPerson?> GetWantedPersonById(Guid id)
+        {
+            var person = await _db.WantedPersons.FirstOrDefaultAsync(p => p.Id == id);
+            return person;
+        }
+
+        public async Task UpdateWantedPerson(WantedPerson person)
+        {
+            if (_db.Entry(person).State == EntityState.Detached)
+            {
+                _db.WantedPersons.Attach(person);
+            }
+
+            _db.WantedPersons.Update(person);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task<bool> DeleteWantedPerson(Guid id)
+        {
+            var person = await _db.WantedPersons.FirstOrDefaultAsync(p => p.Id == id);
+            if (person is null)
+                return false;
+
+            _db.WantedPersons.Remove(person);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
         public bool ContainCrimeType(Guid id)
         {
             return _db.CrimeTypes.Any(c => c.Id == id);
+        }
+
+        public bool ContainCrimeType(string title)
+        {
+            return _db.CrimeTypes.Any(c => c.Title == title);
         }
 
         public async Task<CrimeType?> GetCrimeTypeById(Guid id)
@@ -101,10 +133,31 @@ namespace Infrastructure.Repositories
             return crimeType;
         }
 
-        public async Task<WantedPerson?> GetWantedPersonById(Guid id)
+        public async Task AddCrimeType(CrimeType type)
         {
-            var person = await _db.WantedPersons.FirstOrDefaultAsync(p => p.Id == id);
-            return person;
+            await _db.CrimeTypes.AddAsync(type);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task UpdateCrimeType(CrimeType type)
+        {
+            if (_db.Entry(type).State == EntityState.Detached)
+            {
+                _db.CrimeTypes.Attach(type);
+            }
+
+            _db.CrimeTypes.Update(type);
+            await _db.SaveChangesAsync();
+        }
+        public async Task<bool> DeleteCrimeType(Guid id)
+        {
+            var crimeType = await _db.CrimeTypes.FirstOrDefaultAsync(t => t.Id == id);
+            if (crimeType is null)
+                return false;
+
+            _db.CrimeTypes.Remove(crimeType);
+            await _db.SaveChangesAsync();
+            return true;
         }
     }
 }

@@ -61,9 +61,7 @@ namespace Web.Controllers
 
             var response = await _createCrime.Handle(request);
             if (response is null)
-            {
                 return BadRequest(response);
-            }
 
             return CreatedAtAction(nameof(ShowCrimeMark), new { id = response.Id }, response);
         }
@@ -76,6 +74,9 @@ namespace Web.Controllers
 
             var response = await _updateCrime.Handle(request);
 
+            if (response is null)
+                return BadRequest(response);
+
             return Ok(response);
         }
 
@@ -83,7 +84,10 @@ namespace Web.Controllers
         [Route("{id}")]
         public async Task<IActionResult> RemoveCrimeMark(Guid id) 
         {
-            await _deleteCrime.Handle(id);
+            var response = await _deleteCrime.Handle(id);
+            if(!response)
+                return NotFound();
+
             return Ok();
         }
     }

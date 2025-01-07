@@ -49,7 +49,7 @@ const App = () => {
       const loadedPoints = response.data.map((item) => ({
         title: item.crimeTypeTitle,
         location: item.location,
-        coords: [item.xPoint, item.yPoint],
+        coords: [item.pointLatitude, item.pointLongitude],
       }));
 
       setPoints(loadedPoints);

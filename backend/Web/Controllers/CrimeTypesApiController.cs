@@ -1,5 +1,8 @@
-﻿using Application.UseCases.GetAllCrimeTypes;
+﻿using Application.UseCases.CreateCrimeType;
+using Application.UseCases.DeleteCrimeType;
+using Application.UseCases.GetAllCrimeTypes;
 using Application.UseCases.GetCrimeType;
+using Application.UseCases.UpdateCrimeType;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Controllers
@@ -10,11 +13,21 @@ namespace Web.Controllers
     {
         private readonly IGetAllCrimeTypesUseCase _getAllCrimeTypes;
         private readonly IGetCrimeTypeUseCase _getCrimeType;
-
-        public CrimeTypesApiController(IGetAllCrimeTypesUseCase getAllCrimeTypes, IGetCrimeTypeUseCase getCrimeType)
+        private readonly ICreateCrimeTypeUseCase _createCrimeType;
+        private readonly IUpdateCrimeTypeUseCase _updateCrimeType;
+        private readonly IDeleteCrimeTypeUseCase _deleteCrimeType;
+        public CrimeTypesApiController(
+            IGetAllCrimeTypesUseCase getAllCrimeTypes,
+            IGetCrimeTypeUseCase getCrimeType,
+            ICreateCrimeTypeUseCase createCrimeType,
+            IUpdateCrimeTypeUseCase updateCrimeType,
+            IDeleteCrimeTypeUseCase deleteCrimeType)
         {
             _getAllCrimeTypes = getAllCrimeTypes;
             _getCrimeType = getCrimeType;
+            _createCrimeType = createCrimeType;
+            _updateCrimeType = updateCrimeType;
+            _deleteCrimeType = deleteCrimeType;
         }
 
         [HttpGet]
@@ -37,6 +50,45 @@ namespace Web.Controllers
             }
 
             return Ok(response);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddCrimeType([FromBody] CreateCrimeTypeRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var response = await _createCrimeType.Handle(request);
+
+            if(response is null)
+                return BadRequest(new { Message = "A type of crime with this title already exists." });
+
+            return CreatedAtAction(nameof(GetCrimeType), new { Id = response.Id }, response);
+        }
+
+        [HttpPatch]
+        public async Task<IActionResult> UpdateCrimeType([FromBody] UpdateCrimeTypeRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var response = await _updateCrimeType.Handle(request);
+
+            if (response is null)
+                return BadRequest(new { Message = "Not found a type of crime with this id." });
+
+            return Ok(response);
+        }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<IActionResult> RemoveCrimeType(Guid id)
+        {
+            var response = await _deleteCrimeType.Handle(id);
+            if(!response)
+                return NotFound();
+
+            return Ok();
         }
     }
 }

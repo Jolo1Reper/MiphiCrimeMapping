@@ -2,6 +2,6 @@
 {
     public interface ICreateCrimeUseCase
     {
-        Task<CreateCrimeResponse?> Handle(CreateCrimeRequest request);
+        Task<CrimeReportResponse?> Handle(CreateCrimeRequest request);
     }
 }
