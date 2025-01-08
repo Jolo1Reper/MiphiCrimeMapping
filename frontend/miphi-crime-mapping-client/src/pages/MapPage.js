@@ -11,6 +11,7 @@ const MapPage = () => {
   const [crimeTypes, setCrimeTypes] = useState([]);
   const [wantedPersons, setWantedPersons] = useState([]);
   const [selectedPoint, setSelectedPoint] = useState(null);
+  
   const fetchAllCrimeTypes = async () => {
     try {
       const response = await api.get("/api/crime-types");

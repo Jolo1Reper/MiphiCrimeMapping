@@ -205,7 +205,7 @@ const MarkerPanel = ({
                 </Form.Group>
 
                 <Button
-                  className="btn btn-primary"
+                  className="btn btn-primary me-2"
                   onClick={handleSave}
                   disabled={isSaving}
                 >
