@@ -7,14 +7,16 @@ namespace Application.Services
 {
     public class CreateCrimeService : ICreateCrimeService
     {
-        private ICrimeReportRepository _repo;
-        public CreateCrimeService(ICrimeReportRepository _crimeRepository)
+        private readonly ICrimeTypeRepository _crimeTypeRepository;
+        private readonly IWantedPersonRepository _wantedPersonRepository;
+        public CreateCrimeService(ICrimeTypeRepository crimeTypeRepository, IWantedPersonRepository wantedPersonRepository)
         {
-            _repo = _crimeRepository;
+            _crimeTypeRepository = crimeTypeRepository;
+            _wantedPersonRepository = wantedPersonRepository;
         }
         public async Task<Crime?> CreateCrime(CreateCrimeRequest request)
         {
-            if (!_repo.ContainCrimeType(request.CrimeTypeId))
+            if (!_crimeTypeRepository.ContainCrimeType(request.CrimeTypeId))
             {
                 return null;
             }
@@ -50,12 +52,12 @@ namespace Application.Services
 
         private async Task<Guid> GetWantedPersonId(string name, string surname, DateTime birthDate)
         {
-            if (!_repo.ContainWantedPerson(name, surname, birthDate))
+            if (!_wantedPersonRepository.ContainWantedPerson(name, surname, birthDate))
             {
                 WantedPerson person = new() { Name = name, Surname = surname, BirthDate = birthDate };
-                await _repo.AddWantedPerson(person);
+                await _wantedPersonRepository.AddWantedPerson(person);
             }
-            return await _repo.GetWantedPersonIdByData(name, surname, birthDate);
+            return await _wantedPersonRepository.GetWantedPersonIdByData(name, surname, birthDate);
         }
     }
 }

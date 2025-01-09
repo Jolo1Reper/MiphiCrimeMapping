@@ -6,9 +6,9 @@ namespace Application.UseCases.CreateCrime
 {
     public class CreateCrimeUseCase : ICreateCrimeUseCase
     {
-        private readonly ICrimeReportRepository _repo;
+        private readonly ICrimeMarkRepository _repo;
         private readonly ICreateCrimeService _createCrimeService;
-        public CreateCrimeUseCase(ICrimeReportRepository _crimeRepository, ICreateCrimeService createCrimeService)
+        public CreateCrimeUseCase(ICrimeMarkRepository _crimeRepository, ICreateCrimeService createCrimeService)
         {
             _repo = _crimeRepository;
             _createCrimeService = createCrimeService;

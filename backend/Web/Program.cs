@@ -9,9 +9,9 @@ using Application.UseCases.GetCrime;
 using Application.UseCases.CreateCrime;
 using Application.UseCases.UpdateCrime;
 using Application.UseCases.DeleteCrime;
-using Application.UseCases.GetAllCrimeTypes;
+using Application.UseCases.SelectAllCrimeTypes;
 using Application.UseCases.GetCrimeType;
-using Application.UseCases.GetAllWantedPersons;
+using Application.UseCases.SelectAllWantedPersons;
 using Application.UseCases.GetWantedPerson;
 using Application.UseCases.CreateCrimeType;
 using Application.UseCases.UpdateCrimeType;
@@ -19,6 +19,8 @@ using Application.UseCases.DeleteCrimeType;
 using Application.UseCases.CreateWantedPerson;
 using Application.UseCases.UpdateWantedPerson;
 using Application.UseCases.DeleteWantedPerson;
+using Application.UseCases.GetAllCrimeTypes;
+using Application.UseCases.GetAllWantedPerson;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,7 +45,9 @@ builder.Services.AddDbContext<AppCrimeMapContext>(
     options => options.UseNpgsql(connection)
 );
 
-builder.Services.AddScoped<ICrimeReportRepository, CrimeReportRepository>();
+builder.Services.AddScoped<ICrimeMarkRepository, CrimeMarkRepository>();
+builder.Services.AddScoped<ICrimeTypeRepository, CrimeTypeRepository>();
+builder.Services.AddScoped<IWantedPersonRepository, WantedPersonRepository>();
 
 builder.Services.AddScoped<IGetAllCrimesUseCase, GetAllCrimesUseCase>();
 builder.Services.AddScoped<IGetCrimeUseCase, GetCrimeUseCase>();
@@ -53,13 +57,15 @@ builder.Services.AddScoped<IDeleteCrimeUseCase, DeleteCrimeUseCase>();
 
 builder.Services.AddScoped<ICreateCrimeService, CreateCrimeService>();
 
+builder.Services.AddScoped<ISelectAllCrimeTypesUseCase, SelectAllCrimeTypesUseCase>();
 builder.Services.AddScoped<IGetAllCrimeTypesUseCase, GetAllCrimeTypesUseCase>();
 builder.Services.AddScoped<IGetCrimeTypeUseCase, GetCrimeTypeUseCase>();
 builder.Services.AddScoped<ICreateCrimeTypeUseCase, CreateCrimeTypeUseCase>();
 builder.Services.AddScoped<IUpdateCrimeTypeUseCase, UpdateCrimeTypeUseCase>();
 builder.Services.AddScoped<IDeleteCrimeTypeUseCase, DeleteCrimeTypeUseCase>();
 
-builder.Services.AddScoped<IGetAllWantedPersonsUseCase, GetAllWantedPersonsUseCase>();
+builder.Services.AddScoped<ISelectAllWantedPersonsUseCase, SelectAllWantedPersonsUseCase>();
+builder.Services.AddScoped<IGetAllWantedPersonUseCase, GetAllWantedPersonUseCase>();
 builder.Services.AddScoped<IGetWantedPersonUseCase, GetWantedPersonUseCase>();
 builder.Services.AddScoped<ICreateWantedPersonUseCase, CreateWantedPersonUseCase>();
 builder.Services.AddScoped<IUpdateWantedPersonUseCase, UpdateWantedPersonUseCase>();

@@ -1,9 +1,10 @@
 ﻿using Application.UseCases.CreateWantedPerson;
 using Application.UseCases.DeleteWantedPerson;
-using Application.UseCases.GetAllWantedPersons;
+using Application.UseCases.SelectAllWantedPersons;
 using Application.UseCases.GetWantedPerson;
 using Application.UseCases.UpdateWantedPerson;
 using Microsoft.AspNetCore.Mvc;
+using Application.UseCases.GetAllWantedPerson;
 
 namespace Web.Controllers
 {
@@ -11,23 +12,34 @@ namespace Web.Controllers
     [Route("api/wanted-persons")]
     public class WantedPersonApiController : ControllerBase
     {
-        private readonly IGetAllWantedPersonsUseCase _getAllWantedPersons;
+        private readonly ISelectAllWantedPersonsUseCase _selectAllWantedPersons;
+        private readonly IGetAllWantedPersonUseCase _getAllWantedPersons;
         private readonly IGetWantedPersonUseCase _getWantedPerson;
         private readonly ICreateWantedPersonUseCase _createWantedPerson;
         private readonly IUpdateWantedPersonUseCase _updateWantedPerson;
         private readonly IDeleteWantedPersonUseCase _deleteWantedPerson;
         public WantedPersonApiController(
-            IGetAllWantedPersonsUseCase getAllWantedPersons,
+            ISelectAllWantedPersonsUseCase selectAllWantedPersons,
+            IGetAllWantedPersonUseCase getAllWantedPersons,
             IGetWantedPersonUseCase getWantedPerson,
             ICreateWantedPersonUseCase createWantedPerson,
             IUpdateWantedPersonUseCase updateWantedPerson,
             IDeleteWantedPersonUseCase deleteWantedPerson)
         {
+            _selectAllWantedPersons = selectAllWantedPersons;
             _getAllWantedPersons = getAllWantedPersons;
             _getWantedPerson = getWantedPerson;
             _createWantedPerson = createWantedPerson;
             _updateWantedPerson = updateWantedPerson;
             _deleteWantedPerson = deleteWantedPerson;
+        }
+
+        [HttpGet("basic")]
+        public async Task<IActionResult> SelectAllWantedPersons()
+        {
+            var response = await _selectAllWantedPersons.Handle();
+
+            return Ok(response);
         }
 
         [HttpGet]

@@ -1,4 +1,4 @@
-﻿namespace Application.UseCases.GetAllCrimeTypes
+﻿namespace Application.UseCases.SelectAllCrimeTypes
 {
     public record SelectCrimeTypeResponse(Guid Id, string Title);
 }

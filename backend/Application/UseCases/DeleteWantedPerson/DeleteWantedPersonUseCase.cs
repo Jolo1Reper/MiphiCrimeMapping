@@ -4,9 +4,9 @@ namespace Application.UseCases.DeleteWantedPerson
 {
     public class DeleteWantedPersonUseCase : IDeleteWantedPersonUseCase
     {
-        private ICrimeReportRepository _repo;
+        private IWantedPersonRepository _repo;
 
-        public DeleteWantedPersonUseCase(ICrimeReportRepository crimeRepository)
+        public DeleteWantedPersonUseCase(IWantedPersonRepository crimeRepository)
         {
             _repo = crimeRepository;
         }

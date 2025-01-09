@@ -1,0 +1,11 @@
+.map-page-for-app-container {
+  height: 100vh;
+}
+
+.map-page {
+  display: flex;
+  flex: 1;
+  position: relative;
+  height: 100%;
+}
+  

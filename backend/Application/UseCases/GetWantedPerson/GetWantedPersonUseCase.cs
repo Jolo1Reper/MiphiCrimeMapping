@@ -4,8 +4,8 @@ namespace Application.UseCases.GetWantedPerson
 {
     public class GetWantedPersonUseCase : IGetWantedPersonUseCase
     {
-        private ICrimeReportRepository _repo;
-        public GetWantedPersonUseCase(ICrimeReportRepository repository)
+        private IWantedPersonRepository _repo;
+        public GetWantedPersonUseCase(IWantedPersonRepository repository)
         {
             _repo = repository;
         }

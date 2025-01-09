@@ -5,8 +5,8 @@ namespace Application.UseCases.GetAllCrimes
 {
     public class GetAllCrimesUseCase : IGetAllCrimesUseCase
     {
-        ICrimeReportRepository _repo;
-        public GetAllCrimesUseCase(ICrimeReportRepository repository)
+        ICrimeMarkRepository _repo;
+        public GetAllCrimesUseCase(ICrimeMarkRepository repository)
         {
             _repo = repository;
         }

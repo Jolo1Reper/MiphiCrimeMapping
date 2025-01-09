@@ -5,15 +5,15 @@ namespace Application.UseCases.UpdateCrimeType
 {
     public class UpdateCrimeTypeUseCase : IUpdateCrimeTypeUseCase
     {
-        private readonly ICrimeReportRepository _repo;
-        public UpdateCrimeTypeUseCase(ICrimeReportRepository repository)
+        private readonly ICrimeTypeRepository _repo;
+        public UpdateCrimeTypeUseCase(ICrimeTypeRepository repository)
         {
             _repo = repository;
         }
 
         public async Task<CrimeReportResponse?> Handle(UpdateCrimeTypeRequest request)
         {
-            CrimeType crimeType = new() { Id = request.Id, Title = request.Title, Description = request.Description };
+            CrimeType crimeType = new() { Id = request.Id, Title = request.Title, Description = request.Description, Link = request.Link };
 
             await _repo.UpdateCrimeType(crimeType);
 
