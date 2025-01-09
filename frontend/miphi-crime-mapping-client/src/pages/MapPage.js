@@ -10,11 +10,11 @@ const MapPage = () => {
   const [currentPoint, setCurrentPoint] = useState(null);
   const [crimeTypes, setCrimeTypes] = useState([]);
   const [wantedPersons, setWantedPersons] = useState([]);
-  const [selectedPoint, setSelectedPoint] = useState(null);
+  // const [selectedPoint, setSelectedPoint] = useState(null);
   
   const fetchAllCrimeTypes = async () => {
     try {
-      const response = await api.get("/api/crime-types");
+      const response = await api.get("/api/crime-types/titles");
       const loadedCrimeTypes = response.data.map((item) => ({
         id: item.id,
         title: item.title
@@ -28,7 +28,7 @@ const MapPage = () => {
 
   const fetchAllWantedPersons = async () => {
     try {
-      const response = await api.get("api/wanted-persons");
+      const response = await api.get("api/wanted-persons/basic");
       const loadedWantedPersons = response.data.map((item) => ({
         id: item.id,
         name: item.name,
@@ -100,7 +100,7 @@ const MapPage = () => {
   };
 
   return (
-      <div className="main-container">
+      <div className="map-page">
         <FilterPanel />
         <MapComponent points={points} onAddPoint={handleAddPoint} currentPoint={currentPoint} />
         <MarkerPanel

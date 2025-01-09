@@ -4,18 +4,17 @@ import Layout from "./components/Layout";
 import MapPage from "./pages/MapPage";
 import WantedPersonsPage from "./pages/WantedPersonsPage";
 import CrimeTypesListPage from "./pages/CrimeTypesListPage";
-import "./App.css";
+import AboutPage from "./pages/AboutPage";
 
 const App = () => {
   return (
     <Router>
-      <Layout>
         <Routes>
-          <Route path="/" element={<MapPage />} />
-          <Route path="/crime-types" element={<CrimeTypesListPage />} />
-          <Route path="/wanted-persons" element={<WantedPersonsPage />} />
+          <Route path="/" element={<Layout isMapPage={true}><MapPage /></Layout>} />
+          <Route path="/crime-types" element={<Layout><CrimeTypesListPage /></Layout>} />
+          <Route path="/wanted-persons" element={<Layout><WantedPersonsPage /></Layout>} />
+          <Route path="/about" element={<Layout><AboutPage /></Layout>} />
         </Routes>
-      </Layout>
     </Router>
   );
 };

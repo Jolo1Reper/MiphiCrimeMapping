@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from "react";
 import "./CrimeTypesListPage.css";
-import { Button, Form, Accordion, Card } from "react-bootstrap";
+import { Button, Form, Accordion } from "react-bootstrap";
 import api from "../api";
-
-// [
-//   { id: 1, title: "Кража", description: "Незаконное завладение чужим имуществом", count: 5 },
-//   { id: 2, title: "Грабеж", description: "Открытое хищение чужого имущества", count: 2 },
-//   { id: 3, title: "Мошенничество", description: "Обман или злоупотребление доверием", count: 3 },
-// ]
+import capitalizeFirstLetter from "../services/capitalizeFirstLetter";
 
 const CrimeTypesListPage = () => {
   const [crimeTypes, setCrimeTypes] = useState([]);
-
-  const [isEditing, setIsEditing] = useState(null); // ID редактируемого типа преступления
+  const [isEditingType, setIsEditingType] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    link: "",
+    count: 0
   });
 
   const fetchAllCrimeTypes = async () => {
@@ -24,83 +20,119 @@ const CrimeTypesListPage = () => {
       const loadedCrimeTypes = response.data.map((item) => ({
         id: item.id,
         title: item.title,
-        description: "",
-        link: null,
-        count: 0
+        description: item.description,
+        link: item.link,
+        count: item.count
       }));
 
       setCrimeTypes(loadedCrimeTypes);
     } catch(error) {
       console.error("Ошибка при загрузке типов преступлений:", error.response);
     }
-  }
-
-  // const fetchSelectCrimeType = async (id) => {
-  //   try {
-  //     const response = await api.get(`/api/crime-types/${id}`);
-  //     const selectCrimeType = response.data;
-      
-  //     console.log(crimeTypes);
-
-  //     setCrimeTypes(
-  //       crimeTypes.map((crimeType) =>
-  //         crimeType.id === id 
-  //         ? { ...crimeType, id: crimeType.id, title: selectCrimeType.title, description: selectCrimeType.description } 
-
-  //         : crimeType
-  //       )
-  //     );
-  //   } catch(error) {
-  //     console.error("Ошибка при загрузке типа преступления: ", error.response);
-  //   } 
-  // }
+  };
 
   useEffect(() => {
       fetchAllCrimeTypes();
   });
 
+  const fetchAddCrimeType = async (crimeType) => {
+    try {
+      crimeType.title = capitalizeFirstLetter(crimeType.title);
+      const payload ={
+        title: crimeType.title,
+        description: crimeType.description !== "" ? crimeType.description : null,
+        link: crimeType.link !== "" ? crimeType.link : null
+      }
+      const response = await api.post("/api/crime-types", payload);
+      console.log(response.data.message);
+    
+      return {
+        id: response.data.id,
+        title: crimeType.title,
+        description: crimeType.description,
+        link: crimeType.link, 
+        count: 0
+      };
+
+    } catch(error) {
+      console.error("Ошибка при добавлении типа преступления:", error.response);
+    }
+  };
+
+  const fetchUpdateCrimeType = async (id, crimeType) => {
+    try {
+      crimeType.title = capitalizeFirstLetter(crimeType.title);
+      const payload = {
+        id: id,
+        title: crimeType.title,
+        description: crimeType.description !== "" ? crimeType.description : null,
+        link: crimeType.link !== "" ? crimeType.link : null
+      }
+      const response = await api.patch("/api/crime-types", payload);
+      console.log(response.data.message);
+    
+      return {
+        id: id,
+        title: crimeType.title,
+        description: crimeType.description,
+        link: crimeType.link
+      };
+
+    } catch(error) {
+      console.error("Ошибка при редактировании типа преступления:", error.response);
+    }
+  };
+
+  const fetchDeleteCrimeType = async (id) => {
+    try {
+      await api.delete(`/api/crime-types/${id}`);
+    } catch(error) {
+      console.error("Ошибка при удалении типа преступления:", error.response);
+    }
+  }
 
   const handleAddCrimeType = () => {
-    const newCrimeType = {
-      id: Date.now(), // Генерация уникального ID
-      title: formData.title,
-      description: formData.description,
-      count: 0, // Новые типы преступлений не отображаются на карте сразу
-    };
+    const newCrimeType = fetchAddCrimeType(formData);
     setCrimeTypes([...crimeTypes, newCrimeType]);
-    setFormData({ title: "", description: "" });
+    setFormData({ title: "", description: "", link: "" });
   };
 
   const handleUpdateCrimeType = (id) => {
+    const updateCrimeType = fetchUpdateCrimeType(id, formData);
     setCrimeTypes(
       crimeTypes.map((crimeType) =>
-        crimeType.id === id ? { ...crimeType, ...formData } : crimeType
+        crimeType.id === id ? { ...crimeType, ...updateCrimeType } : crimeType
       )
     );
-    setFormData({ title: "", description: "" });
-    setIsEditing(null);
+    setFormData({ title: "", description: "", link: "" });
+    setIsEditingType(null);
   };
 
   const handleDeleteCrimeType = (id) => {
+    fetchDeleteCrimeType(id);
+    if(isEditingType !== null && isEditingType.id === id){
+      setIsEditingType(null);
+      setFormData({ title: "", description: "", link: "" });
+    }
     setCrimeTypes(crimeTypes.filter((crimeType) => crimeType.id !== id));
   };
 
   const handleEdit = (crimeType) => {
-    setIsEditing(crimeType.id);
-    setFormData({ title: crimeType.title, description: crimeType.description });
+    setIsEditingType(crimeType);
+    setFormData({ title: crimeType.title, description: crimeType.description, link: crimeType.link });
   };
 
   const handleSave = () => {
-    if (isEditing) {
-      handleUpdateCrimeType(isEditing);
+    if (isEditingType) {
+      handleUpdateCrimeType(isEditingType.id);
     } else {
       handleAddCrimeType();
     }
   };
 
   const handleCancel = () => {
-    setIsEditing(null);
-    setFormData({ title: "", description: "" });
+    setIsEditingType(null);
+    setFormData({ title: "", description: "", link: "", count: 0 });
   };
 
   return (
@@ -111,7 +143,7 @@ const CrimeTypesListPage = () => {
       <div className="crime-types-content">
       <Accordion>
         {crimeTypes.map((crimeType) => (
-            <Accordion.Item eventKey={crimeType.id} key={`${crimeType.id}`}>
+            <Accordion.Item eventKey={crimeType.id} key={crimeType.id}>
             <Accordion.Header>
                 <div className="d-flex justify-content-between w-100">
                 <span>{crimeType.title}</span>
@@ -119,25 +151,24 @@ const CrimeTypesListPage = () => {
                 </div>
             </Accordion.Header>
             <Accordion.Body>
-                <p>Название: {crimeType.title}</p>
-                <p>Описание:</p>
-                <p>{crimeType.description}</p>
-                <p>Количество преступлений на карте: {crimeType.count}</p>
-                <p>Статья: {crimeType.link === null || crimeType.link === "" ? "отсутствует" : <a href={crimeType.link}>ссылка</a>}</p>
+                <p><strong>Название:</strong> {crimeType.title}</p>
+                <strong>Описание:</strong> {crimeType.description === null || crimeType.description === "" ? "-" : <p> {crimeType.description} </p>}
+                <p><strong>Количество совершенных преступлений:</strong> {crimeType.count}</p>
+                <p>{crimeType.link === null || crimeType.link === "" ? "Ссылка на статью отсутствует" : <a href={crimeType.link} target="_blank" rel="noreferrer">Ссылка на статью</a>}</p>
                 <div className="button-group">
-                <Button variant="primary" size="sm" onClick={() => handleEdit(crimeType)}>
-                    Изменить
-                </Button>
-                <Button variant="danger" size="sm" onClick={() => handleDeleteCrimeType(crimeType.id)}>
-                    Удалить
-                </Button>
+                  <Button variant="primary" size="sm" onClick={() => handleEdit(crimeType)}>
+                      Изменить
+                  </Button>
+                  <Button variant="danger" size="sm" onClick={() => handleDeleteCrimeType(crimeType.id)}>
+                      Удалить
+                  </Button>
                 </div>
             </Accordion.Body>
             </Accordion.Item>
         ))}
         </Accordion>
         <div className="add-new-crime-type">
-          <h3>Добавить новый тип</h3>
+          <h3>{isEditingType ? `Изменение для типа "${isEditingType.title}"` : "Добавление нового типа"}</h3>
           <Form.Group>
             <Form.Label>Название</Form.Label>
             <Form.Control
@@ -147,7 +178,15 @@ const CrimeTypesListPage = () => {
             />
           </Form.Group>
           <Form.Group>
-            <Form.Label>Описание</Form.Label>
+            <Form.Label>Ссылка на статью (необязательно)</Form.Label>
+            <Form.Control
+              type="text"
+              value={formData.link}
+              onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Описание (необязательно)</Form.Label>
             <Form.Control
               as="textarea"
               rows={3}

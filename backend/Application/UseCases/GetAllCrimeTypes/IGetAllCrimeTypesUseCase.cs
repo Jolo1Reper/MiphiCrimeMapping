@@ -2,6 +2,6 @@
 {
     public interface IGetAllCrimeTypesUseCase
     {
-        Task<IEnumerable<SelectCrimeTypeResponse>> Handle();
+        Task<IEnumerable<GetAllCrimeTypesResponse>> Handle();
     }
 }

@@ -6,8 +6,8 @@ namespace Application.UseCases.CreateWantedPerson
 {
     public class CreateWantedPersonUseCase : ICreateWantedPersonUseCase
     {
-        private readonly ICrimeReportRepository _repo;
-        public CreateWantedPersonUseCase(ICrimeReportRepository repository)
+        private readonly IWantedPersonRepository _repo;
+        public CreateWantedPersonUseCase(IWantedPersonRepository repository)
         {
             _repo = repository;
         }
@@ -17,7 +17,9 @@ namespace Application.UseCases.CreateWantedPerson
             if (_repo.ContainWantedPerson(request.Name, request.Surname, DateTime.SpecifyKind(request.BirthDate, DateTimeKind.Utc)))
                 return null;
 
-            WantedPerson person = new() { Name = request.Name, Surname = request.Surname, BirthDate = DateTime.SpecifyKind(request.BirthDate, DateTimeKind.Utc) };
+            WantedPerson person = new() { Name = request.Name, Surname = request.Surname, Patronymic = request.Patronymic,
+                BirthDate = DateTime.SpecifyKind(request.BirthDate, DateTimeKind.Utc), 
+                RegistrationAddress = request.RegistrationAddress, AddInfo = request.AddInfo };
             
             await _repo.AddWantedPerson(person);
             return new CrimeReportResponse(person.Id, "Wanted person successfully created.");

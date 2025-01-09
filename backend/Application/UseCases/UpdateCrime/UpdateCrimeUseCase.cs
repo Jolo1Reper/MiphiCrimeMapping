@@ -7,16 +7,19 @@ namespace Application.UseCases.UpdateCrime
 {
     public class UpdateCrimeUseCase : IUpdateCrimeUseCase
     {
-        private readonly ICrimeReportRepository _repo;
+        private readonly ICrimeMarkRepository _markRepository;
         private readonly ICreateCrimeService _createCrimeService;
-        public UpdateCrimeUseCase(ICrimeReportRepository repository, ICreateCrimeService createCrimeService)
+        private readonly ICrimeTypeRepository _typeRepository;  
+        public UpdateCrimeUseCase(ICrimeMarkRepository markRepository, ICrimeTypeRepository typeRepository, ICreateCrimeService createCrimeService)
         {
-            _repo = repository;
+            _markRepository = markRepository;
             _createCrimeService = createCrimeService;
+            _typeRepository = typeRepository;
         }
+
         public async Task<CrimeReportResponse?> Handle(UpdateCrimeRequest request)
         {
-            if(!_repo.ContainCrimeType(request.CrimeTypeId))
+            if(!_typeRepository.ContainCrimeType(request.CrimeTypeId))
                 return null;
 
             CreateCrimeRequest createRequest = new CreateCrimeRequest(
@@ -34,7 +37,7 @@ namespace Application.UseCases.UpdateCrime
 
             crime.Id = request.Id;
 
-            await _repo.UpdateCrime(request.Id, crime);
+            await _markRepository.UpdateCrime(request.Id, crime);
 
             return new CrimeReportResponse(crime.Id, "Crime report successfully edited.");
         }

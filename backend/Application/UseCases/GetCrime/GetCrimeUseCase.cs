@@ -4,8 +4,8 @@ namespace Application.UseCases.GetCrime
 {
     public class GetCrimeUseCase : IGetCrimeUseCase
     {
-        private ICrimeReportRepository _repo;
-        public GetCrimeUseCase(ICrimeReportRepository repository)
+        private ICrimeMarkRepository _repo;
+        public GetCrimeUseCase(ICrimeMarkRepository repository)
         {
             _repo = repository;
         }

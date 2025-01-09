@@ -8,5 +8,6 @@
         public DateTime BirthDate { get; set; }
         public string? RegistrationAddress { get; set; }
         public string? AddInfo { get; set; }
+        public List<Crime> Crimes { get; set; } = new List<Crime>();
     }
 }

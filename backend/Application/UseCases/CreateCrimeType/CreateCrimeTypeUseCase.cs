@@ -7,8 +7,8 @@ namespace Application.UseCases.CreateCrimeType
 {
     public class CreateCrimeTypeUseCase : ICreateCrimeTypeUseCase
     {
-        private readonly ICrimeReportRepository _repo;
-        public CreateCrimeTypeUseCase(ICrimeReportRepository _crimeRepository)
+        private readonly ICrimeTypeRepository _repo;
+        public CreateCrimeTypeUseCase(ICrimeTypeRepository _crimeRepository)
         {
             _repo = _crimeRepository;
         }
@@ -17,7 +17,7 @@ namespace Application.UseCases.CreateCrimeType
             if(_repo.ContainCrimeType(request.Title))
                 return null;
 
-            CrimeType type = new() { Title = request.Title, Description = request.Description };
+            CrimeType type = new() { Title = request.Title, Description = request.Description, Link = request.Link };
 
             await _repo.AddCrimeType(type);
             return new CrimeReportResponse(type.Id, "Crime type successfully created.");

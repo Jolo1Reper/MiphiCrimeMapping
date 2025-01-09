@@ -1,9 +1,10 @@
 ﻿using Application.UseCases.CreateCrimeType;
 using Application.UseCases.DeleteCrimeType;
-using Application.UseCases.GetAllCrimeTypes;
+using Application.UseCases.SelectAllCrimeTypes;
 using Application.UseCases.GetCrimeType;
 using Application.UseCases.UpdateCrimeType;
 using Microsoft.AspNetCore.Mvc;
+using Application.UseCases.GetAllCrimeTypes;
 
 namespace Web.Controllers
 {
@@ -11,23 +12,34 @@ namespace Web.Controllers
     [Route("api/crime-types")]
     public class CrimeTypesApiController : ControllerBase
     {
+        private readonly ISelectAllCrimeTypesUseCase _selectAllCrimeTypes;
         private readonly IGetAllCrimeTypesUseCase _getAllCrimeTypes;
         private readonly IGetCrimeTypeUseCase _getCrimeType;
         private readonly ICreateCrimeTypeUseCase _createCrimeType;
         private readonly IUpdateCrimeTypeUseCase _updateCrimeType;
         private readonly IDeleteCrimeTypeUseCase _deleteCrimeType;
         public CrimeTypesApiController(
+            ISelectAllCrimeTypesUseCase selectAllCrimeTypes,
             IGetAllCrimeTypesUseCase getAllCrimeTypes,
             IGetCrimeTypeUseCase getCrimeType,
             ICreateCrimeTypeUseCase createCrimeType,
             IUpdateCrimeTypeUseCase updateCrimeType,
             IDeleteCrimeTypeUseCase deleteCrimeType)
         {
+            _selectAllCrimeTypes = selectAllCrimeTypes;
             _getAllCrimeTypes = getAllCrimeTypes;
             _getCrimeType = getCrimeType;
             _createCrimeType = createCrimeType;
             _updateCrimeType = updateCrimeType;
             _deleteCrimeType = deleteCrimeType;
+        }
+
+        [HttpGet("titles")]
+        public async Task<IActionResult> SelectAllCrimeTypes()
+        {
+            var response = await _selectAllCrimeTypes.Handle();
+
+            return Ok(response);
         }
 
         [HttpGet]
