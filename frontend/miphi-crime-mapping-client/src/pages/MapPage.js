@@ -44,6 +44,7 @@ const MapPage = () => {
     try {
       const response = await api.get("/api/crime-marks");
       const loadedPoints = response.data.map((item) => ({
+        id: item.id,
         title: item.crimeTypeTitle,
         location: item.location,
         coords: [item.pointLatitude, item.pointLongitude],
@@ -55,12 +56,29 @@ const MapPage = () => {
     }
   }
 
+  const handleGetPoint = async (point) => {
+    const response = await api.get(`/api/crime-marks/${point.id}`);
+    const getPoint = {
+      id: response.data.id,
+      crimeTypeId: response.data.crimeTypeId,
+      wantedPersonId: response.data.wantedPersonId,
+      wantedPersonName: response.data.wantedPersonName,
+      wantedPersonSurname: response.data.wantedPersonSurname,
+      wantedPersonBirthDate: response.data.wantedPersonBirthDate,
+      crimeDate: response.data.crimeDate,
+      location: response.data.location,
+      coords: [response.data.pointLatitude, response.data.pointLongitude]
+    } 
+    setEditPoint(getPoint);
+  };
+
   const handleSavePoint = async (data) => {
     try {
       const response = await api.post("/api/crime-marks", data);
       console.log(response.data.message);
 
       const newPoint = {
+        id: response.data.id,
         title: crimeTypes.find((type) => type.id === data.crimeTypeId)?.title,
         location: data.location,
         coords: [data.pointLatitude, data.pointLongitude],
@@ -74,24 +92,35 @@ const MapPage = () => {
       console.error("Ошибка при сохранении метки:", error);
     } 
   };
-//TODO
-  const handleUpdatePoint = async (updatedPoint) => {
+
+  const handleUpdatePoint = async (point) => {
     try {
-      await api.put(`/api/crime-marks/${updatedPoint.id}`, updatedPoint);
+      console.log(point);
+      const response = await api.patch(`/api/crime-marks`, point);
+      console.log(response.data.message);
+      const updatePoint = {
+        id: response.data.id,
+        title: crimeTypes.find((type) => type.id === point.crimeTypeId)?.title,
+        location: point.location,
+        coords: [point.pointLatitude, point.pointLongitude],
+      };
       setPoints((prev) =>
-        prev.map((p) => (p.id === updatedPoint.id ? updatedPoint : p))
+        prev.map((p) => (p.id === updatePoint.id ? updatePoint : p))
       );
       setEditPoint(null);
+      showNotification("Изменения метки сохранены!");
     } catch (error) {
       console.error("Ошибка при обновлении метки:", error.response);
     }
   };
-//TODO
+
   const handleDeletePoint = async (point) => {
     try {
-      await api.delete(`/api/crime-marks/${point.id}`);
+      const response = await api.delete(`/api/crime-marks/${point.id}`);
+      console.log(response.data.message);
       setPoints((prev) => prev.filter((p) => p.id !== point.id));
       setEditPoint(null);
+      showNotification("Метка успешно удалена!");
     } catch (error) {
       console.error("Ошибка при удалении метки:", error.response);
     }
@@ -102,18 +131,15 @@ const MapPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleCancelPoint = () => {
+  const handleCancelAddPoint = () => {
     setIsModalOpen(false);
     setCurrentPoint(null);
-    showNotification("Добавление метки отменено.");
+    showNotification("Добавление метки отменено!");
   };
 
-  const handleEditPoint = (point) => {
-    setEditPoint(point);
-  };
-
-  const handleCancelEdit = () => {
+  const handleCancelEditPoint = () => {
     setEditPoint(null);
+    showNotification("Изменение метки отменено!");
   };
 
   const showNotification = (message) => {
@@ -128,12 +154,12 @@ const MapPage = () => {
         points={points} 
         onAddPoint={handleAddPoint} 
         currentPoint={currentPoint} 
-        onEditPoint={handleEditPoint} 
+        onGetPoint={handleGetPoint} 
         />
         <MarkerPanel points={points} />
         <AddPointModal
           show={isModalOpen}
-          onHide={handleCancelPoint}
+          onHide={handleCancelAddPoint}
           onSave={handleSavePoint}
           crimeTypes={crimeTypes}
           wantedPersons={wantedPersons}
@@ -141,11 +167,12 @@ const MapPage = () => {
         />
         {editPoint && (
         <EditPointModal
-          show={!!editPoint}
           point={editPoint}
+          crimeTypes={crimeTypes}
+          wantedPersons={wantedPersons}
           onSave={handleUpdatePoint}
           onDelete={handleDeletePoint}
-          onCancel={handleCancelEdit}
+          onHide={handleCancelEditPoint}
         />
         )}
         {notification && <div className="notification">{notification}</div>}

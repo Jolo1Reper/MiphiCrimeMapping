@@ -1,7 +1,7 @@
 import { YMaps, Map, Placemark, Clusterer } from "@pbe/react-yandex-maps";
 import "./MapComponent.css";
 
-const MapComponent = ({ onAddPoint = () => {}, points = [], currentPoint = null, onEditPoint = () => {} }) => {
+const MapComponent = ({ onAddPoint = () => {}, points = [], currentPoint = null, onGetPoint = () => {} }) => {
   const defaultState = {
     center: [47.517641, 42.160875],
     zoom: 14,
@@ -13,7 +13,7 @@ const MapComponent = ({ onAddPoint = () => {}, points = [], currentPoint = null,
   };
 
   const handlePlacemarkClick = (point) => {
-    onEditPoint(point);
+    onGetPoint(point);
   };
 
   return (

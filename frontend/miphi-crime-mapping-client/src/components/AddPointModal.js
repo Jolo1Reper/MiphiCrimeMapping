@@ -40,10 +40,8 @@ const AddPointModal = ({
         if (currentPoint) {
           const payload = {
             ...formData,
-            wantedPersonId: formData.wantedPersonId === "" ? null : formData.wantedPersonId,
-            wantedPersonBirthDate: formData.wantedPersonBirthDate
-              ? new Date(formData.wantedPersonBirthDate).toISOString()
-              : null,
+            wantedPersonId: formData.wantedPersonId || null,
+            wantedPersonBirthDate: new Date(formData.wantedPersonBirthDate).toISOString(),
             crimeDate: new Date(formData.crimeDate).toISOString(),
             pointLatitude: currentPoint.coords[0],
             pointLongitude: currentPoint.coords[1],
@@ -123,7 +121,7 @@ const AddPointModal = ({
               <option value="">Выберите преступника</option>
               {wantedPersons.map((person) => (
                 <option key={person.id} value={person.id}>
-                  {person.surname} {person.name} ({person.birthDate})
+                  {person.surname} {person.name} ({person.birthDate.split("T")[0]})
                 </option>
               ))}
             </Form.Select>
