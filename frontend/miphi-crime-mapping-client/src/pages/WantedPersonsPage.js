@@ -201,7 +201,7 @@ const WantedPersonsPage = () => {
         ))}
       </Accordion>
         <div className="add-new-wanted-person">
-          <h3>Добавить разыскиваемого</h3>
+          <h3>{isEditingPerson ? `Изменение для разыскиваемого "${isEditingPerson.name } ${isEditingPerson.surname} ${isEditingPerson.birthDate}"` : "Добавление разыскиваемого"}</h3>
           <Form.Group>
             <Form.Label>Имя</Form.Label>
             <Form.Control
@@ -252,7 +252,7 @@ const WantedPersonsPage = () => {
             />
           </Form.Group>
           <Button className="me-2" onClick={handleSave}>
-            Добавить
+            Сохранить
           </Button>
           <Button className="btn btn-secondary me-2" onClick={handleCancel}>
             Отменить
