@@ -1,7 +1,7 @@
-import { YMaps, Map, Placemark } from "@pbe/react-yandex-maps";
+import { YMaps, Map, Placemark, Clusterer } from "@pbe/react-yandex-maps";
 import "./MapComponent.css";
 
-const MapComponent = ({ onAddPoint = () => {}, points = [], currentPoint = null }) => {
+const MapComponent = ({ onAddPoint = () => {}, points = [], currentPoint = null, onEditPoint = () => {} }) => {
   const defaultState = {
     center: [47.517641, 42.160875],
     zoom: 14,
@@ -12,6 +12,10 @@ const MapComponent = ({ onAddPoint = () => {}, points = [], currentPoint = null 
     onAddPoint(coords);
   };
 
+  const handlePlacemarkClick = (point) => {
+    onEditPoint(point);
+  };
+
   return (
     <div className="map-container">
       <YMaps query={{ apikey: "ef6ce2bf-6d1d-4567-aaf2-5ca3e0d8da70" }}>
@@ -20,8 +24,11 @@ const MapComponent = ({ onAddPoint = () => {}, points = [], currentPoint = null 
           width="100%"
           height="100%"
           onClick={handleMapClick}
+          options={{
+            suppressMapOpenBlock: true,
+            // restrictMapArea: true // Sets for one city only!
+          }}
         >
-          {/* Отображение временной метки красным цветом */}
           {currentPoint && (
             <Placemark
               geometry={currentPoint.coords}
@@ -30,16 +37,27 @@ const MapComponent = ({ onAddPoint = () => {}, points = [], currentPoint = null 
               }}
             />
           )}
-          {/* Отображение сохранённых меток */}
-          {points.map((point, index) => (
-            <Placemark
-              key={index}
-              geometry={point.coords}
-              properties={{
-                balloonContent: `<strong>${point.title}</strong><br>${point.description}`,
+            <Clusterer
+              options={{
+                preset: "islands#invertedVioletClusterIcons",
+                groupByCoordinates: false
               }}
-            />
-          ))}
+            >
+              {points.map((point, index) => (
+                <Placemark
+                  key={index}
+                  geometry={point.coords}
+                  properties={{
+                    hintContent: `<strong>${point.title}</strong><br>${point.location}`,
+                  }}
+                  options={{
+                    preset: "islands#blueIcon",
+                    hasHint: true,
+                  }}
+                  onClick={() => handlePlacemarkClick(point)}
+                />
+              ))}
+            </Clusterer>
         </Map>
       </YMaps>
     </div>

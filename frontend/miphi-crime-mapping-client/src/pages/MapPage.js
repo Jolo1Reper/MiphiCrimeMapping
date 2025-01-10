@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import MapComponent from "../components/MapComponent";
 import FilterPanel from "../components/FilterPanel";
 import MarkerPanel from "../components/MarkerPanel";
+import AddPointModal from "../components/AddPointModal";
+import EditPointModal from "../components/EditPointModal";
 import "./MapPage.css";
 import api from "../api";
 
@@ -10,35 +12,31 @@ const MapPage = () => {
   const [currentPoint, setCurrentPoint] = useState(null);
   const [crimeTypes, setCrimeTypes] = useState([]);
   const [wantedPersons, setWantedPersons] = useState([]);
-  // const [selectedPoint, setSelectedPoint] = useState(null);
-  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [notification, setNotification] = useState(null);
+  const [editPoint, setEditPoint] = useState(null);
+
+  useEffect(() => {
+    fetchAllCrimeTypes();
+    fetchAllWantedPersons();
+    fetchAllCrimeMarks();
+  }, []);
+
   const fetchAllCrimeTypes = async () => {
     try {
       const response = await api.get("/api/crime-types/titles");
-      const loadedCrimeTypes = response.data.map((item) => ({
-        id: item.id,
-        title: item.title
-      }));
-
-      setCrimeTypes(loadedCrimeTypes);
+      setCrimeTypes(response.data);
     } catch(error) {
-      console.error("Ошибка при загрузке типов преступлений:", error.response);
+      console.error("Ошибка при загрузке типов преступлений:", error);
     }
   }
 
   const fetchAllWantedPersons = async () => {
     try {
       const response = await api.get("api/wanted-persons/basic");
-      const loadedWantedPersons = response.data.map((item) => ({
-        id: item.id,
-        name: item.name,
-        surname: item.surname,
-        birthDate: item.birthDate
-      }));
-
-      setWantedPersons(loadedWantedPersons);
+      setWantedPersons(response.data);
     } catch(error) {
-      console.error("Ошибка при загрузке преступников:", error.response);
+      console.error("Ошибка при загрузке преступников:", error);
     }
   }
 
@@ -57,60 +55,100 @@ const MapPage = () => {
     }
   }
 
-  useEffect(() => {
-    let isMounted = true; // Добавляем флаг
-    fetchAllCrimeTypes();
-    fetchAllWantedPersons();
-    fetchAllCrimeMarks().then(() => {
-        // Проверяем, смонтирован ли компонент
-        if (!isMounted) return; // Если компонент не смонтирован, ничего не делаем
-    });
-
-    return () => { // Возвращаем функцию cleanup
-      isMounted = false; // Устанавливаем флаг при размонтировании
-      console.log("Компонент размонтирован.");
-    };
-  }, []);
-
-  const handleAddPoint = (newPoint) => {
-    setCurrentPoint({ coords: newPoint, title: "", location: "" });
-  };
-
   const handleSavePoint = async (data) => {
     try {
       const response = await api.post("/api/crime-marks", data);
       console.log(response.data.message);
 
-      const crimeTypeResponse = await api.get(`/api/crime-types/${data.crimeTypeId}`);
       const newPoint = {
-        title: crimeTypeResponse.data.title,
+        title: crimeTypes.find((type) => type.id === data.crimeTypeId)?.title,
         location: data.location,
         coords: [data.pointLatitude, data.pointLongitude],
       };
       setPoints((prev) => [...prev, newPoint]);
       setCurrentPoint(null);
+      setIsModalOpen(false);
+      showNotification("Метка успешно сохранена!");
 
     } catch(error) {
-      console.error("Ошибка при сохранении метки:", error.response);
+      console.error("Ошибка при сохранении метки:", error);
     } 
+  };
+//TODO
+  const handleUpdatePoint = async (updatedPoint) => {
+    try {
+      await api.put(`/api/crime-marks/${updatedPoint.id}`, updatedPoint);
+      setPoints((prev) =>
+        prev.map((p) => (p.id === updatedPoint.id ? updatedPoint : p))
+      );
+      setEditPoint(null);
+    } catch (error) {
+      console.error("Ошибка при обновлении метки:", error.response);
+    }
+  };
+//TODO
+  const handleDeletePoint = async (point) => {
+    try {
+      await api.delete(`/api/crime-marks/${point.id}`);
+      setPoints((prev) => prev.filter((p) => p.id !== point.id));
+      setEditPoint(null);
+    } catch (error) {
+      console.error("Ошибка при удалении метки:", error.response);
+    }
+  };
+
+  const handleAddPoint = (coords) => {
+    setCurrentPoint({ coords: coords });
+    setIsModalOpen(true);
   };
 
   const handleCancelPoint = () => {
+    setIsModalOpen(false);
     setCurrentPoint(null);
+    showNotification("Добавление метки отменено.");
+  };
+
+  const handleEditPoint = (point) => {
+    setEditPoint(point);
+  };
+
+  const handleCancelEdit = () => {
+    setEditPoint(null);
+  };
+
+  const showNotification = (message) => {
+    setNotification(message);
+    setTimeout(() => setNotification(null), 3000);
   };
 
   return (
       <div className="map-page">
         <FilterPanel />
-        <MapComponent points={points} onAddPoint={handleAddPoint} currentPoint={currentPoint} />
-        <MarkerPanel
-          points={points}
-          crimeTypes={crimeTypes}
-          currentPoint={currentPoint}
-          wantedPersons={wantedPersons}
-          onSavePoint={handleSavePoint}
-          onCancelPoint={handleCancelPoint}
+        <MapComponent 
+        points={points} 
+        onAddPoint={handleAddPoint} 
+        currentPoint={currentPoint} 
+        onEditPoint={handleEditPoint} 
         />
+        <MarkerPanel points={points} />
+        <AddPointModal
+          show={isModalOpen}
+          onHide={handleCancelPoint}
+          onSave={handleSavePoint}
+          crimeTypes={crimeTypes}
+          wantedPersons={wantedPersons}
+          currentPoint={currentPoint}
+        />
+        {editPoint && (
+        <EditPointModal
+          show={!!editPoint}
+          point={editPoint}
+          onSave={handleUpdatePoint}
+          onDelete={handleDeletePoint}
+          onCancel={handleCancelEdit}
+        />
+        )}
+        {notification && <div className="notification">{notification}</div>}
       </div>
   );
 };
