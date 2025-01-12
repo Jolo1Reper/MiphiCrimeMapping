@@ -1,26 +1,48 @@
+import { useState, useEffect } from "react";
 import { YMaps, Map, Placemark, Clusterer } from "@pbe/react-yandex-maps";
 import "./MapComponent.css";
+import Legend from "./Legend";
 
-const MapComponent = ({ onAddPoint = () => {}, points = [], currentPoint = null, onGetPoint = () => {} }) => {
+const MapComponent = ({ onAddPoint = () => {}, points = [], crimeTypes = [], selectedPoint= null, onGetPoint = () => {} }) => {
   const defaultState = {
     center: [47.517641, 42.160875],
     zoom: 14,
   };
+
+  const [mapCenter, setMapCenter] = useState(defaultState.center);
+  const [hoveredPoint, setHoveredPoint] = useState(null);
+
+  useEffect(() => {
+    if (selectedPoint) {
+      setMapCenter(selectedPoint.coords);
+    }
+  }, [selectedPoint]);
 
   const handleMapClick = (e) => {
     const coords = e.get("coords");
     onAddPoint(coords);
   };
 
+  const handleMouseEnter = (point) => {
+    setHoveredPoint(point);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredPoint(null);
+  };
+
   const handlePlacemarkClick = (point) => {
     onGetPoint(point);
   };
+
+
 
   return (
     <div className="map-container">
       <YMaps query={{ apikey: "ef6ce2bf-6d1d-4567-aaf2-5ca3e0d8da70" }}>
         <Map
           defaultState={defaultState}
+          state={{ ...defaultState, center: mapCenter }}
           width="100%"
           height="100%"
           onClick={handleMapClick}
@@ -29,9 +51,10 @@ const MapComponent = ({ onAddPoint = () => {}, points = [], currentPoint = null,
             // restrictMapArea: true // Sets for one city only!
           }}
         >
-          {currentPoint && (
+          {selectedPoint &&
+          (
             <Placemark
-              geometry={currentPoint.coords}
+              geometry={selectedPoint.coords}
               options={{
                 preset: "islands#redIcon",
               }}
@@ -47,19 +70,38 @@ const MapComponent = ({ onAddPoint = () => {}, points = [], currentPoint = null,
                 <Placemark
                   key={index}
                   geometry={point.coords}
-                  properties={{
-                    hintContent: `<strong>${point.title}</strong><br>${point.location}`,
-                  }}
                   options={{
-                    preset: "islands#blueIcon",
-                    hasHint: true,
+                    iconColor: point.color || "#FFFFFF"
                   }}
                   onClick={() => handlePlacemarkClick(point)}
+                  onMouseEnter={() => handleMouseEnter(point)}
+                  onMouseLeave={handleMouseLeave}
                 />
               ))}
             </Clusterer>
         </Map>
       </YMaps>
+
+      {hoveredPoint && (
+        <div
+          style={{
+            position: "absolute",
+            top: "5%",
+            left: "20%",
+            backgroundColor: "white",
+            padding: "10px",
+            border: "1px solid #ccc",
+            borderRadius: "5px",
+            zIndex: 1000
+          }}
+        >
+          <strong>{hoveredPoint.title}</strong>
+          <p>Местонахождение: {hoveredPoint.location}</p>
+          <p>Время совершения: {hoveredPoint.crimeDate.split("T")[0]}</p>
+        </div>
+      )}
+
+      <Legend crimeTypes={crimeTypes} />
     </div>
   );
 };

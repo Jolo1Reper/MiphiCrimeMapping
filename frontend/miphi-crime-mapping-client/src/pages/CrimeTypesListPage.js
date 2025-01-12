@@ -11,6 +11,7 @@ const CrimeTypesListPage = () => {
     title: "",
     description: "",
     link: "",
+    color: "#1E90FF",
     count: 0
   });
 
@@ -22,6 +23,7 @@ const CrimeTypesListPage = () => {
         title: item.title,
         description: item.description,
         link: item.link,
+        color: item.color,
         count: item.count
       }));
 
@@ -40,18 +42,17 @@ const CrimeTypesListPage = () => {
       crimeType.title = capitalizeFirstLetter(crimeType.title);
       const payload ={
         title: crimeType.title,
-        description: crimeType.description !== "" ? crimeType.description : null,
-        link: crimeType.link !== "" ? crimeType.link : null
+        description: crimeType.description || null,
+        link: crimeType.link || null,
+        color: crimeType.color || null
       }
       const response = await api.post("/api/crime-types", payload);
       console.log(response.data.message);
     
       return {
         id: response.data.id,
-        title: crimeType.title,
-        description: crimeType.description,
-        link: crimeType.link, 
-        count: 0
+        ...payload,
+        count: 0,
       };
 
     } catch(error) {
@@ -65,19 +66,14 @@ const CrimeTypesListPage = () => {
       const payload = {
         id: id,
         title: crimeType.title,
-        description: crimeType.description !== "" ? crimeType.description : null,
-        link: crimeType.link !== "" ? crimeType.link : null
+        description: crimeType.description || null,
+        link: crimeType.link || null,
+        color: crimeType.color || null,
       }
       const response = await api.patch("/api/crime-types", payload);
       console.log(response.data.message);
     
-      return {
-        id: id,
-        title: crimeType.title,
-        description: crimeType.description,
-        link: crimeType.link
-      };
-
+      return payload;
     } catch(error) {
       console.error("Ошибка при редактировании типа преступления:", error.response);
     }
@@ -91,25 +87,25 @@ const CrimeTypesListPage = () => {
     }
   }
 
-  const handleAddCrimeType = () => {
-    const newCrimeType = fetchAddCrimeType(formData);
+  const handleAddCrimeType = async () => {
+    const newCrimeType = await fetchAddCrimeType(formData);
     setCrimeTypes([...crimeTypes, newCrimeType]);
-    setFormData({ title: "", description: "", link: "" });
+    setFormData({ title: "", description: "", link: "", color: "#1E90FF" });
   };
 
-  const handleUpdateCrimeType = (id) => {
-    const updateCrimeType = fetchUpdateCrimeType(id, formData);
+  const handleUpdateCrimeType = async (id) => {
+    const updateCrimeType = await fetchUpdateCrimeType(id, formData);
     setCrimeTypes(
       crimeTypes.map((crimeType) =>
         crimeType.id === id ? { ...crimeType, ...updateCrimeType } : crimeType
       )
     );
-    setFormData({ title: "", description: "", link: "" });
+    setFormData({ title: "", description: "", link: "", color: "#1E90FF" });
     setIsEditingType(null);
   };
 
-  const handleDeleteCrimeType = (id) => {
-    fetchDeleteCrimeType(id);
+  const handleDeleteCrimeType = async (id) => {
+    await fetchDeleteCrimeType(id);
     if(isEditingType !== null && isEditingType.id === id){
       setIsEditingType(null);
       setFormData({ title: "", description: "", link: "" });
@@ -119,7 +115,12 @@ const CrimeTypesListPage = () => {
 
   const handleEdit = (crimeType) => {
     setIsEditingType(crimeType);
-    setFormData({ title: crimeType.title, description: crimeType.description, link: crimeType.link });
+    setFormData({
+      title: crimeType.title,
+      description: crimeType.description || "",
+      link: crimeType.link || "",
+      color: crimeType.color || "#1E90FF",
+    });
   };
 
   const handleSave = () => {
@@ -132,7 +133,7 @@ const CrimeTypesListPage = () => {
 
   const handleCancel = () => {
     setIsEditingType(null);
-    setFormData({ title: "", description: "", link: "", count: 0 });
+    setFormData({ title: "", description: "", link: "", color: "#1E90FF" });
   };
 
   return (
@@ -146,15 +147,40 @@ const CrimeTypesListPage = () => {
             <Accordion.Item eventKey={crimeType.id} key={crimeType.id}>
             <Accordion.Header>
                 <div className="d-flex justify-content-between w-100">
-                <span>{crimeType.title}</span>
-                <span className="crime-count">({crimeType.count} преступлений на карте)</span>
+                  <span>{crimeType.title}</span>
+                    <span className="crime-count">
+                      ({crimeType.count} преступлений на карте)
+                    </span>
                 </div>
             </Accordion.Header>
             <Accordion.Body>
-                <p><strong>Название:</strong> {crimeType.title}</p>
-                <strong>Описание:</strong> {crimeType.description === null || crimeType.description === "" ? "-" : <p> {crimeType.description} </p>}
-                <p><strong>Количество совершенных преступлений:</strong> {crimeType.count}</p>
-                <p>{crimeType.link === null || crimeType.link === "" ? "Ссылка на статью отсутствует" : <a href={crimeType.link} target="_blank" rel="noreferrer">Ссылка на статью</a>}</p>
+                <p>
+                  <strong>Название:</strong> {crimeType.title}
+                </p>
+                <strong>Описание: </strong> 
+                {crimeType.description === null || crimeType.description === "" 
+                ? "-" 
+                : <p> {crimeType.description} </p>}
+                <p>
+                  <strong>Количество совершенных преступлений:</strong> {crimeType.count}
+                </p>
+                <p>
+                  {crimeType.link === null || crimeType.link === "" 
+                  ? "Ссылка на статью отсутствует" 
+                  : <a href={crimeType.link} target="_blank" rel="noreferrer">Ссылка на статью</a>}
+                </p>
+                <p>
+                  <strong>Цвет:</strong>{" "}
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: "20px",
+                      height: "20px",
+                      border: "1px solid #000",
+                      backgroundColor: crimeType.color
+                    }}
+                  ></span>
+                </p>
                 <div className="button-group">
                   <Button variant="primary" size="sm" onClick={() => handleEdit(crimeType)}>
                       Изменить
@@ -168,7 +194,11 @@ const CrimeTypesListPage = () => {
         ))}
         </Accordion>
         <div className="add-new-crime-type">
-          <h3>{isEditingType ? `Изменение для типа "${isEditingType.title}"` : "Добавление нового типа"}</h3>
+          <h3>
+            {isEditingType
+            ? `Изменение для типа "${isEditingType.title}"`
+            : "Добавление нового типа"}
+          </h3>
           <Form.Group>
             <Form.Label>Название</Form.Label>
             <Form.Control
@@ -194,12 +224,23 @@ const CrimeTypesListPage = () => {
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </Form.Group>
-          <Button className="me-2 btn btn-primary me-2" onClick={handleSave}>
-            Сохранить
-          </Button>
-          <Button className="btn btn-secondary me-2" onClick={handleCancel}>
-            Отменить
-          </Button>
+          <Form.Group className="add-type-color">
+            <Form.Label>Цвет</Form.Label>
+            <Form.Control
+              type="color"
+              value={formData.color}
+              onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+            />
+          </Form.Group>
+          <div className="add-crime-type-buttons">
+            <Button className="me-2 btn btn-primary me-2" onClick={handleSave}>
+              Сохранить
+            </Button>
+            <Button className="btn btn-secondary me-2" onClick={handleCancel}>
+              Отменить
+            </Button>
+          </div>
+
         </div>
       </div>
     </div>

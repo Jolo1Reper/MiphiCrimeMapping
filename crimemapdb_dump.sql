@@ -5,7 +5,7 @@
 -- Dumped from database version 16.1
 -- Dumped by pg_dump version 16.1
 
--- Started on 2025-01-09 04:48:25
+-- Started on 2025-01-12 04:16:36
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -31,7 +31,8 @@ CREATE TABLE public."CrimeTypes" (
     "Id" uuid NOT NULL,
     "Title" text NOT NULL,
     "Description" text,
-    "Link" text
+    "Link" text,
+    "Color" text
 );
 
 
@@ -115,12 +116,12 @@ ALTER TABLE public."__EFMigrationsHistory" OWNER TO postgres;
 -- Data for Name: CrimeTypes; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."CrimeTypes" ("Id", "Title", "Description", "Link") FROM stdin;
-01943e21-bc4f-7616-b762-175694e57639	Тяжелое увечье	тяжелое преступление, прям да..	https://www.consultant.ru/document/cons_doc_LAW_10699/e7204e825c8e87b5c7be210b06a0cde61cd60a3c/
-0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	Насилие	\N	https://www.consultant.ru/document/cons_doc_LAW_10699/6b12cdea9308b35504628c3292186f5140f65a68/
-8fdfcea4-ddb1-46fd-ad0c-66be6156d550	Убийство	\N	https://www.consultant.ru/document/cons_doc_LAW_10699/5b3e04338020a09b25fe98ea83bc9362c8bc5a76/
-9cd0be1a-3952-40c9-a93a-bff647ec85e6	Кража	Незаконное завладение чужим имуществом	https://www.consultant.ru/document/cons_doc_LAW_10699/57b5c7b83fcd2cf40cabe2042f2d8f04ed6875ad/
-01944833-52b7-7460-9adc-bfbe771c8679	Грабеж	Открытое хищение чужого имущества	https://www.consultant.ru/document/cons_doc_LAW_10699/8727611b42df79f2b3ef8d2f3b68fea711ed0c7a/
+COPY public."CrimeTypes" ("Id", "Title", "Description", "Link", "Color") FROM stdin;
+01943e21-bc4f-7616-b762-175694e57639	Тяжелое увечье	тяжелое преступление, прям да..	https://www.consultant.ru/document/cons_doc_LAW_10699/e7204e825c8e87b5c7be210b06a0cde61cd60a3c/	#ff1fad
+01944833-52b7-7460-9adc-bfbe771c8679	Грабеж	Открытое хищение чужого имущества	https://www.consultant.ru/document/cons_doc_LAW_10699/8727611b42df79f2b3ef8d2f3b68fea711ed0c7a/	#2fbbe9
+0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	Насилие	\N	https://www.consultant.ru/document/cons_doc_LAW_10699/6b12cdea9308b35504628c3292186f5140f65a68/	#30c54e
+8fdfcea4-ddb1-46fd-ad0c-66be6156d550	Убийство	\N	https://www.consultant.ru/document/cons_doc_LAW_10699/5b3e04338020a09b25fe98ea83bc9362c8bc5a76/	#d70f19
+9cd0be1a-3952-40c9-a93a-bff647ec85e6	Кража	Незаконное завладение чужим имуществом	https://www.consultant.ru/document/cons_doc_LAW_10699/57b5c7b83fcd2cf40cabe2042f2d8f04ed6875ad/	#a929ff
 \.
 
 
@@ -132,7 +133,6 @@ COPY public."CrimeTypes" ("Id", "Title", "Description", "Link") FROM stdin;
 
 COPY public."Crimes" ("Id", "Applicant", "TypeId", "WantedPersonId", "Location", "CreateAt", "LawsuitId", "Point_Latitude", "Point_Longitude", "CrimeDate") FROM stdin;
 0194295c-abba-7995-975c-ec940f876871		0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	0194295c-ab01-7f16-9b60-8d186431f90f	ул. Горького	2025-01-03 02:32:06.483077+03	\N	32.513252	74.321578	2025-01-03 02:30:55.015+03
-0194295f-85bc-74c7-9f48-3c16043fce55		0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	3559cdf1-e821-484a-aa10-83962847d6c1	ул. Московская	2025-01-03 02:35:13.595787+03	\N	44.515299	38.333538	2024-10-05 03:00:00+03
 01942960-c240-72bb-b213-7d3299dcfae7		9cd0be1a-3952-40c9-a93a-bff647ec85e6	12654663-c462-44cf-847e-a626d4313b1c	ул. Матросова	2025-01-03 02:36:34.62449+03	\N	32.510009	45.330038	2024-11-23 03:00:00+03
 01942ecf-b49e-7f42-a2f9-0328d51f937c		9cd0be1a-3952-40c9-a93a-bff647ec85e6	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Волгодонск	2025-01-04 03:55:44.114768+03	\N	47.51921089342353	42.15031782531733	2024-12-12 03:00:00+03
 01942ee5-5663-7eb0-8183-88112337fbd4		9cd0be1a-3952-40c9-a93a-bff647ec85e6	01942ecf-97ae-7fb6-ab03-81a560a7fe59	ВИТИ	2025-01-04 04:19:29.372873+03	\N	47.515489587838566	42.15890089416499	2025-01-01 03:00:00+03
@@ -142,10 +142,16 @@ COPY public."Crimes" ("Id", "Applicant", "TypeId", "WantedPersonId", "Location",
 01942eef-c2f0-7c63-a9f0-f7f059c5da18		9cd0be1a-3952-40c9-a93a-bff647ec85e6	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Кино	2025-01-04 04:30:52.522927+03	\N	47.518003127551545	42.19192613796318	2024-12-31 03:00:00+03
 01943917-5a95-7c9e-9d22-40c9f9672102		0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	81e9e469-4c14-4f06-8cec-a901240c6ce3	Рынок	2025-01-06 03:50:19.404516+03	\N	47.562916344358655	42.130061782836854	2023-12-12 03:00:00+03
 0194392b-8d91-7214-85db-6f395c6bfdf7		8fdfcea4-ddb1-46fd-ad0c-66be6156d550	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Поля	2025-01-06 04:12:23.185417+03	\N	47.511534445041384	42.124387421935204	2024-12-12 03:00:00+03
-01943952-448f-755a-837e-22a2890cd2b0		0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	345e254f-7869-4d1a-bbd1-bee9fc0b5102	Шоссе	2025-01-06 04:54:40.399707+03	\N	47.5033353497656	42.20825354003901	2020-12-07 03:00:00+03
 01943939-ce33-7b62-80bb-47eca5ca1459		0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Центр	2025-01-07 02:27:22.922406+03	\N	47.504207757833186	42.15684095764155	2020-12-12 03:00:00+03
-01943e27-3b43-7410-9b44-d735a351924c		01943e21-bc4f-7616-b762-175694e57639	7f4f062f-8da3-47e6-b8be-4759e48edb9b	Парк Юность	2025-01-07 03:25:46.016296+03	\N	47.526738499610794	42.13716251097092	2025-01-07 03:00:00+03
-0194485b-72c7-7718-a672-45d6f7d6ba15		01944833-52b7-7460-9adc-bfbe771c8679	81e9e469-4c14-4f06-8cec-a901240c6ce3	Набережная	2025-01-09 02:59:00.27895+03	\N	47.52703058428322	42.18095938110348	2025-01-09 03:00:00+03
+01944d32-3f87-7cce-80d5-b2ee1ec76845		01943e21-bc4f-7616-b762-175694e57639	12654663-c462-44cf-847e-a626d4313b1c	ул. Новая	2025-01-10 01:32:06.257697+03	\N	47.50324810815652	42.184306777954056	2025-01-10 03:00:00+03
+01944d34-4586-7053-bc59-032edde6e4e7		01944833-52b7-7460-9adc-bfbe771c8679	345e254f-7869-4d1a-bbd1-bee9fc0b5102	ул. Химиков	2025-01-10 01:34:18.886021+03	\N	47.523426114123765	42.1317783966064	2025-01-10 03:00:00+03
+01944d36-da48-707e-b6e9-f161c68c4d6c		01944833-52b7-7460-9adc-bfbe771c8679	3559cdf1-e821-484a-aa10-83962847d6c1	Озерный перекресток	2025-01-10 01:37:08.040393+03	\N	47.521623785594365	42.18722502136225	2025-01-10 03:00:00+03
+01944d4b-d14c-7fee-8079-b1b64574ba78		0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	0194295c-ab01-7f16-9b60-8d186431f90f	Церковь	2025-01-11 00:09:22.875362+03	\N	47.51906553490789	42.14551130676265	2025-01-09 03:00:00+03
+01944d52-c8db-7089-97ed-6e880d9f2caf		8fdfcea4-ddb1-46fd-ad0c-66be6156d550	0194295c-ab01-7f16-9b60-8d186431f90f	ул. Великая	2025-01-11 00:18:04.986471+03	\N	47.51877481666104	42.152978576660104	2025-01-09 03:00:00+03
+0194485b-72c7-7718-a672-45d6f7d6ba15		8fdfcea4-ddb1-46fd-ad0c-66be6156d550	81e9e469-4c14-4f06-8cec-a901240c6ce3	Набережная	2025-01-12 02:04:02.417397+03	\N	47.52703058428322	42.18095938110348	2025-01-09 03:00:00+03
+01943952-448f-755a-837e-22a2890cd2b0		01943e21-bc4f-7616-b762-175694e57639	345e254f-7869-4d1a-bbd1-bee9fc0b5102	Шоссе	2025-01-12 02:04:28.434431+03	\N	47.5033353497656	42.20825354003901	2020-12-07 03:00:00+03
+019457a0-42f7-776d-a100-5d3967bed55c		0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	7f4f062f-8da3-47e6-b8be-4759e48edb9b	Победа	2025-01-12 02:15:29.236952+03	\N	47.494406868756826	42.15426603698725	2025-01-11 03:00:00+03
+01943e27-3b43-7410-9b44-d735a351924c		0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	7f4f062f-8da3-47e6-b8be-4759e48edb9b	Парк Юность	2025-01-12 02:16:19.383915+03	\N	47.526738499610794	42.13716251097092	2025-01-06 03:00:00+03
 \.
 
 
@@ -197,6 +203,7 @@ COPY public."__EFMigrationsHistory" ("MigrationId", "ProductVersion") FROM stdin
 20241222003947_AddCrimeDate	8.0.11
 20250101215144_ChangePointTypeToDecimal	9.0.0
 20250108215455_AddCrimeTypeLinkColumn	9.0.0
+20250111221841_AddColorCrimeType	9.0.0
 \.
 
 
@@ -313,7 +320,7 @@ ALTER TABLE ONLY public."Lawsuits"
     ADD CONSTRAINT "FK_Lawsuits_WantedPersons_PersonId" FOREIGN KEY ("PersonId") REFERENCES public."WantedPersons"("Id") ON DELETE CASCADE;
 
 
--- Completed on 2025-01-09 04:48:26
+-- Completed on 2025-01-12 04:16:36
 
 --
 -- PostgreSQL database dump complete
