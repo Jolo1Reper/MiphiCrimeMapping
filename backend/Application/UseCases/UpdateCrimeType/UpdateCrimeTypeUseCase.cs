@@ -13,7 +13,7 @@ namespace Application.UseCases.UpdateCrimeType
 
         public async Task<CrimeReportResponse?> Handle(UpdateCrimeTypeRequest request)
         {
-            CrimeType crimeType = new() { Id = request.Id, Title = request.Title, Description = request.Description, Link = request.Link };
+            CrimeType crimeType = new() { Id = request.Id, Title = request.Title, Description = request.Description, Link = request.Link, Color = request.Color };
 
             await _repo.UpdateCrimeType(crimeType);
 

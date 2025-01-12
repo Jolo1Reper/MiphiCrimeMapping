@@ -17,7 +17,7 @@ namespace Application.UseCases.CreateCrimeType
             if(_repo.ContainCrimeType(request.Title))
                 return null;
 
-            CrimeType type = new() { Title = request.Title, Description = request.Description, Link = request.Link };
+            CrimeType type = new() { Title = request.Title, Description = request.Description, Link = request.Link, Color = request.Color };
 
             await _repo.AddCrimeType(type);
             return new CrimeReportResponse(type.Id, "Crime type successfully created.");

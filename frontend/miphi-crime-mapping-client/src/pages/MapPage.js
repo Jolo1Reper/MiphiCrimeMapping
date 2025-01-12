@@ -15,46 +15,60 @@ const MapPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [notification, setNotification] = useState(null);
   const [editPoint, setEditPoint] = useState(null);
+  const [selectedPoint, setSelectedPoint] = useState(null);
 
   useEffect(() => {
-    fetchAllCrimeTypes();
-    fetchAllWantedPersons();
-    fetchAllCrimeMarks();
-  }, []);
+    const fetchData = async () => {
+      const loadTypes = await fetchAllCrimeTypes();
+      setCrimeTypes(loadTypes);
 
+      const loadPersons = await fetchAllWantedPersons();
+      setWantedPersons(loadPersons);
+
+      const loadPoints = await fetchAllCrimeMarks(loadTypes);
+      setPoints(loadPoints);
+    };
+
+    fetchData();
+  }, []);
+  
   const fetchAllCrimeTypes = async () => {
     try {
       const response = await api.get("/api/crime-types/titles");
-      setCrimeTypes(response.data);
-    } catch(error) {
+      return response.data;
+    } catch (error) {
       console.error("Ошибка при загрузке типов преступлений:", error);
     }
-  }
-
+  };
+  
   const fetchAllWantedPersons = async () => {
     try {
       const response = await api.get("api/wanted-persons/basic");
-      setWantedPersons(response.data);
-    } catch(error) {
+      return response.data;
+    } catch (error) {
       console.error("Ошибка при загрузке преступников:", error);
     }
-  }
-
-  const fetchAllCrimeMarks = async () => {
+  };
+  
+  const fetchAllCrimeMarks = async (crimeTypes) => {
     try {
       const response = await api.get("/api/crime-marks");
-      const loadedPoints = response.data.map((item) => ({
-        id: item.id,
-        title: item.crimeTypeTitle,
-        location: item.location,
-        coords: [item.pointLatitude, item.pointLongitude],
-      }));
-
-      setPoints(loadedPoints);
-    } catch(error) {
-      console.error("Ошибка при загрузке меток:", error.response);
+      const loadedPoints = response.data.map((item) => {
+        const crimeType = crimeTypes.find((type) => type.id === item.crimeTypeId);
+        return {
+          id: item.id,
+          title: crimeType.title,
+          color: crimeType?.color || null,
+          crimeDate: item.crimeDate,
+          location: item.location,
+          coords: [item.pointLatitude, item.pointLongitude],
+        };
+      });
+      return loadedPoints;
+    } catch (error) {
+      console.error("Ошибка при загрузке меток преступлений:", error);
     }
-  }
+  };
 
   const handleGetPoint = async (point) => {
     const response = await api.get(`/api/crime-marks/${point.id}`);
@@ -72,16 +86,19 @@ const MapPage = () => {
     setEditPoint(getPoint);
   };
 
-  const handleSavePoint = async (data) => {
+  const handleSavePoint = async (point) => {
     try {
-      const response = await api.post("/api/crime-marks", data);
+      const response = await api.post("/api/crime-marks", point);
       console.log(response.data.message);
 
+      const crimeType = crimeTypes.find((type) => type.id === point.crimeTypeId);
       const newPoint = {
         id: response.data.id,
-        title: crimeTypes.find((type) => type.id === data.crimeTypeId)?.title,
-        location: data.location,
-        coords: [data.pointLatitude, data.pointLongitude],
+        title: crimeType.title,
+        color: crimeType.color,
+        crimeDate: point.crimeDate,
+        location: point.location,
+        coords: [point.pointLatitude, point.pointLongitude],
       };
       setPoints((prev) => [...prev, newPoint]);
       setCurrentPoint(null);
@@ -98,9 +115,13 @@ const MapPage = () => {
       console.log(point);
       const response = await api.patch(`/api/crime-marks`, point);
       console.log(response.data.message);
+      const crimeType = crimeTypes.find((type) => type.id === point.crimeTypeId);
+      
       const updatePoint = {
         id: response.data.id,
-        title: crimeTypes.find((type) => type.id === point.crimeTypeId)?.title,
+        title: crimeType.title,
+        color: crimeType.color,
+        crimeDate: point.crimeDate,
         location: point.location,
         coords: [point.pointLatitude, point.pointLongitude],
       };
@@ -147,16 +168,23 @@ const MapPage = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
+  // TODO Modal?  
+  const handleMarkerSelect = (point) => {
+    setSelectedPoint(point);
+  } 
+
   return (
       <div className="map-page">
         <FilterPanel />
         <MapComponent 
-        points={points} 
+        points={points}
+        crimeTypes={crimeTypes}
         onAddPoint={handleAddPoint} 
         currentPoint={currentPoint} 
-        onGetPoint={handleGetPoint} 
+        onGetPoint={handleGetPoint}
+        selectedPoint={selectedPoint} 
         />
-        <MarkerPanel points={points} />
+        <MarkerPanel points={points} onMarkerSelect={handleMarkerSelect} />
         <AddPointModal
           show={isModalOpen}
           onHide={handleCancelAddPoint}
@@ -176,6 +204,7 @@ const MapPage = () => {
         />
         )}
         {notification && <div className="notification">{notification}</div>}
+
       </div>
   );
 };

@@ -15,7 +15,7 @@ namespace Application.UseCases.GetAllCrimeTypes
             var crimeTypes = await _repo.GetAllCrimeTypesWithCounts();
 
             IEnumerable<GetAllCrimeTypesResponse> crimeTypeDtos = crimeTypes.Select(t => new GetAllCrimeTypesResponse(t.CrimeType.Id, 
-                t.CrimeType.Title, t.CrimeType.Description, t.CrimeType.Link, t.CrimeCount));
+                t.CrimeType.Title, t.CrimeType.Description, t.CrimeType.Link, t.CrimeType.Color, t.CrimeCount));
             return crimeTypeDtos;
         }
     }
