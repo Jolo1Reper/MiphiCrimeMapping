@@ -3,10 +3,14 @@ import "./WantedPersonsPage.css";
 import { Button, Form, Accordion } from "react-bootstrap";
 import api from "../api";
 import capitalizeFirstLetter from "../services/capitalizeFirstLetter";
+import { Modal } from "react-bootstrap";
 
 const WantedPersonsPage = () => {
   const [wantedPersons, setWantedPersons] = useState([]);
   const [isEditingPerson, setIsEditingPerson] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmDeletePerson, setConfirmDeletePerson] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     surname: "",
@@ -114,6 +118,15 @@ const WantedPersonsPage = () => {
     }
   }
 
+  const handleSave = () => {
+    if (isEditingPerson) {
+      handleUpdateWantedPerson(isEditingPerson.id);
+    } else {
+      handleAddWantedPerson();
+    }
+    handleCloseModal();
+  };
+
   const handleAddWantedPerson = () => {
     const newWantedPerson = fetchAddWantedPerson(formData);
     setWantedPersons([...wantedPersons, newWantedPerson]);
@@ -131,8 +144,8 @@ const WantedPersonsPage = () => {
     setIsEditingPerson(null);
   };
 
-  const handleDeleteWantedPerson = (id) => {
-    fetchDeleteWantedPerson(id);
+  const handleDeleteWantedPerson = async (id) => {
+    await fetchDeleteWantedPerson(id);
      if(isEditingPerson !== null && isEditingPerson.id === id){
        setIsEditingPerson(null);
        setFormData({ name: "", surname: "", patronymic: "", birthDate: "",  address: "", addInfo: "" });
@@ -150,19 +163,35 @@ const WantedPersonsPage = () => {
       address: person.address,
       addInfo: person.addInfo
     });
+    setShowModal(true);
   };
 
-  const handleSave = () => {
-    if (isEditingPerson) {
-      handleUpdateWantedPerson(isEditingPerson.id);
-    } else {
-      handleAddWantedPerson();
-    }
-  };
-
-  const handleCancel = () => {
+  const handleOpenModal = () => {
     setIsEditingPerson(null);
     setFormData({ name: "", surname: "", patronymic: "", birthDate: "",  address: "", addInfo: "" });
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsEditingPerson(null);
+    setFormData({ name: "", surname: "", patronymic: "", birthDate: "",  address: "", addInfo: "" });
+    setShowModal(false);
+  };
+
+  const handleDeleteClick = (person) => {
+    setConfirmDeletePerson(person);
+    setShowConfirm(true);
+  };
+
+  const cancelDeleteClick = () => {
+    setConfirmDeletePerson(null);
+    setShowConfirm(false);
+  };
+
+  const confirmDeleteClick = async () => {
+    await handleDeleteWantedPerson(confirmDeletePerson.id);
+    setConfirmDeletePerson(null);
+    setShowConfirm(false);
   };
 
   return (
@@ -171,18 +200,29 @@ const WantedPersonsPage = () => {
         <h2>Разыскиваемые лица</h2>
       </header>
       <div className="wanted-persons-content">
-      <Accordion>
-        {wantedPersons.map((wantedPerson) => (
+        <Accordion>
+          <Accordion.Item eventKey="0">
+            <Accordion.Header>
+              <Button
+                variant="link"
+                className="w-100 text-start text-decoration-none d-flex justify-content-start align-items-center"
+                onClick={handleOpenModal}
+              >
+                Добавить разыскиваемого
+              </Button>
+            </Accordion.Header>
+          </Accordion.Item>
+          {wantedPersons.map((wantedPerson) => (
           <Accordion.Item eventKey={wantedPerson.id} key={wantedPerson.id}>
             <Accordion.Header>
               <div className="d-flex justify-content-between w-100">
-                <span>{wantedPerson.name} {wantedPerson.surname} {wantedPerson.birthDate}</span>
+                <span>{wantedPerson.surname} {wantedPerson.name} {wantedPerson.patronymic} {wantedPerson.birthDate}</span>
                 <span className="wanted-count">({wantedPerson.count} преступления на карте)</span>
               </div>
             </Accordion.Header>
             <Accordion.Body>
-              <p><strong>Имя:</strong> {wantedPerson.name} </p>
               <p><strong>Фамилия:</strong> {wantedPerson.surname}</p>
+              <p><strong>Имя:</strong> {wantedPerson.name} </p>
               <p><strong>Отчество:</strong> {wantedPerson.patronymic === null || wantedPerson.patronymic === "" ? "-" : wantedPerson.patronymic}</p>
               <p><strong>Дата рождения:</strong> {wantedPerson.birthDate}</p>
               <p><strong>Адрес регистрации: </strong> {wantedPerson.address === null || wantedPerson.address === "" ? "-" : wantedPerson.address}</p>
@@ -192,30 +232,39 @@ const WantedPersonsPage = () => {
                 <Button variant="primary" size="sm" onClick={() => handleEdit(wantedPerson)}>
                   Изменить
                 </Button>
-                <Button variant="danger" size="sm" onClick={() => handleDeleteWantedPerson(wantedPerson.id)}>
+                <Button variant="danger" size="sm" onClick={() => handleDeleteClick(wantedPerson)}>
                   Удалить
                 </Button>
               </div>
             </Accordion.Body>
           </Accordion.Item>
-        ))}
-      </Accordion>
-        <div className="add-new-wanted-person">
-          <h3>{isEditingPerson ? `Изменение для разыскиваемого "${isEditingPerson.name } ${isEditingPerson.surname} ${isEditingPerson.birthDate}"` : "Добавление разыскиваемого"}</h3>
-          <Form.Group>
-            <Form.Label>Имя</Form.Label>
-            <Form.Control
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            />
-          </Form.Group>
+          ))}
+        </Accordion>
+      </div>
+
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+        <Modal.Title>
+              {isEditingPerson 
+              ? `Изменение для разыскиваемого "${isEditingPerson.name } ${isEditingPerson.surname} ${isEditingPerson.birthDate}"`
+              : "Добавление разыскиваемого"}
+            </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
           <Form.Group>
             <Form.Label>Фамилия</Form.Label>
             <Form.Control
               type="text"
               value={formData.surname}
               onChange={(e) => setFormData({ ...formData, surname: e.target.value })}
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Имя</Form.Label>
+            <Form.Control
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
           </Form.Group>
           <Form.Group>
@@ -251,14 +300,33 @@ const WantedPersonsPage = () => {
               onChange={(e) => setFormData({ ...formData, addInfo: e.target.value })}
             />
           </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
           <Button className="me-2" onClick={handleSave}>
             Сохранить
           </Button>
-          <Button className="btn btn-secondary me-2" onClick={handleCancel}>
+          <Button className="btn btn-secondary me-2" onClick={handleCloseModal}>
             Отменить
           </Button>
-        </div>
-      </div>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showConfirm} onHide={cancelDeleteClick}>
+        <Modal.Header closeButton>
+          <Modal.Title>Подтвердите удаление</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Вы уверены, что хотите удалить разыскиваемого {confirmDeletePerson?.surname} {confirmDeletePerson?.name} {confirmDeletePerson?.patronymic} {confirmDeletePerson?.birthDate}?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="danger" onClick={confirmDeleteClick}>
+            Удалить
+          </Button>
+          <Button variant="secondary" onClick={cancelDeleteClick}>
+            Отмена
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

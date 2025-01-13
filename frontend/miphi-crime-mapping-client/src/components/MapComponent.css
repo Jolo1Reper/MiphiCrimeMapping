@@ -2,3 +2,45 @@
   flex: 1;
   height: 100%;
 }
+
+.hovered-point-window {
+  position: absolute;
+  top: 2%; /* Позиция сверху */
+  left: 17%; /* Позиция слева */
+  background-color: #34495e; /* Темный фон, как у MarkerPanel */
+  color: #ecf0f1; /* Светлый текст */
+  padding: 15px;
+  border: 1px solid #1abc9c; /* Зеленая рамка */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Тень для окна */
+  z-index: 1000;
+  width: 300px; /* Ширина окна */
+  transition: transform 0.2s ease, opacity 0.3s ease;
+}
+
+.hovered-point-window:hover {
+  transform: translateY(-5px); /* Легкий подъем при наведении */
+  opacity: 0.9; /* Легкая прозрачность при наведении */
+}
+
+.hovered-point-window strong {
+  font-size: 18px;
+  font-weight: bold;
+  color: #1abc9c; /* Зеленый акцент для заголовка */
+}
+
+.hovered-point-window p {
+  font-size: 14px;
+  margin: 5px 0;
+  color: #bdc3c7; /* Светлый серый текст */
+}
+
+.hovered-point-window .hovered-point-location {
+  font-weight: bold;
+  color: #ecf0f1; /* Светлый акцент для местонахождения */
+}
+
+.hovered-point-window .hovered-point-crime-date {
+  font-style: italic;
+  color: #bdc3c7; /* Серый цвет для времени совершения */
+}

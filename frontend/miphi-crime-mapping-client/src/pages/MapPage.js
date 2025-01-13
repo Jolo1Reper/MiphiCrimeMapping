@@ -6,6 +6,7 @@ import AddPointModal from "../components/AddPointModal";
 import EditPointModal from "../components/EditPointModal";
 import "./MapPage.css";
 import api from "../api";
+import axios from "axios";
 
 const MapPage = () => {
   const [points, setPoints] = useState([]);
@@ -17,22 +18,27 @@ const MapPage = () => {
   const [editPoint, setEditPoint] = useState(null);
   const [selectedPoint, setSelectedPoint] = useState(null);
 
+  const [isFilterPanelVisible, setFilterPanelVisible] = useState(true);
+  const [isMarkerPanelVisible, setMarkerPanelVisible] = useState(true);
+  const toggleFilterPanel = () => setFilterPanelVisible(!isFilterPanelVisible);
+  const toggleMarkerPanel = () => setMarkerPanelVisible(!isMarkerPanelVisible);
+
   useEffect(() => {
     const fetchData = async () => {
-      const loadTypes = await fetchAllCrimeTypes();
+      const loadTypes = await fetchGetAllCrimeTypes();
       setCrimeTypes(loadTypes);
 
-      const loadPersons = await fetchAllWantedPersons();
+      const loadPersons = await fetchGetAllWantedPersons();
       setWantedPersons(loadPersons);
 
-      const loadPoints = await fetchAllCrimeMarks(loadTypes);
+      const loadPoints = await fetchGetAllCrimeMarks(loadTypes);
       setPoints(loadPoints);
     };
 
     fetchData();
   }, []);
   
-  const fetchAllCrimeTypes = async () => {
+  const fetchGetAllCrimeTypes = async () => {
     try {
       const response = await api.get("/api/crime-types/titles");
       return response.data;
@@ -41,7 +47,7 @@ const MapPage = () => {
     }
   };
   
-  const fetchAllWantedPersons = async () => {
+  const fetchGetAllWantedPersons = async () => {
     try {
       const response = await api.get("api/wanted-persons/basic");
       return response.data;
@@ -50,7 +56,7 @@ const MapPage = () => {
     }
   };
   
-  const fetchAllCrimeMarks = async (crimeTypes) => {
+  const fetchGetAllCrimeMarks = async (crimeTypes) => {
     try {
       const response = await api.get("/api/crime-marks");
       const loadedPoints = response.data.map((item) => {
@@ -70,7 +76,8 @@ const MapPage = () => {
     }
   };
 
-  const handleGetPoint = async (point) => {
+  const fetchGetPoint = async (point) => {
+    try {
     const response = await api.get(`/api/crime-marks/${point.id}`);
     const getPoint = {
       id: response.data.id,
@@ -83,10 +90,14 @@ const MapPage = () => {
       location: response.data.location,
       coords: [response.data.pointLatitude, response.data.pointLongitude]
     } 
+
     setEditPoint(getPoint);
+  } catch(error) {
+    console.error("Ошибка при загрузке метки преступления:", error);
+  }
   };
 
-  const handleSavePoint = async (point) => {
+  const fetchAddPoint = async (point) => {
     try {
       const response = await api.post("/api/crime-marks", point);
       console.log(response.data.message);
@@ -110,7 +121,7 @@ const MapPage = () => {
     } 
   };
 
-  const handleUpdatePoint = async (point) => {
+  const fetchUpdatePoint = async (point) => {
     try {
       console.log(point);
       const response = await api.patch(`/api/crime-marks`, point);
@@ -135,7 +146,7 @@ const MapPage = () => {
     }
   };
 
-  const handleDeletePoint = async (point) => {
+  const fetchDeletePoint = async (point) => {
     try {
       const response = await api.delete(`/api/crime-marks/${point.id}`);
       console.log(response.data.message);
@@ -147,8 +158,49 @@ const MapPage = () => {
     }
   };
 
-  const handleAddPoint = (coords) => {
-    setCurrentPoint({ coords: coords });
+  const fetchAddressFromCoordinates = async (coords) => {
+    const [latitude, longitude] = coords;
+    const apiKey = "78f10438-fb7e-4516-a20a-41c29d8f3b01";
+    const url = `https://geocode-maps.yandex.ru/1.x/?apikey=${apiKey}&geocode=${longitude},${latitude}&format=json`;
+    try {
+      const response = await axios.get(url);
+      const data = response.data;
+      return data;
+    } catch (error) {
+      console.error("Ошибка при запросе адреса:", error);
+    }
+  };
+
+  const extractShortAddress = (data) => {
+    const featureMembers = data?.response?.GeoObjectCollection?.featureMember;
+  
+    if (featureMembers && featureMembers.length > 0) {
+      const firstGeoObject = featureMembers[0]?.GeoObject;
+      const components =
+        firstGeoObject?.metaDataProperty?.GeocoderMetaData?.Address?.Components;
+  
+      if (components) {
+        const city = components.find((comp) => comp.kind === "locality")?.name;
+        const street = components.find((comp) => comp.kind === "street")?.name;
+        const house = components.find((comp) => comp.kind === "house")?.name;
+  
+        return [city, street, house].filter(Boolean).join(", ") || "Адрес не найден";
+      }
+    }
+
+    return "-";
+  };
+
+  const handleAddPoint = async (coords) => {
+    const geocodeData = await fetchAddressFromCoordinates(coords);
+  
+    if (geocodeData) {
+      const shortAddress = extractShortAddress(geocodeData);
+      console.log("Краткий адрес:", shortAddress);
+      setCurrentPoint({ location: shortAddress, coords: coords });
+    } else {
+      setCurrentPoint({ coords: coords });
+    }
     setIsModalOpen(true);
   };
 
@@ -174,21 +226,45 @@ const MapPage = () => {
   } 
 
   return (
-      <div className="map-page">
-        <FilterPanel />
+        <div className="map-page">
+        <div
+          className={`filter-panel ${isFilterPanelVisible ? "" : "collapsed"}`}
+        >
+          <FilterPanel />
+        </div>
+
+        <div
+          className={`panel-toggle left ${isFilterPanelVisible ? "" : "collapsed"}`}
+          onClick={toggleFilterPanel}
+        >
+          <span>Фильтры</span>
+        </div>
+        
         <MapComponent 
         points={points}
         crimeTypes={crimeTypes}
-        onAddPoint={handleAddPoint} 
-        currentPoint={currentPoint} 
-        onGetPoint={handleGetPoint}
+        onAddPoint={handleAddPoint}
+        onGetPoint={fetchGetPoint}
         selectedPoint={selectedPoint} 
         />
-        <MarkerPanel points={points} onMarkerSelect={handleMarkerSelect} />
+
+        <div
+          className={`marker-panel ${isMarkerPanelVisible ? "" : "collapsed"}`}
+        >
+          <MarkerPanel points={points} onMarkerSelect={handleMarkerSelect} />
+        </div>
+
+        <div
+          className={`panel-toggle right ${isMarkerPanelVisible ? "" : "collapsed"}`}
+          onClick={toggleMarkerPanel}
+        >
+          <span>Метки</span>
+        </div>
+
         <AddPointModal
           show={isModalOpen}
           onHide={handleCancelAddPoint}
-          onSave={handleSavePoint}
+          onSave={fetchAddPoint}
           crimeTypes={crimeTypes}
           wantedPersons={wantedPersons}
           currentPoint={currentPoint}
@@ -198,8 +274,8 @@ const MapPage = () => {
           point={editPoint}
           crimeTypes={crimeTypes}
           wantedPersons={wantedPersons}
-          onSave={handleUpdatePoint}
-          onDelete={handleDeletePoint}
+          onSave={fetchUpdatePoint}
+          onDelete={fetchDeletePoint}
           onHide={handleCancelEditPoint}
         />
         )}

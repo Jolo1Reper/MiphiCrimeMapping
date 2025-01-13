@@ -81,7 +81,7 @@
 .filter-date-range {
   display: flex;
   align-items: center;
-  gap: 10px; /* Расстояние между элементами */
+  gap: 10px;
   flex-wrap: wrap; /* Разрешить перенос строк для маленьких экранов */
 }
 
@@ -94,4 +94,34 @@
   font-size: 16px;
   font-weight: bold;
   color: #ecf0f1;
+}
+
+/* для контейнера поиска и кнопки */
+.search-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.filter-input {
+  width: calc(100% - 30px); /* Уменьшаем ширину для кнопки */
+  padding: 8px;
+  border: 1px solid #1abc9c;
+  border-radius: 5px;
+  background-color: #34495e;
+  color: white;
+}
+
+.search-button {
+  background-color: transparent;
+  border: none;
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+}
+
+.search-icon {
+  width: 18px;
+  height: 18px;
+  filter: brightness(1) saturate(0) invert(1);
 }

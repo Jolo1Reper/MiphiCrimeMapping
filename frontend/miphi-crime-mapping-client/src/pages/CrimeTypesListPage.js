@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import "./CrimeTypesListPage.css";
-import { Button, Form, Accordion } from "react-bootstrap";
+import { Button, Form, Accordion, Modal } from "react-bootstrap";
 import api from "../api";
 import capitalizeFirstLetter from "../services/capitalizeFirstLetter";
 
 const CrimeTypesListPage = () => {
   const [crimeTypes, setCrimeTypes] = useState([]);
   const [isEditingType, setIsEditingType] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmDeleteType, setConfirmDeleteType] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -15,7 +18,7 @@ const CrimeTypesListPage = () => {
     count: 0
   });
 
-  const fetchAllCrimeTypes = async () => {
+  const fetchGetAllCrimeTypes = async () => {
     try {
       const response = await api.get("/api/crime-types");
       const loadedCrimeTypes = response.data.map((item) => ({
@@ -34,7 +37,7 @@ const CrimeTypesListPage = () => {
   };
 
   useEffect(() => {
-      fetchAllCrimeTypes();
+      fetchGetAllCrimeTypes();
   });
 
   const fetchAddCrimeType = async (crimeType) => {
@@ -87,6 +90,15 @@ const CrimeTypesListPage = () => {
     }
   }
 
+  const handleSave = () => {
+    if (isEditingType) {
+      handleUpdateCrimeType(isEditingType.id);
+    } else {
+      handleAddCrimeType();
+    }
+    handleCloseModal();
+  };
+
   const handleAddCrimeType = async () => {
     const newCrimeType = await fetchAddCrimeType(formData);
     setCrimeTypes([...crimeTypes, newCrimeType]);
@@ -121,84 +133,116 @@ const CrimeTypesListPage = () => {
       link: crimeType.link || "",
       color: crimeType.color || "#1E90FF",
     });
+    setShowModal(true);
   };
 
-  const handleSave = () => {
-    if (isEditingType) {
-      handleUpdateCrimeType(isEditingType.id);
-    } else {
-      handleAddCrimeType();
-    }
-  };
-
-  const handleCancel = () => {
+  const handleOpenModal = () => {
     setIsEditingType(null);
     setFormData({ title: "", description: "", link: "", color: "#1E90FF" });
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsEditingType(null);
+    setFormData({ title: "", description: "", link: "", color: "#1E90FF" });
+    setShowModal(false);
+  };
+
+  const handleDeleteClick = (type) => {
+    setConfirmDeleteType(type);
+    setShowConfirm(true);
+  };
+
+  const cancelDeleteClick = () => {
+    setConfirmDeleteType(null);
+    setShowConfirm(false);
+  };
+
+  const confirmDeleteClick = async () => {
+    await handleDeleteCrimeType(confirmDeleteType.id);
+    setConfirmDeleteType(null);
+    setShowConfirm(false);
   };
 
   return (
     <div className="crime-types-list-page">
       <header className="crime-types-header">
-        <h2>Список типов преступлений</h2>
+        <h2>Типы преступлений</h2>
       </header>
       <div className="crime-types-content">
-      <Accordion>
+        <Accordion>
+        <Accordion.Item eventKey="0">
+          <Accordion.Header>
+            <Button
+              variant="link"
+              className="w-100 text-start text-decoration-none d-flex justify-content-start align-items-center"
+              onClick={handleOpenModal}
+            >
+              Добавить тип преступления
+            </Button>
+          </Accordion.Header>
+        </Accordion.Item>
         {crimeTypes.map((crimeType) => (
-            <Accordion.Item eventKey={crimeType.id} key={crimeType.id}>
-            <Accordion.Header>
-                <div className="d-flex justify-content-between w-100">
-                  <span>{crimeType.title}</span>
-                    <span className="crime-count">
-                      ({crimeType.count} преступлений на карте)
-                    </span>
-                </div>
-            </Accordion.Header>
-            <Accordion.Body>
-                <p>
-                  <strong>Название:</strong> {crimeType.title}
-                </p>
-                <strong>Описание: </strong> 
-                {crimeType.description === null || crimeType.description === "" 
-                ? "-" 
-                : <p> {crimeType.description} </p>}
-                <p>
-                  <strong>Количество совершенных преступлений:</strong> {crimeType.count}
-                </p>
-                <p>
-                  {crimeType.link === null || crimeType.link === "" 
-                  ? "Ссылка на статью отсутствует" 
-                  : <a href={crimeType.link} target="_blank" rel="noreferrer">Ссылка на статью</a>}
-                </p>
-                <p>
-                  <strong>Цвет:</strong>{" "}
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: "20px",
-                      height: "20px",
-                      border: "1px solid #000",
-                      backgroundColor: crimeType.color
-                    }}
-                  ></span>
-                </p>
-                <div className="button-group">
-                  <Button variant="primary" size="sm" onClick={() => handleEdit(crimeType)}>
-                      Изменить
-                  </Button>
-                  <Button variant="danger" size="sm" onClick={() => handleDeleteCrimeType(crimeType.id)}>
-                      Удалить
-                  </Button>
-                </div>
-            </Accordion.Body>
-            </Accordion.Item>
+        <Accordion.Item eventKey={crimeType.id} key={crimeType.id}>
+          <Accordion.Header>
+              <div className="d-flex justify-content-between w-100">
+                <span>{crimeType.title}</span>
+                  <span className="crime-count">
+                    ({crimeType.count} преступлений на карте)
+                  </span>
+              </div>
+          </Accordion.Header>
+          <Accordion.Body>
+              <p>
+                <strong>Название:</strong> {crimeType.title}
+              </p>
+              <strong>Описание: </strong> 
+              {crimeType.description === null || crimeType.description === "" 
+              ? "-" 
+              : <p> {crimeType.description} </p>}
+              <p>
+                <strong>Количество совершенных преступлений:</strong> {crimeType.count}
+              </p>
+              <p>
+                {crimeType.link === null || crimeType.link === "" 
+                ? "Ссылка на статью отсутствует" 
+                : <a href={crimeType.link} target="_blank" rel="noreferrer">Ссылка на статью</a>}
+              </p>
+              <p>
+                <strong>Цвет:</strong>{" "}
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: "20px",
+                    height: "20px",
+                    border: "1px solid #000",
+                    backgroundColor: crimeType.color
+                  }}
+                ></span>
+              </p>
+              <div className="button-group">
+                <Button variant="primary" size="sm" onClick={() => handleEdit(crimeType)}>
+                    Изменить
+                </Button>
+                <Button variant="danger" size="sm" onClick={() => handleDeleteClick(crimeType)}>
+                    Удалить
+                </Button>
+              </div>
+          </Accordion.Body>
+        </Accordion.Item>
         ))}
         </Accordion>
-        <div className="add-new-crime-type">
-          <h3>
-            {isEditingType
-            ? `Изменение для типа "${isEditingType.title}"`
+      </div>
+
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {isEditingType 
+            ? `Изменение типа "${isEditingType.title}"` 
             : "Добавление нового типа"}
-          </h3>
+          </Modal.Title>
+        </Modal.Header>
+          <Modal.Body>
           <Form.Group>
             <Form.Label>Название</Form.Label>
             <Form.Control
@@ -232,17 +276,33 @@ const CrimeTypesListPage = () => {
               onChange={(e) => setFormData({ ...formData, color: e.target.value })}
             />
           </Form.Group>
-          <div className="add-crime-type-buttons">
-            <Button className="me-2 btn btn-primary me-2" onClick={handleSave}>
-              Сохранить
-            </Button>
-            <Button className="btn btn-secondary me-2" onClick={handleCancel}>
-              Отменить
-            </Button>
-          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleSave}>
+            Сохранить
+          </Button>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Отменить
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
-        </div>
-      </div>
+      <Modal show={showConfirm} onHide={cancelDeleteClick}>
+        <Modal.Header closeButton>
+          <Modal.Title>Подтвердите удаление</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Вы уверены, что хотите удалить тип преступления <strong>{confirmDeleteType?.title}</strong>?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="danger" onClick={confirmDeleteClick}>
+            Удалить
+          </Button>
+          <Button variant="secondary" onClick={cancelDeleteClick}>
+            Отмена
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
