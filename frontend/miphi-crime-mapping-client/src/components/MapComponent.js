@@ -18,7 +18,7 @@ const MapComponent = ({ onAddPoint = () => {}, points = [], crimeTypes = [], sel
     }
   }, [selectedPoint]);
 
-  const handleMapClick = (e) => {
+  const handleMapClick = async (e) => {
     const coords = e.get("coords");
     onAddPoint(coords);
   };
@@ -34,8 +34,6 @@ const MapComponent = ({ onAddPoint = () => {}, points = [], crimeTypes = [], sel
   const handlePlacemarkClick = (point) => {
     onGetPoint(point);
   };
-
-
 
   return (
     <div className="map-container">
@@ -83,21 +81,10 @@ const MapComponent = ({ onAddPoint = () => {}, points = [], crimeTypes = [], sel
       </YMaps>
 
       {hoveredPoint && (
-        <div
-          style={{
-            position: "absolute",
-            top: "5%",
-            left: "20%",
-            backgroundColor: "white",
-            padding: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-            zIndex: 1000
-          }}
-        >
+        <div className="hovered-point-window">
           <strong>{hoveredPoint.title}</strong>
-          <p>Местонахождение: {hoveredPoint.location}</p>
-          <p>Время совершения: {hoveredPoint.crimeDate.split("T")[0]}</p>
+          <p className="hovered-point-location">Местонахождение: {hoveredPoint.location}</p>
+          <p className="hovered-point-crime-date">Время совершения: {hoveredPoint.crimeDate.split("T")[0]}</p>
         </div>
       )}
 

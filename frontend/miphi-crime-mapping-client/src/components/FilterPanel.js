@@ -8,6 +8,7 @@ const FilterPanel = () => {
   const [dateRange, setDateRange] = useState({ from: "", to: "" });
 
   const handleSearchChange = (e) => setSearch(e.target.value);
+  const handleSearch = (e) => setSearch(e.target.value);
   const handleCrimeTypeChange = (e) => setSelectedCrimeType(e.target.value);
   const handleRadiusChange = (e) => setRadius(e.target.value);
   const handleDateRangeChange = (field, value) =>
@@ -22,14 +23,19 @@ const FilterPanel = () => {
         {/* Секция поиска */}
         <div className="filter-section">
           <label htmlFor="search">Поиск</label>
-          <input
-            type="text"
-            id="search"
-            className="filter-input"
-            value={search}
-            onChange={handleSearchChange}
-            placeholder="Введите текст для поиска..."
-          />
+          <div className="search-container">
+            <input
+              type="text"
+              id="search"
+              className="filter-input"
+              value={search}
+              onChange={handleSearchChange}
+              placeholder="Введите текст для поиска..."
+            />
+            <button className="search-button" onClick={handleSearch}>
+              <img src="/icons/search.png" alt="Поиск" className="search-icon" />
+            </button>
+          </div>
         </div>
 
         {/* Секция выбора вида преступления */}

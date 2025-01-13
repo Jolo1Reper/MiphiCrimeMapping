@@ -25,6 +25,7 @@ const AddPointModal = ({
     if (currentPoint) {
       setFormData((prev) => ({
         ...prev,
+        location: currentPoint.location,
         pointLatitude: currentPoint.coords[0],
         pointLongitude: currentPoint.coords[1],
       }));

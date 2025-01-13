@@ -4,7 +4,7 @@ import "./Legend.css";
 const Legend = ({ crimeTypes = [] }) => {
   return (
     <div className="legend-container">
-      <strong className="legend-title">Легенда:</strong>
+      <strong className="legend-title">Преступления:</strong>
       <ul className="legend-list">
         {crimeTypes.map((type) => (
           <li className="legend-item" key={type.id}>

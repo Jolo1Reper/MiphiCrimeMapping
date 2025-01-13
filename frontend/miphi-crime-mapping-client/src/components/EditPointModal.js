@@ -170,35 +170,35 @@ const EditPointModal = ({ point, crimeTypes, wantedPersons, onSave, onDelete, on
             </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
+      <Modal.Footer>
         <Button variant="primary" onClick={handleSaveClick}>
-            Сохранить
-            </Button>
-            <Button variant="danger" onClick={handleDeleteClick}>
-            Удалить
-            </Button>
-            <Button variant="secondary" onClick={onHide}>
-            Отмена
-            </Button>
-        </Modal.Footer>
-        </Modal>
+          Сохранить
+        </Button>
+        <Button variant="danger" onClick={handleDeleteClick}>
+          Удалить
+        </Button>
+        <Button variant="secondary" onClick={onHide}>
+          Отмена
+        </Button>
+      </Modal.Footer>
+    </Modal>
 
-        <Modal show={showConfirm} onHide={cancelDeleteClick}>
-        <Modal.Header closeButton>
-          <Modal.Title>Подтвердите удаление</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Вы уверены, что хотите удалить метку <strong>{point?.title}</strong>?
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="danger" onClick={confirmDeleteClick}>
-            Удалить
-          </Button>
-          <Button variant="secondary" onClick={cancelDeleteClick}>
-            Отмена
-          </Button>
-        </Modal.Footer>
-      </Modal>
+    <Modal show={showConfirm} onHide={cancelDeleteClick}>
+    <Modal.Header closeButton>
+      <Modal.Title>Подтвердите удаление</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+      Вы уверены, что хотите удалить метку <strong>{point?.title}</strong>?
+    </Modal.Body>
+    <Modal.Footer>
+      <Button variant="danger" onClick={confirmDeleteClick}>
+        Удалить
+      </Button>
+      <Button variant="secondary" onClick={cancelDeleteClick}>
+        Отмена
+      </Button>
+    </Modal.Footer>
+  </Modal>
     </>
     
   );
