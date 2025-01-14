@@ -1,4 +1,5 @@
 using Domain.Interfaces;
+using Domain.Entities;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ using Application.UseCases.UpdateWantedPerson;
 using Application.UseCases.DeleteWantedPerson;
 using Application.UseCases.GetAllCrimeTypes;
 using Application.UseCases.GetAllWantedPerson;
+using Application.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,7 +44,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddDbContext<AppCrimeMapContext>(
-    options => options.UseNpgsql(connection)
+    options => options.UseNpgsql(connection,
+        x => x.UseNetTopologySuite())
 );
 
 builder.Services.AddScoped<ICrimeMarkRepository, CrimeMarkRepository>();
@@ -70,6 +73,12 @@ builder.Services.AddScoped<IGetWantedPersonUseCase, GetWantedPersonUseCase>();
 builder.Services.AddScoped<ICreateWantedPersonUseCase, CreateWantedPersonUseCase>();
 builder.Services.AddScoped<IUpdateWantedPersonUseCase, UpdateWantedPersonUseCase>();
 builder.Services.AddScoped<IDeleteWantedPersonUseCase, DeleteWantedPersonUseCase>();
+
+
+builder.Services.AddScoped<IFilter<Crime>, SearchQueryFilter>();
+builder.Services.AddScoped<IFilter<Crime>, CrimeTypeFilter>();
+builder.Services.AddScoped<IFilter<Crime>, RadiusFilter>();
+builder.Services.AddScoped<IFilter<Crime>, DateRangeFilter>();
 
 var app = builder.Build();
 

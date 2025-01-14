@@ -3,7 +3,7 @@
 namespace Domain.Entities
 {
     [ComplexType]
-    public class Point
+    public class PointMe
     {
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }

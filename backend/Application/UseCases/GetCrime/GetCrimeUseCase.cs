@@ -30,8 +30,8 @@ namespace Application.UseCases.GetCrime
                 crime.CreateAt,
                 crime.CrimeDate,
                 crime.Location,
-                crime.Point.Latitude,
-                crime.Point.Longitude
+                crime.Point.Y,
+                crime.Point.X
             );
         }
     }

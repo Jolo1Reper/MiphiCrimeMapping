@@ -2,15 +2,18 @@
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Domain.Models;
 
 namespace Infrastructure.Repositories
 {
     public class CrimeMarkRepository : ICrimeMarkRepository
     {
         private readonly AppCrimeMapContext _db;
-        public CrimeMarkRepository(AppCrimeMapContext db) 
+        private readonly IEnumerable<IFilter<Crime>> _filters;
+        public CrimeMarkRepository(AppCrimeMapContext db, IEnumerable<IFilter<Crime>> filters) 
         {
             _db = db;
+            _filters = filters;
         }
 
         public async Task AddCrime(Crime crime)
@@ -25,10 +28,18 @@ namespace Infrastructure.Repositories
             return crime;
         }
 
-        public async Task<IEnumerable<Crime>> GetAllCrimes()
+        public async Task<IEnumerable<Crime>> GetFilteredCrimes(CrimeFilterRequest filterRequest)
         {
-            IEnumerable<Crime> crimes = await _db.Crimes.Include(c => c.Type).Include(c => c.WantedPerson).AsNoTracking().ToListAsync();
-            return crimes;
+            IQueryable<Crime> query = _db.Set<Crime>();
+            foreach (var filterHandler in _filters)
+            {
+                query = filterHandler.Apply(query, filterRequest);
+            }
+
+            return await query.ToListAsync();
+
+            // IEnumerable<Crime> crimes = await _db.Crimes.Include(c => c.Type).Include(c => c.WantedPerson).AsNoTracking().ToListAsync();
+            // return crimes;
         }
 
         public async Task UpdateCrime(Guid id, Crime data)

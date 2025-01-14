@@ -1,4 +1,6 @@
-﻿namespace Domain.Entities
+﻿using NetTopologySuite.Geometries;
+
+namespace Domain.Entities
 {
     public class Crime : BaseEntity
     {
