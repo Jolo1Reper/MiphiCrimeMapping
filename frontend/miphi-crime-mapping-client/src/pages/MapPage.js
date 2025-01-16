@@ -23,6 +23,10 @@ const MapPage = () => {
   const toggleFilterPanel = () => setFilterPanelVisible(!isFilterPanelVisible);
   const toggleMarkerPanel = () => setMarkerPanelVisible(!isMarkerPanelVisible);
 
+  const [isSettingSearchCenter, setIsSettingSearchCenter] = useState(false);
+  const [searchCenter, setSearchCenter] = useState(null);
+  const [radius, setRadius] = useState(1);
+
   useEffect(() => {
     const fetchData = async () => {
       const loadTypes = await fetchGetAllCrimeTypes();
@@ -56,9 +60,27 @@ const MapPage = () => {
     }
   };
   
-  const fetchGetAllCrimeMarks = async (crimeTypes) => {
+  const fetchGetAllCrimeMarks = async(
+    crimeTypes = [],
+    search = "",
+    selectedCrimeTypeId = null,
+    center = { latitude: null, longitude: null },
+    radius = null,
+    dateRange = { from: null, to: null }
+  ) => {
     try {
-      const response = await api.get("/api/crime-marks");
+      const params = {
+        searchQuery: search || "",
+        crimeTypeId: selectedCrimeTypeId || "",
+        latitude: center?.latitude || "",
+        longitude: center?.longitude || "",
+        radius: radius || "",
+        startDate: dateRange?.from  ? new Date (dateRange?.from).toISOString() : "",
+        endDate: dateRange?.to ? new Date(dateRange?.to).toISOString() : ""
+      };
+
+      const response = await api.get(`/api/crime-marks?SearchQuery=${params.searchQuery}&CrimeTypeId=${params.crimeTypeId}&Latitude=${params.latitude}&Longitude=${params.longitude}&Radius=${params.radius}&StartDate=${params.startDate}&EndDate=${params.endDate}`);
+      console.log(response);
       const loadedPoints = response.data.map((item) => {
         const crimeType = crimeTypes.find((type) => type.id === item.crimeTypeId);
         return {
@@ -225,12 +247,62 @@ const MapPage = () => {
     setSelectedPoint(point);
   } 
 
+  const onApplyFilters = async({ search, selectedCrimeTypeId, searchCenter, radius, dateRange }) => {
+    setPoints([]);
+    console.log(searchCenter[0]);
+    const loadedPoints = await fetchGetAllCrimeMarks( crimeTypes, search, selectedCrimeTypeId,
+      searchCenter === null ? { latitude: null, longitude: null } 
+      : { latitude: searchCenter[0], longitude: searchCenter[1] },
+      radius, { from: dateRange.from, to: dateRange.to }
+    )
+    
+    setPoints(loadedPoints);
+  }
+
+  const onResetFilters = async() => {
+    setRadius(1);
+    setSearchCenter(null);
+    setPoints([]);
+    const loadedPoints = await fetchGetAllCrimeMarks(crimeTypes);
+    setPoints(loadedPoints);
+  }
+
+  const onToggleSearchCenter = () => {
+    if(isSettingSearchCenter) {
+      setIsSettingSearchCenter(false);
+    } else {
+      setIsSettingSearchCenter(true);
+    }
+  }
+
+  const onAddSearchCenter = (coords) => {
+    if(isSettingSearchCenter) {
+    setSearchCenter(coords);
+    setIsSettingSearchCenter(false);
+    }
+  }
+
+  const onSetRadius = (r) => {
+    setRadius(r);
+  }
+
   return (
         <div className="map-page">
         <div
           className={`filter-panel ${isFilterPanelVisible ? "" : "collapsed"}`}
         >
-          <FilterPanel />
+
+          <FilterPanel
+          crimeTypes={crimeTypes}
+          onApplyFilters={onApplyFilters}
+          onResetFilters={onResetFilters}
+          onToggleSearchCenter={onToggleSearchCenter}
+          isSettingSearchCenter={isSettingSearchCenter}
+          searchCenter={searchCenter}
+          radius={radius}
+          onSetRadius={onSetRadius}
+          />
+
         </div>
 
         <div
@@ -245,7 +317,11 @@ const MapPage = () => {
         crimeTypes={crimeTypes}
         onAddPoint={handleAddPoint}
         onGetPoint={fetchGetPoint}
-        selectedPoint={selectedPoint} 
+        selectedPoint={selectedPoint}
+        isSettingSearchCenter={isSettingSearchCenter}
+        searchCenter={searchCenter}
+        radius={radius}
+        onAddSearchCenter={onAddSearchCenter}
         />
 
         <div

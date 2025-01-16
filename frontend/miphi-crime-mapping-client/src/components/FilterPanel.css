@@ -125,3 +125,49 @@
   height: 18px;
   filter: brightness(1) saturate(0) invert(1);
 }
+
+.radius-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggle-center-button {
+  padding: 8px 12px;
+  border: 1px solid #1abc9c;
+  border-radius: 5px;
+  background-color: #34495e;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.toggle-center-button.active {
+  background-color: #1abc9c;
+  color: #34495e;
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.apply-button,
+.reset-button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  color: white;
+}
+
+.apply-button {
+  background-color: #1abc9c;
+}
+
+.reset-button {
+  background-color: #e74c3c;
+}

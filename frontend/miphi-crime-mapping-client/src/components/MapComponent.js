@@ -1,9 +1,19 @@
 import { useState, useEffect } from "react";
-import { YMaps, Map, Placemark, Clusterer } from "@pbe/react-yandex-maps";
+import { YMaps, Map, Placemark, Clusterer, Circle } from "@pbe/react-yandex-maps";
 import "./MapComponent.css";
 import Legend from "./Legend";
 
-const MapComponent = ({ onAddPoint = () => {}, points = [], crimeTypes = [], selectedPoint= null, onGetPoint = () => {} }) => {
+const MapComponent = ({
+  onAddPoint = () => {},
+  points = [],
+  crimeTypes = [],
+  selectedPoint = null,
+  onGetPoint = () => {},
+  isSettingSearchCenter = true,
+  searchCenter = null,
+  radius,
+  onAddSearchCenter = () => {}}) => {
+    
   const defaultState = {
     center: [47.517641, 42.160875],
     zoom: 14,
@@ -13,6 +23,7 @@ const MapComponent = ({ onAddPoint = () => {}, points = [], crimeTypes = [], sel
   const [hoveredPoint, setHoveredPoint] = useState(null);
 
   useEffect(() => {
+    console.log("Точки"+points);
     if (selectedPoint) {
       setMapCenter(selectedPoint.coords);
     }
@@ -20,7 +31,14 @@ const MapComponent = ({ onAddPoint = () => {}, points = [], crimeTypes = [], sel
 
   const handleMapClick = async (e) => {
     const coords = e.get("coords");
-    onAddPoint(coords);
+    console.log("Радиус "+radius);
+    if (isSettingSearchCenter) {
+      onAddSearchCenter(coords);
+      console.log("Центр:"+ searchCenter);
+    }
+    else {
+      onAddPoint(coords);
+    }
   };
 
   const handleMouseEnter = (point) => {
@@ -49,19 +67,33 @@ const MapComponent = ({ onAddPoint = () => {}, points = [], crimeTypes = [], sel
             // restrictMapArea: true // Sets for one city only!
           }}
         >
-          {selectedPoint &&
-          (
+
+          {searchCenter &&
+            <>
+            <Circle
+            onClick={handleMapClick}
+            geometry={[searchCenter, Number(radius)]}
+            options={{
+              draggable: false,
+              fillColor: "#1E90FF33",
+              strokeColor: "#1E90FF",
+              strokeWidth: 2,
+              }}
+            /> 
             <Placemark
-              geometry={selectedPoint.coords}
+              geometry={searchCenter}
               options={{
-                preset: "islands#redIcon",
+                iconColor: "#95b5ba",
               }}
             />
-          )}
+            </>
+
+            }
+
             <Clusterer
               options={{
                 preset: "islands#invertedVioletClusterIcons",
-                groupByCoordinates: false
+                groupByCoordinates: true
               }}
             >
               {points.map((point, index) => (
