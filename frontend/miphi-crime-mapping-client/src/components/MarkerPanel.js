@@ -31,7 +31,7 @@ const MarkerPanel = ({ points = [], onMarkerSelect }) => {
             ))}
           </ul>
         ) : (
-          <p className="marker-empty">Нет добавленных меток.</p>
+          <p className="marker-empty">Преступлений нет.</p>
         )}
       </div>
     </div>

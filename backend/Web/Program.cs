@@ -1,4 +1,5 @@
 using Domain.Interfaces;
+using Domain.Entities;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -21,10 +22,13 @@ using Application.UseCases.UpdateWantedPerson;
 using Application.UseCases.DeleteWantedPerson;
 using Application.UseCases.GetAllCrimeTypes;
 using Application.UseCases.GetAllWantedPerson;
+using Application.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
 string connection = Environment.GetEnvironmentVariable("CONNECTION_STRING") ?? builder.Configuration.GetConnectionString("DefaultConnection")!;
+var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS");
+var originsArray = allowedOrigins?.Split(',', StringSplitOptions.RemoveEmptyEntries) ?? ["http://localhost:3000", "https://localhost:3000"];
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -34,15 +38,15 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowClientCrimeMapApp", policy =>
     {
-        policy.WithOrigins("http://localhost:3000")
+        policy.WithOrigins(originsArray)
               .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+              .AllowAnyMethod();
     });
 });
 
 builder.Services.AddDbContext<AppCrimeMapContext>(
-    options => options.UseNpgsql(connection)
+    options => options.UseNpgsql(connection,
+        x => x.UseNetTopologySuite())
 );
 
 builder.Services.AddScoped<ICrimeMarkRepository, CrimeMarkRepository>();
@@ -70,6 +74,12 @@ builder.Services.AddScoped<IGetWantedPersonUseCase, GetWantedPersonUseCase>();
 builder.Services.AddScoped<ICreateWantedPersonUseCase, CreateWantedPersonUseCase>();
 builder.Services.AddScoped<IUpdateWantedPersonUseCase, UpdateWantedPersonUseCase>();
 builder.Services.AddScoped<IDeleteWantedPersonUseCase, DeleteWantedPersonUseCase>();
+
+
+builder.Services.AddScoped<IFilter<Crime>, SearchQueryFilter>();
+builder.Services.AddScoped<IFilter<Crime>, CrimeTypeFilter>();
+builder.Services.AddScoped<IFilter<Crime>, RadiusFilter>();
+builder.Services.AddScoped<IFilter<Crime>, DateRangeFilter>();
 
 var app = builder.Build();
 

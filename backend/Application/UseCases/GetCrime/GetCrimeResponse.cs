@@ -11,6 +11,6 @@
         DateTime CreateAt,
         DateTime CrimeDate,
         string? Location,
-        decimal PointLatitude,
-        decimal PointLongitude);
+        double PointLatitude,
+        double PointLongitude);
 }

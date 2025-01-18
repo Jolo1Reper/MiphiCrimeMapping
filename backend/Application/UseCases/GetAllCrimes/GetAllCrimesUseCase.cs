@@ -1,23 +1,24 @@
 ﻿using Domain.Interfaces;
 using Domain.Entities;
+using Domain.Models;
 
 namespace Application.UseCases.GetAllCrimes
 {
     public class GetAllCrimesUseCase : IGetAllCrimesUseCase
     {
-        ICrimeMarkRepository _repo;
+        private readonly ICrimeMarkRepository _repo;
         public GetAllCrimesUseCase(ICrimeMarkRepository repository)
         {
             _repo = repository;
         }
 
-        public async Task<IEnumerable<ShowOnMapCrimeResponse>> Handle()
+        public async Task<IEnumerable<ShowOnMapCrimeResponse>> Handle(CrimeFilterRequest filterRequest)
         {
-            IEnumerable<Crime> crimes = await _repo.GetAllCrimes();
+            IEnumerable<Crime> crimes = await _repo.GetFilteredCrimes(filterRequest);
             IEnumerable<ShowOnMapCrimeResponse> crimeDtos = crimes.Select(c => new ShowOnMapCrimeResponse(
                     c.Id, c.TypeId,
-                    c.Location, c.CrimeDate, c.Point.Latitude,
-                    c.Point.Longitude)
+                    c.Location, c.CrimeDate, c.Point.Y,
+                    c.Point.X)
             );
 
             return crimeDtos;

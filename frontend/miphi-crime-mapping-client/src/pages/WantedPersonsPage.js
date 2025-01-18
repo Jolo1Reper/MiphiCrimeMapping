@@ -43,7 +43,7 @@ const WantedPersonsPage = () => {
 
   useEffect(() => {
     fetchAllWantedPersons();
-  });
+  }, []);
 
   const fetchAddWantedPerson = async (wantedPerson) => {
     try {
@@ -212,7 +212,7 @@ const WantedPersonsPage = () => {
               </Button>
             </Accordion.Header>
           </Accordion.Item>
-          {wantedPersons.map((wantedPerson) => (
+          {wantedPersons.length > 0 ? (wantedPersons.map((wantedPerson) => (
           <Accordion.Item eventKey={wantedPerson.id} key={wantedPerson.id}>
             <Accordion.Header>
               <div className="d-flex justify-content-between w-100">
@@ -238,7 +238,16 @@ const WantedPersonsPage = () => {
               </div>
             </Accordion.Body>
           </Accordion.Item>
-          ))}
+          )))
+        : (
+          <Accordion.Item eventKey="999">
+          <Accordion.Header>
+          <div className="d-flex justify-content-between w-100">
+                <span>Преступники не определены.</span>
+              </div>
+          </Accordion.Header>
+        </Accordion.Item>
+        )}
         </Accordion>
       </div>
 

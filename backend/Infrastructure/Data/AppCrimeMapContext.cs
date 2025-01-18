@@ -1,6 +1,5 @@
 ﻿using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Numerics;
 
 namespace Infrastructure.Data
 {
@@ -10,5 +9,14 @@ namespace Infrastructure.Data
         public DbSet<CrimeType> CrimeTypes { get; set; } = null!;
         public DbSet<WantedPerson> WantedPersons { get; set; } = null!;
         public DbSet<Lawsuit> Lawsuits { get; set; } = null!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.HasPostgresExtension("postgis");
+
+            
+        }
     }
 }

@@ -2,6 +2,7 @@
 using Application.UseCases.CreateCrime;
 using Domain.Entities;
 using Domain.Interfaces;
+using NetTopologySuite.Geometries;
 
 namespace Application.Services
 {
@@ -29,7 +30,7 @@ namespace Application.Services
                     CreateAt = DateTime.Now.ToUniversalTime(),
                     CrimeDate = DateTime.SpecifyKind(request.CrimeDate, DateTimeKind.Utc),
                     WantedPersonId = id,
-                    Point = new() { Latitude = request.PointLatitude, Longitude = request.PointLongitude },
+                    Point = new Point(request.PointLongitude, request.PointLatitude) { SRID = 4326 }
                 };
             }
             else if (request.WantedPersonName is not null && request.WantedPersonSurname is not null)
@@ -40,8 +41,9 @@ namespace Application.Services
                     Location = request.Location,
                     CreateAt = DateTime.Now.ToUniversalTime(),
                     CrimeDate = DateTime.SpecifyKind(request.CrimeDate, DateTimeKind.Utc),
-                    WantedPersonId = await GetWantedPersonId(request.WantedPersonName, request.WantedPersonSurname, DateTime.SpecifyKind(request.WantedPersonBirthDate, DateTimeKind.Utc)),
-                    Point = new() { Latitude = request.PointLatitude, Longitude = request.PointLongitude },
+                    WantedPersonId = await GetWantedPersonId(request.WantedPersonName, request.WantedPersonSurname, 
+                        DateTime.SpecifyKind(request.WantedPersonBirthDate, DateTimeKind.Utc)),
+                    Point = new Point(request.PointLongitude, request.PointLatitude) { SRID = 4326 }
                 };
             }
             else

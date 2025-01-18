@@ -5,7 +5,7 @@
 -- Dumped from database version 16.1
 -- Dumped by pg_dump version 16.1
 
--- Started on 2025-01-12 04:16:36
+-- Started on 2025-01-18 00:54:05
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -18,12 +18,29 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+--
+-- TOC entry 2 (class 3079 OID 82205)
+-- Name: postgis; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
+
+
+--
+-- TOC entry 5753 (class 0 OID 0)
+-- Dependencies: 2
+-- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION postgis IS 'PostGIS geometry and geography spatial types and functions';
+
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- TOC entry 216 (class 1259 OID 74002)
+-- TOC entry 217 (class 1259 OID 74002)
 -- Name: CrimeTypes; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -39,7 +56,7 @@ CREATE TABLE public."CrimeTypes" (
 ALTER TABLE public."CrimeTypes" OWNER TO postgres;
 
 --
--- TOC entry 219 (class 1259 OID 74028)
+-- TOC entry 220 (class 1259 OID 74028)
 -- Name: Crimes; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -51,16 +68,15 @@ CREATE TABLE public."Crimes" (
     "Location" text,
     "CreateAt" timestamp with time zone NOT NULL,
     "LawsuitId" uuid,
-    "Point_Latitude" numeric NOT NULL,
-    "Point_Longitude" numeric NOT NULL,
-    "CrimeDate" timestamp with time zone DEFAULT '-infinity'::timestamp with time zone NOT NULL
+    "CrimeDate" timestamp with time zone DEFAULT '-infinity'::timestamp with time zone NOT NULL,
+    "Point" public.geometry NOT NULL
 );
 
 
 ALTER TABLE public."Crimes" OWNER TO postgres;
 
 --
--- TOC entry 218 (class 1259 OID 74016)
+-- TOC entry 219 (class 1259 OID 74016)
 -- Name: Lawsuits; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -80,7 +96,7 @@ CREATE TABLE public."Lawsuits" (
 ALTER TABLE public."Lawsuits" OWNER TO postgres;
 
 --
--- TOC entry 217 (class 1259 OID 74009)
+-- TOC entry 218 (class 1259 OID 74009)
 -- Name: WantedPersons; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -98,7 +114,7 @@ CREATE TABLE public."WantedPersons" (
 ALTER TABLE public."WantedPersons" OWNER TO postgres;
 
 --
--- TOC entry 215 (class 1259 OID 57580)
+-- TOC entry 216 (class 1259 OID 57580)
 -- Name: __EFMigrationsHistory; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -111,8 +127,8 @@ CREATE TABLE public."__EFMigrationsHistory" (
 ALTER TABLE public."__EFMigrationsHistory" OWNER TO postgres;
 
 --
--- TOC entry 4812 (class 0 OID 74002)
--- Dependencies: 216
+-- TOC entry 5744 (class 0 OID 74002)
+-- Dependencies: 217
 -- Data for Name: CrimeTypes; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -126,38 +142,32 @@ COPY public."CrimeTypes" ("Id", "Title", "Description", "Link", "Color") FROM st
 
 
 --
--- TOC entry 4815 (class 0 OID 74028)
--- Dependencies: 219
+-- TOC entry 5747 (class 0 OID 74028)
+-- Dependencies: 220
 -- Data for Name: Crimes; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Crimes" ("Id", "Applicant", "TypeId", "WantedPersonId", "Location", "CreateAt", "LawsuitId", "Point_Latitude", "Point_Longitude", "CrimeDate") FROM stdin;
-0194295c-abba-7995-975c-ec940f876871		0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	0194295c-ab01-7f16-9b60-8d186431f90f	ул. Горького	2025-01-03 02:32:06.483077+03	\N	32.513252	74.321578	2025-01-03 02:30:55.015+03
-01942960-c240-72bb-b213-7d3299dcfae7		9cd0be1a-3952-40c9-a93a-bff647ec85e6	12654663-c462-44cf-847e-a626d4313b1c	ул. Матросова	2025-01-03 02:36:34.62449+03	\N	32.510009	45.330038	2024-11-23 03:00:00+03
-01942ecf-b49e-7f42-a2f9-0328d51f937c		9cd0be1a-3952-40c9-a93a-bff647ec85e6	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Волгодонск	2025-01-04 03:55:44.114768+03	\N	47.51921089342353	42.15031782531733	2024-12-12 03:00:00+03
-01942ee5-5663-7eb0-8183-88112337fbd4		9cd0be1a-3952-40c9-a93a-bff647ec85e6	01942ecf-97ae-7fb6-ab03-81a560a7fe59	ВИТИ	2025-01-04 04:19:29.372873+03	\N	47.515489587838566	42.15890089416499	2025-01-01 03:00:00+03
-01942ee9-8e44-7b25-a69b-8fbae1076b0f		9cd0be1a-3952-40c9-a93a-bff647ec85e6	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Пятерочка	2025-01-04 04:24:05.823636+03	\N	47.51217507648569	42.15392271423336	2024-03-03 03:00:00+03
-01942eec-5da7-762e-b9c8-6ba499536c14		9cd0be1a-3952-40c9-a93a-bff647ec85e6	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Парк	2025-01-04 04:27:09.986874+03	\N	47.509558208210024	42.161347068786576	2023-12-12 03:00:00+03
-01942eee-fd77-70f2-b954-b275077f16e2		9cd0be1a-3952-40c9-a93a-bff647ec85e6	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Магазин	2025-01-04 04:30:01.970063+03	\N	47.51583847151753	42.14808622741695	2025-01-03 03:00:00+03
-01942eef-c2f0-7c63-a9f0-f7f059c5da18		9cd0be1a-3952-40c9-a93a-bff647ec85e6	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Кино	2025-01-04 04:30:52.522927+03	\N	47.518003127551545	42.19192613796318	2024-12-31 03:00:00+03
-01943917-5a95-7c9e-9d22-40c9f9672102		0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	81e9e469-4c14-4f06-8cec-a901240c6ce3	Рынок	2025-01-06 03:50:19.404516+03	\N	47.562916344358655	42.130061782836854	2023-12-12 03:00:00+03
-0194392b-8d91-7214-85db-6f395c6bfdf7		8fdfcea4-ddb1-46fd-ad0c-66be6156d550	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Поля	2025-01-06 04:12:23.185417+03	\N	47.511534445041384	42.124387421935204	2024-12-12 03:00:00+03
-01943939-ce33-7b62-80bb-47eca5ca1459		0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Центр	2025-01-07 02:27:22.922406+03	\N	47.504207757833186	42.15684095764155	2020-12-12 03:00:00+03
-01944d32-3f87-7cce-80d5-b2ee1ec76845		01943e21-bc4f-7616-b762-175694e57639	12654663-c462-44cf-847e-a626d4313b1c	ул. Новая	2025-01-10 01:32:06.257697+03	\N	47.50324810815652	42.184306777954056	2025-01-10 03:00:00+03
-01944d34-4586-7053-bc59-032edde6e4e7		01944833-52b7-7460-9adc-bfbe771c8679	345e254f-7869-4d1a-bbd1-bee9fc0b5102	ул. Химиков	2025-01-10 01:34:18.886021+03	\N	47.523426114123765	42.1317783966064	2025-01-10 03:00:00+03
-01944d36-da48-707e-b6e9-f161c68c4d6c		01944833-52b7-7460-9adc-bfbe771c8679	3559cdf1-e821-484a-aa10-83962847d6c1	Озерный перекресток	2025-01-10 01:37:08.040393+03	\N	47.521623785594365	42.18722502136225	2025-01-10 03:00:00+03
-01944d4b-d14c-7fee-8079-b1b64574ba78		0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	0194295c-ab01-7f16-9b60-8d186431f90f	Церковь	2025-01-11 00:09:22.875362+03	\N	47.51906553490789	42.14551130676265	2025-01-09 03:00:00+03
-01944d52-c8db-7089-97ed-6e880d9f2caf		8fdfcea4-ddb1-46fd-ad0c-66be6156d550	0194295c-ab01-7f16-9b60-8d186431f90f	ул. Великая	2025-01-11 00:18:04.986471+03	\N	47.51877481666104	42.152978576660104	2025-01-09 03:00:00+03
-0194485b-72c7-7718-a672-45d6f7d6ba15		8fdfcea4-ddb1-46fd-ad0c-66be6156d550	81e9e469-4c14-4f06-8cec-a901240c6ce3	Набережная	2025-01-12 02:04:02.417397+03	\N	47.52703058428322	42.18095938110348	2025-01-09 03:00:00+03
-01943952-448f-755a-837e-22a2890cd2b0		01943e21-bc4f-7616-b762-175694e57639	345e254f-7869-4d1a-bbd1-bee9fc0b5102	Шоссе	2025-01-12 02:04:28.434431+03	\N	47.5033353497656	42.20825354003901	2020-12-07 03:00:00+03
-019457a0-42f7-776d-a100-5d3967bed55c		0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	7f4f062f-8da3-47e6-b8be-4759e48edb9b	Победа	2025-01-12 02:15:29.236952+03	\N	47.494406868756826	42.15426603698725	2025-01-11 03:00:00+03
-01943e27-3b43-7410-9b44-d735a351924c		0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	7f4f062f-8da3-47e6-b8be-4759e48edb9b	Парк Юность	2025-01-12 02:16:19.383915+03	\N	47.526738499610794	42.13716251097092	2025-01-06 03:00:00+03
+COPY public."Crimes" ("Id", "Applicant", "TypeId", "WantedPersonId", "Location", "CreateAt", "LawsuitId", "CrimeDate", "Point") FROM stdin;
+01942ecf-b49e-7f42-a2f9-0328d51f937c	\N	9cd0be1a-3952-40c9-a93a-bff647ec85e6	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Волгодонск	2025-01-04 03:55:44.114768+03	\N	2024-12-12 03:00:00+03	0101000020E610000034DF4F9D3D134540927DA78075C24740
+01942ee9-8e44-7b25-a69b-8fbae1076b0f	\N	9cd0be1a-3952-40c9-a93a-bff647ec85e6	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Пятерочка	2025-01-04 04:24:05.823636+03	\N	2024-03-03 03:00:00+03	0101000020E610000036DF4FBDB31345408AAAF1F38EC14740
+01942eee-fd77-70f2-b954-b275077f16e2	\N	9cd0be1a-3952-40c9-a93a-bff647ec85e6	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Магазин	2025-01-04 04:30:01.970063+03	\N	2025-01-03 03:00:00+03	0101000020E610000035DF4F7DF4124540DD97BAFE06C24740
+01942eef-c2f0-7c63-a9f0-f7f059c5da18	\N	9cd0be1a-3952-40c9-a93a-bff647ec85e6	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Кино	2025-01-04 04:30:52.522927+03	\N	2024-12-31 03:00:00+03	0101000020E610000054E6220991184540A1072EED4DC24740
+0194392b-8d91-7214-85db-6f395c6bfdf7	\N	8fdfcea4-ddb1-46fd-ad0c-66be6156d550	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Поля	2025-01-06 04:12:23.185417+03	\N	2024-12-12 03:00:00+03	0101000020E61000006B9F52EDEB0F4540791DF0F579C14740
+01946b8b-4e14-7736-afe8-a92d293e058a		01943e21-bc4f-7616-b762-175694e57639	345e254f-7869-4d1a-bbd1-bee9fc0b5102	Волгодонск, Вокзальный переулок, 56	2025-01-15 22:57:59.159996+03	\N	2025-01-15 03:00:00+03	0101000020E610000033DF4FFCFB134540C25744BBBBC14740
+01946b8b-a409-7d28-b2a5-7d31bd32f127		01944833-52b7-7460-9adc-bfbe771c8679	12654663-c462-44cf-847e-a626d4313b1c	Волгодонск, Советская улица, 87	2025-01-15 22:58:21.193013+03	\N	2025-01-15 03:00:00+03	0101000020E610000035DF4F1B281445403826660F71C14740
+01946b98-35b4-744e-9eac-1c5155ee91c2		8fdfcea4-ddb1-46fd-ad0c-66be6156d550	7f4f062f-8da3-47e6-b8be-4759e48edb9b	Волгодонск, Вокзальный переулок	2025-01-15 23:12:04.888677+03	\N	2025-01-15 03:00:00+03	0101000020E610000031DF8FB3F5134540CDB982CABBC14740
+01946ba3-b3c1-7abf-a501-d1973523e79d		01943e21-bc4f-7616-b762-175694e57639	81e9e469-4c14-4f06-8cec-a901240c6ce3	Волгодонск, улица Ленина, 52	2025-01-15 23:24:38.053765+03	\N	2025-01-15 03:00:00+03	0101000020E610000078DDBF123D134540A669030E71C24740
+01946c30-f69d-752b-a672-7487ed549724		01943e21-bc4f-7616-b762-175694e57639	81e9e469-4c14-4f06-8cec-a901240c6ce3	Волгодонск, улица Думенко, 1	2025-01-16 01:58:55.715274+03	\N	2025-01-15 03:00:00+03	0101000020E6100000D1960543A81245404FF4F5573AC24740
+01946c31-13b0-7edf-ae0d-6380a06d834d		01944833-52b7-7460-9adc-bfbe771c8679	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Волгодонск, улица Максима Горького	2025-01-16 01:59:03.215616+03	\N	2025-01-15 03:00:00+03	0101000020E6100000D396055757134540B78D48C49AC14740
+01947614-85f9-7e23-98b3-8b36d167aa68		0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	0194295c-ab01-7f16-9b60-8d186431f90f	Волгодонск, улица Ленина, 122	2025-01-18 00:04:04.071264+03	\N	2025-01-17 03:00:00+03	0101000020E6100000B17336B0981545407D950ABDB5C04740
+01947632-15a0-7d27-97b9-423e3e18463e		0f5a55fd-ca82-4f00-99c5-3ef13cdd3648	81e9e469-4c14-4f06-8cec-a901240c6ce3	Волгодонск, улица 2-я Линия, 56	2025-01-18 00:36:26.527591+03	\N	2023-12-12 03:00:00+03	0101000020E6100000DD635191A8104540B0A2BF5709C84740
+01947632-8d66-7b13-a8a9-3f4ffdd6dd5d		9cd0be1a-3952-40c9-a93a-bff647ec85e6	01942ecf-97ae-7fb6-ab03-81a560a7fe59	Волгодонск, улица Ленина, 73	2025-01-18 00:36:52.07045+03	\N	2025-01-17 03:00:00+03	0101000020E6100000A3C6D01B561445408E3859BAF6C14740
 \.
 
 
 --
--- TOC entry 4814 (class 0 OID 74016)
--- Dependencies: 218
+-- TOC entry 5746 (class 0 OID 74016)
+-- Dependencies: 219
 -- Data for Name: Lawsuits; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -166,8 +176,8 @@ COPY public."Lawsuits" ("Id", "Number", "ReceiptDate", "PersonId", "Judge", "Dec
 
 
 --
--- TOC entry 4813 (class 0 OID 74009)
--- Dependencies: 217
+-- TOC entry 5745 (class 0 OID 74009)
+-- Dependencies: 218
 -- Data for Name: WantedPersons; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -183,8 +193,8 @@ COPY public."WantedPersons" ("Id", "Name", "Surname", "Patronymic", "BirthDate",
 
 
 --
--- TOC entry 4811 (class 0 OID 57580)
--- Dependencies: 215
+-- TOC entry 5743 (class 0 OID 57580)
+-- Dependencies: 216
 -- Data for Name: __EFMigrationsHistory; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -204,11 +214,29 @@ COPY public."__EFMigrationsHistory" ("MigrationId", "ProductVersion") FROM stdin
 20250101215144_ChangePointTypeToDecimal	9.0.0
 20250108215455_AddCrimeTypeLinkColumn	9.0.0
 20250111221841_AddColorCrimeType	9.0.0
+20250112214201_ChangePlaceLongitudeAndLatitude	9.0.0
+20250114011638_RenamePointMe	9.0.0
+20250114012859_AddGeoPointColumnToCrime	9.0.0
+20250114012956_AddGeoPointColumnToCrime2	9.0.0
+20250114013111_AddGeoPointColumnToCrime3	9.0.0
+20250114013418_AddGeoPointColumnToCrime4	9.0.0
+20250114014741_AddGeoPointColumnToCrime6	9.0.0
+20250114020218_AddGeoPointColumnToCrimeUpdate	9.0.0
 \.
 
 
 --
--- TOC entry 4653 (class 2606 OID 74008)
+-- TOC entry 5572 (class 0 OID 82523)
+-- Dependencies: 222
+-- Data for Name: spatial_ref_sys; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5578 (class 2606 OID 74008)
 -- Name: CrimeTypes PK_CrimeTypes; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -217,7 +245,7 @@ ALTER TABLE ONLY public."CrimeTypes"
 
 
 --
--- TOC entry 4663 (class 2606 OID 74034)
+-- TOC entry 5588 (class 2606 OID 74034)
 -- Name: Crimes PK_Crimes; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -226,7 +254,7 @@ ALTER TABLE ONLY public."Crimes"
 
 
 --
--- TOC entry 4658 (class 2606 OID 74022)
+-- TOC entry 5583 (class 2606 OID 74022)
 -- Name: Lawsuits PK_Lawsuits; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -235,7 +263,7 @@ ALTER TABLE ONLY public."Lawsuits"
 
 
 --
--- TOC entry 4655 (class 2606 OID 74015)
+-- TOC entry 5580 (class 2606 OID 74015)
 -- Name: WantedPersons PK_WantedPersons; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -244,7 +272,7 @@ ALTER TABLE ONLY public."WantedPersons"
 
 
 --
--- TOC entry 4651 (class 2606 OID 57584)
+-- TOC entry 5576 (class 2606 OID 57584)
 -- Name: __EFMigrationsHistory PK___EFMigrationsHistory; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -253,7 +281,7 @@ ALTER TABLE ONLY public."__EFMigrationsHistory"
 
 
 --
--- TOC entry 4659 (class 1259 OID 74050)
+-- TOC entry 5584 (class 1259 OID 74050)
 -- Name: IX_Crimes_LawsuitId; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -261,7 +289,7 @@ CREATE INDEX "IX_Crimes_LawsuitId" ON public."Crimes" USING btree ("LawsuitId");
 
 
 --
--- TOC entry 4660 (class 1259 OID 74051)
+-- TOC entry 5585 (class 1259 OID 74051)
 -- Name: IX_Crimes_TypeId; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -269,7 +297,7 @@ CREATE INDEX "IX_Crimes_TypeId" ON public."Crimes" USING btree ("TypeId");
 
 
 --
--- TOC entry 4661 (class 1259 OID 74052)
+-- TOC entry 5586 (class 1259 OID 74052)
 -- Name: IX_Crimes_WantedPersonId; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -277,7 +305,7 @@ CREATE INDEX "IX_Crimes_WantedPersonId" ON public."Crimes" USING btree ("WantedP
 
 
 --
--- TOC entry 4656 (class 1259 OID 74053)
+-- TOC entry 5581 (class 1259 OID 74053)
 -- Name: IX_Lawsuits_PersonId; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -285,7 +313,7 @@ CREATE INDEX "IX_Lawsuits_PersonId" ON public."Lawsuits" USING btree ("PersonId"
 
 
 --
--- TOC entry 4665 (class 2606 OID 74035)
+-- TOC entry 5592 (class 2606 OID 74035)
 -- Name: Crimes FK_Crimes_CrimeTypes_TypeId; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -294,7 +322,7 @@ ALTER TABLE ONLY public."Crimes"
 
 
 --
--- TOC entry 4666 (class 2606 OID 74040)
+-- TOC entry 5593 (class 2606 OID 74040)
 -- Name: Crimes FK_Crimes_Lawsuits_LawsuitId; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -303,7 +331,7 @@ ALTER TABLE ONLY public."Crimes"
 
 
 --
--- TOC entry 4667 (class 2606 OID 74045)
+-- TOC entry 5594 (class 2606 OID 74045)
 -- Name: Crimes FK_Crimes_WantedPersons_WantedPersonId; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -312,7 +340,7 @@ ALTER TABLE ONLY public."Crimes"
 
 
 --
--- TOC entry 4664 (class 2606 OID 74023)
+-- TOC entry 5591 (class 2606 OID 74023)
 -- Name: Lawsuits FK_Lawsuits_WantedPersons_PersonId; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -320,7 +348,7 @@ ALTER TABLE ONLY public."Lawsuits"
     ADD CONSTRAINT "FK_Lawsuits_WantedPersons_PersonId" FOREIGN KEY ("PersonId") REFERENCES public."WantedPersons"("Id") ON DELETE CASCADE;
 
 
--- Completed on 2025-01-12 04:16:36
+-- Completed on 2025-01-18 00:54:06
 
 --
 -- PostgreSQL database dump complete

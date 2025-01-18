@@ -4,6 +4,7 @@ using Application.UseCases.GetCrime;
 using Application.UseCases.CreateCrime;
 using Application.UseCases.UpdateCrime;
 using Application.UseCases.DeleteCrime;
+using Domain.Models;
 
 namespace Web.Controllers
 {
@@ -32,9 +33,9 @@ namespace Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ShowAllCrimeMarks()
+        public async Task<IActionResult> ShowAllCrimeMarks([FromQuery] CrimeFilterRequest filterRequest)
         {
-            IEnumerable<ShowOnMapCrimeResponse> response = await _getAllCrimes.Handle();
+            var response = await _getAllCrimes.Handle(filterRequest);
 
             return Ok(response);
         }
