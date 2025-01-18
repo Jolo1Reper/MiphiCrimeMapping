@@ -24,7 +24,7 @@ const MapPage = () => {
   const toggleMarkerPanel = () => setMarkerPanelVisible(!isMarkerPanelVisible);
 
   const [isSettingSearchCenter, setIsSettingSearchCenter] = useState(false);
-  const [searchCenter, setSearchCenter] = useState(null);
+  const [searchCenter, setSearchCenter] = useState({ latitude: null, longitude: null });
   const [radius, setRadius] = useState(1);
 
   useEffect(() => {
@@ -80,7 +80,7 @@ const MapPage = () => {
       };
 
       const response = await api.get(`/api/crime-marks?SearchQuery=${params.searchQuery}&CrimeTypeId=${params.crimeTypeId}&Latitude=${params.latitude}&Longitude=${params.longitude}&Radius=${params.radius}&StartDate=${params.startDate}&EndDate=${params.endDate}`);
-      console.log(response);
+      
       const loadedPoints = response.data.map((item) => {
         const crimeType = crimeTypes.find((type) => type.id === item.crimeTypeId);
         return {
@@ -218,7 +218,6 @@ const MapPage = () => {
   
     if (geocodeData) {
       const shortAddress = extractShortAddress(geocodeData);
-      console.log("Краткий адрес:", shortAddress);
       setCurrentPoint({ location: shortAddress, coords: coords });
     } else {
       setCurrentPoint({ coords: coords });
@@ -249,10 +248,9 @@ const MapPage = () => {
 
   const onApplyFilters = async({ search, selectedCrimeTypeId, searchCenter, radius, dateRange }) => {
     setPoints([]);
-    console.log(searchCenter[0]);
     const loadedPoints = await fetchGetAllCrimeMarks( crimeTypes, search, selectedCrimeTypeId,
       searchCenter === null ? { latitude: null, longitude: null } 
-      : { latitude: searchCenter[0], longitude: searchCenter[1] },
+      : { latitude: searchCenter.latitude, longitude: searchCenter.longitude },
       radius, { from: dateRange.from, to: dateRange.to }
     )
     
@@ -261,7 +259,7 @@ const MapPage = () => {
 
   const onResetFilters = async() => {
     setRadius(1);
-    setSearchCenter(null);
+    setSearchCenter({ latitude: null, longitude: null });
     setPoints([]);
     const loadedPoints = await fetchGetAllCrimeMarks(crimeTypes);
     setPoints(loadedPoints);
@@ -277,8 +275,10 @@ const MapPage = () => {
 
   const onAddSearchCenter = (coords) => {
     if(isSettingSearchCenter) {
-    setSearchCenter(coords);
+    setSearchCenter({ latitude: coords[0], longitude: coords[1] });
     setIsSettingSearchCenter(false);
+    console.log("Центр при выборе точки: "+ searchCenter.latitude + ", " + searchCenter.longitude);
+    console.log("Радиус при выборе точки: " + radius);
     }
   }
 

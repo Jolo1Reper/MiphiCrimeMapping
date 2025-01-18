@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="NetTopologySuite" Version="2.5.0" />
-    <PackageReference Include="ProjNet" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>

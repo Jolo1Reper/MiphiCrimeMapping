@@ -38,7 +38,7 @@ const CrimeTypesListPage = () => {
 
   useEffect(() => {
       fetchGetAllCrimeTypes();
-  });
+  }, []);
 
   const fetchAddCrimeType = async (crimeType) => {
     try {
@@ -182,7 +182,7 @@ const CrimeTypesListPage = () => {
             </Button>
           </Accordion.Header>
         </Accordion.Item>
-        {crimeTypes.map((crimeType) => (
+        {crimeTypes.length > 0 ? (crimeTypes.map((crimeType) => (
         <Accordion.Item eventKey={crimeType.id} key={crimeType.id}>
           <Accordion.Header>
               <div className="d-flex justify-content-between w-100">
@@ -230,7 +230,16 @@ const CrimeTypesListPage = () => {
               </div>
           </Accordion.Body>
         </Accordion.Item>
-        ))}
+        ))) :
+        (
+          <Accordion.Item eventKey="999">
+          <Accordion.Header>
+          <div className="d-flex justify-content-between w-100">
+                <span>Типы преступлений не определены.</span>
+              </div>
+          </Accordion.Header>
+        </Accordion.Item>
+        )}
         </Accordion>
       </div>
 

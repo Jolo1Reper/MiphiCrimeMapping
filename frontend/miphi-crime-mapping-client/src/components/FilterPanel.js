@@ -7,7 +7,7 @@ const FilterPanel = ({
   onResetFilters = () => {},
   onToggleSearchCenter = () => {},
   isSettingSearchCenter = false,
-  searchCenter = null,
+  searchCenter,
   radius = 1,
   onSetRadius = () => {}
 }) => {

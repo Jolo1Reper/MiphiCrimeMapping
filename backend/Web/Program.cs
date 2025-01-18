@@ -27,6 +27,8 @@ using Application.Filters;
 var builder = WebApplication.CreateBuilder(args);
 
 string connection = Environment.GetEnvironmentVariable("CONNECTION_STRING") ?? builder.Configuration.GetConnectionString("DefaultConnection")!;
+var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS");
+var originsArray = allowedOrigins?.Split(',', StringSplitOptions.RemoveEmptyEntries) ?? ["http://localhost:3000", "https://localhost:3000"];
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -36,10 +38,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowClientCrimeMapApp", policy =>
     {
-        policy.WithOrigins("http://localhost:3000")
+        policy.WithOrigins(originsArray)
               .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+              .AllowAnyMethod();
     });
 });
 

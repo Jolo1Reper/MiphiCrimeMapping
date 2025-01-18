@@ -2,8 +2,6 @@
 using Domain.Interfaces;
 using Domain.Models;
 using NetTopologySuite.Geometries;
-using ProjNet.CoordinateSystems;
-using ProjNet.CoordinateSystems.Transformations;
 
 namespace Application.Filters
 {
@@ -20,8 +18,7 @@ namespace Application.Filters
             var centerPoint = new Point(longitude, latitude) { SRID = 4326 };
 
             return query.Where(c =>
-                c.Point.IsWithinDistance(centerPoint, radius*0.01)); //TODO
+                c.Point.IsWithinDistance(centerPoint, radius*0.01));
         }
     }
-        // TODO 4326 -> 3857????
 }

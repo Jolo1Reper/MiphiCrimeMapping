@@ -23,7 +23,6 @@ const MapComponent = ({
   const [hoveredPoint, setHoveredPoint] = useState(null);
 
   useEffect(() => {
-    console.log("Точки"+points);
     if (selectedPoint) {
       setMapCenter(selectedPoint.coords);
     }
@@ -31,10 +30,9 @@ const MapComponent = ({
 
   const handleMapClick = async (e) => {
     const coords = e.get("coords");
-    console.log("Радиус "+radius);
+    
     if (isSettingSearchCenter) {
       onAddSearchCenter(coords);
-      console.log("Центр:"+ searchCenter);
     }
     else {
       onAddPoint(coords);
@@ -72,7 +70,7 @@ const MapComponent = ({
             <>
             <Circle
             onClick={handleMapClick}
-            geometry={[searchCenter, Number(radius)]}
+            geometry={[[searchCenter.latitude, searchCenter.longitude], Number(radius)*1000]}
             options={{
               draggable: false,
               fillColor: "#1E90FF33",
@@ -81,7 +79,7 @@ const MapComponent = ({
               }}
             /> 
             <Placemark
-              geometry={searchCenter}
+              geometry={[searchCenter.latitude, searchCenter.longitude]}
               options={{
                 iconColor: "#95b5ba",
               }}
