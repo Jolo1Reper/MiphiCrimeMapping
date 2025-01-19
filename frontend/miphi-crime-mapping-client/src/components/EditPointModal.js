@@ -5,7 +5,7 @@ const EditPointModal = ({ point, crimeTypes, wantedPersons, onSave, onDelete, on
   const [formData, setFormData] = useState({
     id: point?.id || "",
     crimeTypeId: point?.crimeTypeId || "",
-    wantedPersonId: point?.wantedPersonId || "",
+    wantedPersonId: point?.wantedPersonId || "-1",
     wantedPersonName: point?.wantedPersonName || "",
     wantedPersonSurname: point?.wantedPersonSurname || "",
     wantedPersonBirthDate: point?.wantedPersonBirthDate?.split("T")[0] || "",
@@ -22,13 +22,17 @@ const EditPointModal = ({ point, crimeTypes, wantedPersons, onSave, onDelete, on
   };
 
   const handleSaveClick = () => {
+    const convertWantedPersonId = (formData.wantedPersonId === "0" || formData.wantedPersonId === "-1")
+    ? null 
+    : formData.wantedPersonId;
+
     const payload = {
       id: formData.id,
-      crimeTypeId: formData.crimeTypeId,
-      wantedPersonId: formData.wantedPersonId || null,
-      wantedPersonName: formData.wantedPersonName,
-      wantedPersonSurname: formData.wantedPersonSurname,
-      wantedPersonBirthDate: new Date(formData.wantedPersonBirthDate).toISOString(),
+      crimeTypeId: formData.crimeTypeId ? formData.crimeTypeId : null,
+      wantedPersonId: convertWantedPersonId || null,
+      wantedPersonName: formData.wantedPersonName ? formData.wantedPersonName : null,
+      wantedPersonSurname: formData.wantedPersonSurname ? formData.wantedPersonSurname : null,
+      wantedPersonBirthDate: formData.wantedPersonBirthDate ? new Date(formData.wantedPersonBirthDate).toISOString() : null,
       crimeDate: new Date(formData.crimeDate).toISOString(),
       location: formData.location,
       pointLatitude: parseFloat(formData.pointLatitude),
@@ -87,10 +91,13 @@ const EditPointModal = ({ point, crimeTypes, wantedPersons, onSave, onDelete, on
               <Form.Select
                 value={formData.wantedPersonId}
                 onChange={(e) => {
-                  const selectedPerson = wantedPersons.find(
-                    (person) => person.id === e.target.value
-                  );
-                  handleInputChange("wantedPersonId", e.target.value);
+                  const selectedPersonId = e.target.value;
+                  let selectedPerson = null;
+                  if(selectedPersonId !== "0" && selectedPersonId !== "-1") {
+                      selectedPerson = wantedPersons.find((person) => person.id === selectedPersonId);
+                      
+                  }
+                  handleInputChange("wantedPersonId", selectedPersonId );
                   setFormData((prev) => ({
                     ...prev,
                     wantedPersonName: selectedPerson?.name || "",
@@ -99,7 +106,8 @@ const EditPointModal = ({ point, crimeTypes, wantedPersons, onSave, onDelete, on
                   }));
                 }}
               >
-                <option value="">Выберите преступника</option>
+              <option key="default" value="0">Выберите преступника или введите его данные</option>
+              <option key="unknown" value="-1">Неизвестно</option>
                 {wantedPersons.map((person) => (
                   <option key={person.id} value={person.id}>
                     {person.surname} {person.name} ({person.birthDate.split("T")[0]})

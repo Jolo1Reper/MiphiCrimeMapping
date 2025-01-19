@@ -1,13 +1,28 @@
 .marker-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
   width: 300px;
-  height: 91vh; /* Займет всю высоту окна браузера */
-  background-color: #2c3e50; /* Темный фон, как у Header */
+  background-color: #2c3e50;
   color: white;
   display: flex;
   flex-direction: column;
-  border-left: 1px solid #1abc9c; /* Зеленый акцент */
-  overflow-y: auto; /* Добавляет прокрутку */
-  box-shadow: -2px 0 4px rgba(0, 0, 0, 0.2); /* Тень */
+  border-left: 1px solid #1abc9c;
+  overflow-y: auto;
+  box-shadow: -2px 0 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  transform: translateX(0);
+  transition: transform 0.3s ease;
+  scrollbar-width: none;
+}
+
+.marker-panel.collapsed {
+  transform: translateX(100%);
+}
+
+.marker-panel::-webkit-scrollbar {
+  display: none;
 }
 
 .marker-header {
@@ -15,9 +30,9 @@
   align-items: center;
   justify-content: center;
   padding: 15px;
-  background-color: #34495e; /* Темный оттенок для заголовка */
-  border-bottom: 2px solid #1abc9c; /* Зеленая линия */
-  position: sticky; /* Фиксация заголовка при прокрутке */
+  background-color: #34495e;
+  border-bottom: 2px solid #1abc9c;
+  position: sticky;
   top: 0;
   z-index: 10;
 }
@@ -41,39 +56,38 @@
 .marker-list-item {
   padding: 10px;
   margin-bottom: 10px;
-  border: 1px solid #1abc9c; /* Зеленая рамка */
+  border: 1px solid #1abc9c;
   border-radius: 5px;
-  background-color: #34495e; /* Темный фон для элемента */
+  background-color: #34495e;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .marker-list-item:hover {
-  background-color: #1abc9c; /* Зеленый при наведении */
-  transform: translateY(-2px); /* Легкий подъем */
+  background-color: #1abc9c;
+  transform: translateY(-2px);
 }
 
 .marker-item-title {
   font-size: 16px;
   font-weight: bold;
   margin-bottom: 5px;
-  color: #ecf0f1; /* Светлый текст */
+  color: #ecf0f1;
 }
 
 .marker-item-detail {
   font-size: 14px;
   margin: 2px 0;
-  color: #bdc3c7; /* Серый текст */
+  color: #bdc3c7;
 }
 
 .marker-item-detail span {
   font-weight: bold;
-  color: #ecf0f1; /* Светлый акцент */
+  color: #ecf0f1;
 }
 
 .marker-empty {
   font-size: 16px;
-  color: #bdc3c7; /* Серый текст */
+  color: #bdc3c7;
   text-align: center;
   margin-top: 20px;
 }
-

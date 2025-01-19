@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { YMaps, Map, Placemark, Clusterer, Circle } from "@pbe/react-yandex-maps";
 import "./MapComponent.css";
 import Legend from "./Legend";
@@ -21,6 +21,7 @@ const MapComponent = ({
 
   const [mapCenter, setMapCenter] = useState(defaultState.center);
   const [hoveredPoint, setHoveredPoint] = useState(null);
+  const mapRef = useRef(null);
 
   useEffect(() => {
     if (selectedPoint) {
@@ -40,7 +41,24 @@ const MapComponent = ({
   };
 
   const handleMouseEnter = (point) => {
-    setHoveredPoint(point);
+    if (mapRef.current) {
+      const mapInstance = mapRef.current;
+      try {
+        const globalPixels = mapInstance.options.get("projection").toGlobalPixels(
+          [point.coords[0], point.coords[1]],
+          mapInstance.getZoom()
+        );
+        const screenPosition = mapInstance.converter.globalToPage(globalPixels);
+        console.log("Screen position:", screenPosition);
+        setHoveredPoint({
+          ...point,
+          screenPosition,
+        });
+
+      } catch (error) {
+        console.error("Error converting coordinates:", error);
+      }
+    }
   };
 
   const handleMouseLeave = () => {
@@ -55,6 +73,7 @@ const MapComponent = ({
     <div className="map-container">
       <YMaps query={{ apikey: "ef6ce2bf-6d1d-4567-aaf2-5ca3e0d8da70" }}>
         <Map
+          instanceRef={(ref) => (mapRef.current = ref)}
           defaultState={defaultState}
           state={{ ...defaultState, center: mapCenter }}
           width="100%"
@@ -85,7 +104,6 @@ const MapComponent = ({
               }}
             />
             </>
-
             }
 
             <Clusterer
@@ -110,11 +128,19 @@ const MapComponent = ({
         </Map>
       </YMaps>
 
-      {hoveredPoint && (
-        <div className="hovered-point-window">
+      {hoveredPoint && hoveredPoint.screenPosition && (
+        <div
+          className="hovered-point-window"
+          style={{
+            top: `${hoveredPoint.screenPosition[1] - 225}px`,
+            left: `${hoveredPoint.screenPosition[0] + 20}px`,
+          }}
+        >
           <strong>{hoveredPoint.title}</strong>
           <p className="hovered-point-location">Местонахождение: {hoveredPoint.location}</p>
-          <p className="hovered-point-crime-date">Время совершения: {hoveredPoint.crimeDate.split("T")[0]}</p>
+          <p className="hovered-point-crime-date">
+            Время совершения: {hoveredPoint.crimeDate.split("T")[0]}
+          </p>
         </div>
       )}
 

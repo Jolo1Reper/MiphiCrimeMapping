@@ -5,7 +5,7 @@
         Guid? WantedPersonId,
         string? WantedPersonName,
         string? WantedPersonSurname,
-        DateTime WantedPersonBirthDate,
+        DateTime? WantedPersonBirthDate,
         DateTime CrimeDate,
         string Location,
         double PointLatitude,

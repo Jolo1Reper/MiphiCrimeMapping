@@ -1,6 +1,9 @@
 .filter-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
   width: 300px;
-  height: 91vh;
   background-color: #2c3e50;
   color: white;
   display: flex;
@@ -8,6 +11,15 @@
   border-left: 1px solid #1abc9c;
   overflow-y: auto;
   box-shadow: -2px 0 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  transform: translateX(0);
+  transition: transform 0.3s ease;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.filter-panel.collapsed {
+  transform: translateX(-100%);
 }
 
 .filter-header {
@@ -82,12 +94,12 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap; /* Разрешить перенос строк для маленьких экранов */
+  flex-wrap: wrap;
 }
 
 .filter-input {
-  flex: 1; /* Занимает равное пространство */
-  min-width: 0; /* Предотвращает перерастягивание */
+  flex: 1;
+  min-width: 0;
 }
 
 .filter-date-divider {
@@ -96,7 +108,6 @@
   color: #ecf0f1;
 }
 
-/* для контейнера поиска и кнопки */
 .search-container {
   display: flex;
   align-items: center;
@@ -104,7 +115,7 @@
 }
 
 .filter-input {
-  width: calc(100% - 30px); /* Уменьшаем ширину для кнопки */
+  width: calc(100% - 30px);
   padding: 8px;
   border: 1px solid #1abc9c;
   border-radius: 5px;

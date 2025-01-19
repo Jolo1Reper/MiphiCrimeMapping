@@ -33,7 +33,7 @@ namespace Application.Services
                     Point = new Point(request.PointLongitude, request.PointLatitude) { SRID = 4326 }
                 };
             }
-            else if (request.WantedPersonName is not null && request.WantedPersonSurname is not null)
+            else if (request.WantedPersonName is not null && request.WantedPersonSurname is not null && request.WantedPersonBirthDate is not null)
             {
                 return new Crime()
                 {
@@ -42,7 +42,19 @@ namespace Application.Services
                     CreateAt = DateTime.Now.ToUniversalTime(),
                     CrimeDate = DateTime.SpecifyKind(request.CrimeDate, DateTimeKind.Utc),
                     WantedPersonId = await GetWantedPersonId(request.WantedPersonName, request.WantedPersonSurname, 
-                        DateTime.SpecifyKind(request.WantedPersonBirthDate, DateTimeKind.Utc)),
+                        DateTime.SpecifyKind(request.WantedPersonBirthDate.Value, DateTimeKind.Utc)),
+                    Point = new Point(request.PointLongitude, request.PointLatitude) { SRID = 4326 }
+                };
+            }
+            else if (request.WantedPersonId is null && request.WantedPersonName is null && request.WantedPersonSurname is null)
+            {
+                return new Crime()
+                {
+                    TypeId = request.CrimeTypeId,
+                    Location = request.Location,
+                    CreateAt = DateTime.Now.ToUniversalTime(),
+                    CrimeDate = DateTime.SpecifyKind(request.CrimeDate, DateTimeKind.Utc),
+                    WantedPersonId = null,
                     Point = new Point(request.PointLongitude, request.PointLatitude) { SRID = 4326 }
                 };
             }

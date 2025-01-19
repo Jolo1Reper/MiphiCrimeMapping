@@ -39,15 +39,23 @@ const AddPointModal = ({
   const handleSave = () => {
     try {
         if (currentPoint) {
+          const convertWantedPersonId = (formData.wantedPersonId === "0" || formData.wantedPersonId === "-1")
+          ? null 
+          : formData.wantedPersonId;
+
           const payload = {
-            ...formData,
-            wantedPersonId: formData.wantedPersonId || null,
-            wantedPersonBirthDate: new Date(formData.wantedPersonBirthDate).toISOString(),
+            crimeTypeId: formData.crimeTypeId ? formData.crimeTypeId : null,
+            wantedPersonId: convertWantedPersonId || null,
+            wantedPersonName: formData.wantedPersonName ? formData.wantedPersonName : null,
+            wantedPersonSurname: formData.wantedPersonSurname ? formData.wantedPersonSurname : null,
+            wantedPersonBirthDate: formData.wantedPersonBirthDate ? new Date(formData.wantedPersonBirthDate).toISOString() : null,
             crimeDate: new Date(formData.crimeDate).toISOString(),
+            location: formData.location,
             pointLatitude: currentPoint.coords[0],
             pointLongitude: currentPoint.coords[1],
           };
           onSave(payload);
+          
           setFormData({
             crimeTypeId: "",
             wantedPersonId: "",
@@ -107,10 +115,13 @@ const AddPointModal = ({
             <Form.Select
               value={formData.wantedPersonId}
               onChange={(e) => {
-                const selectedPerson = wantedPersons.find(
-                  (person) => person.id === e.target.value
-                );
-                handleInputChange("wantedPersonId", e.target.value);
+                const selectedPersonId = e.target.value;
+                let selectedPerson = null;
+                if(selectedPersonId !== "0" && selectedPersonId !== "-1") {
+                    selectedPerson = wantedPersons.find((person) => person.id === selectedPersonId);
+                    
+                }
+                handleInputChange("wantedPersonId", selectedPersonId );
                 setFormData((prev) => ({
                   ...prev,
                   wantedPersonName: selectedPerson?.name || "",
@@ -119,7 +130,8 @@ const AddPointModal = ({
                 }));
               }}
             >
-              <option value="">Выберите преступника</option>
+              <option key="default" value="0">Выберите преступника или введите его данные</option>
+              <option key="unknown" value="-1">Неизвестно</option>
               {wantedPersons.map((person) => (
                 <option key={person.id} value={person.id}>
                   {person.surname} {person.name} ({person.birthDate.split("T")[0]})

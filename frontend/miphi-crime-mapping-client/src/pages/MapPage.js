@@ -145,7 +145,7 @@ const MapPage = () => {
 
   const fetchUpdatePoint = async (point) => {
     try {
-      console.log(point);
+
       const response = await api.patch(`/api/crime-marks`, point);
       console.log(response.data.message);
       const crimeType = crimeTypes.find((type) => type.id === point.crimeTypeId);
@@ -277,8 +277,6 @@ const MapPage = () => {
     if(isSettingSearchCenter) {
     setSearchCenter({ latitude: coords[0], longitude: coords[1] });
     setIsSettingSearchCenter(false);
-    console.log("Центр при выборе точки: "+ searchCenter.latitude + ", " + searchCenter.longitude);
-    console.log("Радиус при выборе точки: " + radius);
     }
   }
 
