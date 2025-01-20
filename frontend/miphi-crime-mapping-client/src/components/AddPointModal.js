@@ -1,6 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 
+const resetFormData = () => {
+  return {
+    crimeTypeId: "",
+    wantedPersonId: "",
+    wantedPersonName: "",
+    wantedPersonSurname: "",
+    wantedPersonBirthDate: "",
+    crimeDate: new Date().toISOString().split("T")[0],
+    location: "",
+    description: "",
+    pointLatitude: "",
+    pointLongitude: ""
+  }
+}
+
 const AddPointModal = ({
   show,
   onHide,
@@ -9,17 +24,7 @@ const AddPointModal = ({
   wantedPersons = [],
   currentPoint,
 }) => {
-  const [formData, setFormData] = useState({
-    crimeTypeId: "",
-    wantedPersonId: "",
-    wantedPersonName: "",
-    wantedPersonSurname: "",
-    wantedPersonBirthDate: "",
-    crimeDate: new Date().toISOString().split("T")[0],
-    location: "",
-    pointLatitude: "",
-    pointLongitude: "",
-  });
+  const [formData, setFormData] = useState(resetFormData());
 
   useEffect(() => {
     if (currentPoint) {
@@ -51,22 +56,13 @@ const AddPointModal = ({
             wantedPersonBirthDate: formData.wantedPersonBirthDate ? new Date(formData.wantedPersonBirthDate).toISOString() : null,
             crimeDate: new Date(formData.crimeDate).toISOString(),
             location: formData.location,
+            description: formData.description || null,
             pointLatitude: currentPoint.coords[0],
             pointLongitude: currentPoint.coords[1],
           };
           onSave(payload);
           
-          setFormData({
-            crimeTypeId: "",
-            wantedPersonId: "",
-            wantedPersonName: "",
-            wantedPersonSurname: "",
-            wantedPersonBirthDate: "",
-            crimeDate: new Date().toISOString().split("T")[0],
-            location: "",
-            pointLatitude: "",
-            pointLongitude: "",
-          });
+          setFormData(resetFormData());
         }
       } catch (error) {
         console.log(error);
@@ -74,22 +70,12 @@ const AddPointModal = ({
     };
 
   const handleCancel = () => {
-    setFormData({
-        crimeTypeId: "",
-        wantedPersonId: "",
-        wantedPersonName: "",
-        wantedPersonSurname: "",
-        wantedPersonBirthDate: "",
-        crimeDate: new Date().toISOString().split("T")[0],
-        location: "",
-        pointLatitude: "",
-        pointLongitude: "",
-      });
+    setFormData(resetFormData());
       onHide();
   }
 
   return (
-    <Modal show={show} onHide={onHide} centered>
+    <Modal show={show} onHide={onHide} centered size="lg">
       <Modal.Header closeButton>
         <Modal.Title>Добавить метку</Modal.Title>
       </Modal.Header>
@@ -198,6 +184,16 @@ const AddPointModal = ({
               type="date"
               value={formData.crimeDate}
               onChange={(e) => handleInputChange("crimeDate", e.target.value)}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Описание (необязательно)</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              value={formData.description}
+              onChange={(e) => handleInputChange("description", e.target.value)}
             />
           </Form.Group>
         </Form>

@@ -13,8 +13,9 @@ namespace Application.Filters
             if (string.IsNullOrEmpty(searchQuery)) return query;
 
             return query.Where(c =>
-                c.Location != null && c.Location.ToLower().Contains(searchQuery) ||
-                c.Type.Title.ToLower().Contains(searchQuery));
+                (c.Location != null && c.Location.ToLower().Contains(searchQuery)) || 
+                c.Type.Title.ToLower().Contains(searchQuery) ||     
+                (c.Description != null && c.Description.ToLower().Contains(searchQuery)));
         }
     }
 }

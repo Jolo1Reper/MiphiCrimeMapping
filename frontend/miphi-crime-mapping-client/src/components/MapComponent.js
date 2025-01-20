@@ -132,11 +132,12 @@ const MapComponent = ({
         <div
           className="hovered-point-window"
           style={{
-            top: `${hoveredPoint.screenPosition[1] - 225}px`,
+            top: `${hoveredPoint.screenPosition[1] - 230}px`,
             left: `${hoveredPoint.screenPosition[0] + 20}px`,
           }}
         >
-          <strong>{hoveredPoint.title}</strong>
+          <p><strong>{hoveredPoint.title}</strong></p>
+          <p className="hovered-point-description">{hoveredPoint?.description}</p>
           <p className="hovered-point-location">Местонахождение: {hoveredPoint.location}</p>
           <p className="hovered-point-crime-date">
             Время совершения: {hoveredPoint.crimeDate.split("T")[0]}

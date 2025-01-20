@@ -37,6 +37,10 @@
   color: #bdc3c7;
 }
 
+.hovered-point-window .hovered-point-description {
+  color: #1abc9c;
+}
+
 .hovered-point-window .hovered-point-location {
   font-weight: bold;
   color: #ecf0f1;

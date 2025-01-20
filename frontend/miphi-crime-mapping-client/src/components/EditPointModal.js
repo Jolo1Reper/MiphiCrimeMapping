@@ -11,6 +11,7 @@ const EditPointModal = ({ point, crimeTypes, wantedPersons, onSave, onDelete, on
     wantedPersonBirthDate: point?.wantedPersonBirthDate?.split("T")[0] || "",
     crimeDate: point?.crimeDate?.split("T")[0] || "",
     location: point?.location || "",
+    description: point?.description || "",
     pointLatitude: point?.coords?.[0] || "",
     pointLongitude: point?.coords?.[1] || "",
   });
@@ -35,6 +36,7 @@ const EditPointModal = ({ point, crimeTypes, wantedPersons, onSave, onDelete, on
       wantedPersonBirthDate: formData.wantedPersonBirthDate ? new Date(formData.wantedPersonBirthDate).toISOString() : null,
       crimeDate: new Date(formData.crimeDate).toISOString(),
       location: formData.location,
+      description: formData.description,
       pointLatitude: parseFloat(formData.pointLatitude),
       pointLongitude: parseFloat(formData.pointLongitude),
     };
@@ -65,7 +67,7 @@ const EditPointModal = ({ point, crimeTypes, wantedPersons, onSave, onDelete, on
 
   return (
     <>
-      <Modal show={onShow} onHide={onHide}>
+      <Modal show={onShow} onHide={onHide} size="lg">
         <Modal.Header closeButton>
             <Modal.Title>Редактировать метку</Modal.Title>
         </Modal.Header>
@@ -174,6 +176,16 @@ const EditPointModal = ({ point, crimeTypes, wantedPersons, onSave, onDelete, on
                 type="date"
                 value={formData.crimeDate}
                 onChange={(e) => handleInputChange("crimeDate", e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Описание (необязательно)</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={formData.description}
+                onChange={(e) => handleInputChange("description", e.target.value)}
               />
             </Form.Group>
           </Form>

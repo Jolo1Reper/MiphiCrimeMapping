@@ -22,6 +22,9 @@ const MarkerPanel = ({ points = [], onMarkerSelect }) => {
               >
                 <strong className="marker-item-title">{point.title}</strong>
                 <p className="marker-item-detail">
+                  <span>Описание:</span> {point.description || "-"}
+                </p>
+                <p className="marker-item-detail">
                   <span>Местонахождение:</span> {point.location}
                 </p>
                 <p className="marker-item-detail">

@@ -25,7 +25,7 @@ namespace Application.UseCases.UpdateCrime
             CreateCrimeRequest createRequest = new CreateCrimeRequest(
                 request.CrimeTypeId,
                 request.WantedPersonId, request.WantedPersonName, request.WantedPersonSurname, request.WantedPersonBirthDate,
-                request.CrimeDate, request.Location, request.PointLatitude, request.PointLongitude
+                request.CrimeDate, request.Location, request.Description, request.PointLatitude, request.PointLongitude
             );
 
             Crime? crime = await _createCrimeService.CreateCrime(createRequest); ;

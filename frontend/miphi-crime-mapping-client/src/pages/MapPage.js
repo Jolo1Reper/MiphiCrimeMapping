@@ -89,6 +89,7 @@ const MapPage = () => {
           color: crimeType?.color || null,
           crimeDate: item.crimeDate,
           location: item.location,
+          description: item.description,
           coords: [item.pointLatitude, item.pointLongitude],
         };
       });
@@ -110,6 +111,7 @@ const MapPage = () => {
       wantedPersonBirthDate: response.data.wantedPersonBirthDate,
       crimeDate: response.data.crimeDate,
       location: response.data.location,
+      description: response.data.description,
       coords: [response.data.pointLatitude, response.data.pointLongitude]
     } 
 
@@ -131,6 +133,7 @@ const MapPage = () => {
         color: crimeType.color,
         crimeDate: point.crimeDate,
         location: point.location,
+        description: point.description,
         coords: [point.pointLatitude, point.pointLongitude],
       };
       setPoints((prev) => [...prev, newPoint]);
@@ -156,6 +159,7 @@ const MapPage = () => {
         color: crimeType.color,
         crimeDate: point.crimeDate,
         location: point.location,
+        description: point.description,
         coords: [point.pointLatitude, point.pointLongitude],
       };
       setPoints((prev) =>
@@ -193,7 +197,26 @@ const MapPage = () => {
     }
   };
 
-  const extractShortAddress = (data) => {
+  // const extractShortAddress = (data) => {
+  //   const featureMembers = data?.response?.GeoObjectCollection?.featureMember;
+  
+  //   if (featureMembers && featureMembers.length > 0) {
+  //     const firstGeoObject = featureMembers[0]?.GeoObject;
+  //     const components =
+  //       firstGeoObject?.metaDataProperty?.GeocoderMetaData?.Address?.Components;
+  
+  //     if (components) {
+  //       const city = components.find((comp) => comp.kind === "locality")?.name;
+  //       const street = components.find((comp) => comp.kind === "street")?.name;
+  //       const house = components.find((comp) => comp.kind === "house")?.name;
+  
+  //       return [city, street, house].filter(Boolean).join(", ") || "Адрес не найден";
+  //     }
+  //   }
+  //   return "-";
+  // };
+
+  const extractDetailedAddress = (data) => {
     const featureMembers = data?.response?.GeoObjectCollection?.featureMember;
   
     if (featureMembers && featureMembers.length > 0) {
@@ -203,22 +226,40 @@ const MapPage = () => {
   
       if (components) {
         const city = components.find((comp) => comp.kind === "locality")?.name;
+        const district = components.find((comp) => comp.kind === "district")?.name;
+        const suburb = components.find((comp) => comp.kind === "suburb")?.name;
         const street = components.find((comp) => comp.kind === "street")?.name;
         const house = components.find((comp) => comp.kind === "house")?.name;
   
-        return [city, street, house].filter(Boolean).join(", ") || "Адрес не найден";
+        return {
+          city: city || "-",
+          district: district || "-",
+          suburb: suburb || "-",
+          street: street || "-",
+          house: house || "-",
+          fullAddress: [city, district || suburb, street, house]
+            .filter(Boolean)
+            .join(", ") || "Адрес не найден",
+        };
       }
     }
-
-    return "-";
+    return {
+      city: "-",
+      district: "-",
+      suburb: "-",
+      street: "-",
+      house: "-",
+      fullAddress: "Адрес не найден",
+    };
   };
 
   const handleAddPoint = async (coords) => {
     const geocodeData = await fetchAddressFromCoordinates(coords);
   
     if (geocodeData) {
-      const shortAddress = extractShortAddress(geocodeData);
-      setCurrentPoint({ location: shortAddress, coords: coords });
+      // const shortAddress = extractShortAddress(geocodeData);
+      const detailAddress = extractDetailedAddress(geocodeData).fullAddress;
+      setCurrentPoint({ location: detailAddress, coords: coords });
     } else {
       setCurrentPoint({ coords: coords });
     }
@@ -240,8 +281,7 @@ const MapPage = () => {
     setNotification(message);
     setTimeout(() => setNotification(null), 3000);
   };
-
-  // TODO Modal?  
+  
   const handleMarkerSelect = (point) => {
     setSelectedPoint(point);
   } 

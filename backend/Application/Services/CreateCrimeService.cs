@@ -30,6 +30,7 @@ namespace Application.Services
                     CreateAt = DateTime.Now.ToUniversalTime(),
                     CrimeDate = DateTime.SpecifyKind(request.CrimeDate, DateTimeKind.Utc),
                     WantedPersonId = id,
+                    Description = request.Description,
                     Point = new Point(request.PointLongitude, request.PointLatitude) { SRID = 4326 }
                 };
             }
@@ -43,6 +44,7 @@ namespace Application.Services
                     CrimeDate = DateTime.SpecifyKind(request.CrimeDate, DateTimeKind.Utc),
                     WantedPersonId = await GetWantedPersonId(request.WantedPersonName, request.WantedPersonSurname, 
                         DateTime.SpecifyKind(request.WantedPersonBirthDate.Value, DateTimeKind.Utc)),
+                    Description = request.Description,
                     Point = new Point(request.PointLongitude, request.PointLatitude) { SRID = 4326 }
                 };
             }
@@ -55,6 +57,7 @@ namespace Application.Services
                     CreateAt = DateTime.Now.ToUniversalTime(),
                     CrimeDate = DateTime.SpecifyKind(request.CrimeDate, DateTimeKind.Utc),
                     WantedPersonId = null,
+                    Description = request.Description,
                     Point = new Point(request.PointLongitude, request.PointLatitude) { SRID = 4326 }
                 };
             }
