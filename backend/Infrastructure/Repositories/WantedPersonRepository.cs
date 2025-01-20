@@ -18,9 +18,18 @@ namespace Infrastructure.Repositories
             return await _db.WantedPersons.AsNoTracking().ToListAsync();
         }
 
-        public bool ContainWantedPerson(string name, string surname, DateTime birthDate)
+        public bool ContainWantedPerson(string name, string surname, string? patronymic, DateTime birthDate)
         {
-            return _db.WantedPersons.Any(p => p.Name == name && p.Surname == surname && p.BirthDate == birthDate);
+            if(patronymic is null)
+            {
+                return _db.WantedPersons.Any(
+                    p => p.Name == name && p.Surname == surname && p.BirthDate == birthDate);
+            }
+            else
+            {
+                return _db.WantedPersons.Any(
+                    p => p.Name == name && p.Surname == surname && p.BirthDate == birthDate && p.Patronymic == patronymic);
+            }
         }
 
         public async Task AddWantedPerson(WantedPerson person)
@@ -29,9 +38,10 @@ namespace Infrastructure.Repositories
             await _db.SaveChangesAsync();
         }
 
-        public async Task<Guid> GetWantedPersonIdByData(string name, string surname, DateTime birthDate)
+        public async Task<Guid> GetWantedPersonIdByData(string name, string surname, string? patronymic, DateTime birthDate)
         {
-            var person = await _db.WantedPersons.FirstOrDefaultAsync(p => p.Name == name && p.Surname == surname && p.BirthDate == birthDate);
+            var person = await _db.WantedPersons.FirstOrDefaultAsync(
+                p => p.Name == name && p.Surname == surname && p.Patronymic == patronymic && p.BirthDate == birthDate);
             if (person is not null)
             {
                 return person.Id;

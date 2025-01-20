@@ -13,7 +13,8 @@ namespace Application.UseCases.SelectAllWantedPersons
         {
             var persons = await _repo.GetAllWantedPersons();
 
-            IEnumerable<SelectAllWantedPersonResponse> personsDtos = persons.Select(p => new SelectAllWantedPersonResponse(p.Id, p.Name, p.Surname, p.BirthDate));
+            IEnumerable<SelectAllWantedPersonResponse> personsDtos = persons.Select(
+                p => new SelectAllWantedPersonResponse(p.Id, p.Name, p.Surname, p.Patronymic, p.BirthDate));
             return personsDtos;
         }
     }

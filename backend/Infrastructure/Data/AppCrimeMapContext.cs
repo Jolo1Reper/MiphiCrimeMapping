@@ -12,11 +12,15 @@ namespace Infrastructure.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Crime>()
+                .HasOne(c => c.WantedPerson)
+                .WithMany(p => p.Crimes)
+                .HasForeignKey(c => c.WantedPersonId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.HasPostgresExtension("postgis");
 
-            
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

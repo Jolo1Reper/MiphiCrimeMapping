@@ -27,6 +27,7 @@ namespace Application.UseCases.GetCrime
                 crime.WantedPersonId,
                 crime.WantedPerson?.Name,
                 crime.WantedPerson?.Surname,
+                crime.WantedPerson?.Patronymic,
                 crime.WantedPerson?.BirthDate,
                 crime.CreateAt,
                 crime.CrimeDate,

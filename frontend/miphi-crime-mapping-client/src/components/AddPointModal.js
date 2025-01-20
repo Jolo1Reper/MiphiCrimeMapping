@@ -7,6 +7,7 @@ const resetFormData = () => {
     wantedPersonId: "",
     wantedPersonName: "",
     wantedPersonSurname: "",
+    wantedPersonPatronymic: "",
     wantedPersonBirthDate: "",
     crimeDate: new Date().toISOString().split("T")[0],
     location: "",
@@ -51,8 +52,9 @@ const AddPointModal = ({
           const payload = {
             crimeTypeId: formData.crimeTypeId ? formData.crimeTypeId : null,
             wantedPersonId: convertWantedPersonId || null,
-            wantedPersonName: formData.wantedPersonName ? formData.wantedPersonName : null,
-            wantedPersonSurname: formData.wantedPersonSurname ? formData.wantedPersonSurname : null,
+            wantedPersonName: formData.wantedPersonName || null,
+            wantedPersonSurname: formData.wantedPersonSurname || null,
+            wantedPersonPatronymic: formData.wantedPersonPatronymic || null,
             wantedPersonBirthDate: formData.wantedPersonBirthDate ? new Date(formData.wantedPersonBirthDate).toISOString() : null,
             crimeDate: new Date(formData.crimeDate).toISOString(),
             location: formData.location,
@@ -81,7 +83,7 @@ const AddPointModal = ({
       </Modal.Header>
       <Modal.Body>
         <Form>
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-1">
             <Form.Label>Тип преступления</Form.Label>
             <Form.Select
               value={formData.crimeTypeId}
@@ -96,7 +98,7 @@ const AddPointModal = ({
             </Form.Select>
           </Form.Group>
 
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-1">
             <Form.Label>Преступник</Form.Label>
             <Form.Select
               value={formData.wantedPersonId}
@@ -112,6 +114,7 @@ const AddPointModal = ({
                   ...prev,
                   wantedPersonName: selectedPerson?.name || "",
                   wantedPersonSurname: selectedPerson?.surname || "",
+                  wantedPersonPatronymic: selectedPerson?.patronymic || "",
                   wantedPersonBirthDate: selectedPerson?.birthDate || "",
                 }));
               }}
@@ -120,13 +123,26 @@ const AddPointModal = ({
               <option key="unknown" value="-1">Неизвестно</option>
               {wantedPersons.map((person) => (
                 <option key={person.id} value={person.id}>
-                  {person.surname} {person.name} ({person.birthDate.split("T")[0]})
+                  {person.surname} {person.name} {person.patronymic} ({person.birthDate.split("T")[0]})
                 </option>
               ))}
             </Form.Select>
           </Form.Group>
           
-          <Form.Group className="form-control mb-2">
+          <Form.Group className="form-control mb-1">
+          <Form.Label>Фамилия</Form.Label>
+            <Form.Control
+            type="text"
+            value={formData.wantedPersonSurname}
+            onChange={(e) =>
+                setFormData({
+                ...formData,
+                wantedPersonSurname: e.target.value,
+                wantedPersonId: "",
+                })
+            }
+            placeholder="Введите фамилию преступника"
+            />
             <Form.Label>Имя</Form.Label>
             <Form.Control
             type="text"
@@ -140,18 +156,18 @@ const AddPointModal = ({
             }
             placeholder="Введите имя преступника"
             />
-            <Form.Label>Фамилия</Form.Label>
+            <Form.Label>Отчество (при наличии)</Form.Label>
             <Form.Control
             type="text"
-            value={formData.wantedPersonSurname}
+            value={formData.wantedPersonPatronymic}
             onChange={(e) =>
                 setFormData({
                 ...formData,
-                wantedPersonSurname: e.target.value,
+                wantedPersonPatronymic: e.target.value,
                 wantedPersonId: "",
                 })
             }
-            placeholder="Введите фамилию преступника"
+            placeholder="Введите отчество преступника"
             />
             <Form.Label>Дата рождения</Form.Label>
             <Form.Control
@@ -168,7 +184,7 @@ const AddPointModal = ({
             />
           </Form.Group>
 
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-1">
             <Form.Label>Место совершения преступления</Form.Label>
             <Form.Control
               type="text"
@@ -178,7 +194,7 @@ const AddPointModal = ({
             />
           </Form.Group>
 
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-1">
             <Form.Label>Дата совершения преступления</Form.Label>
             <Form.Control
               type="date"
@@ -187,7 +203,7 @@ const AddPointModal = ({
             />
           </Form.Group>
 
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-1">
             <Form.Label>Описание (необязательно)</Form.Label>
             <Form.Control
               as="textarea"

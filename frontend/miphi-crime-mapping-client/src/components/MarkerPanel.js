@@ -3,7 +3,7 @@ import "./MarkerPanel.css";
 const MarkerPanel = ({ points = [], onMarkerSelect }) => {
 
   const handleMarkerClick = (point) => {
-    onMarkerSelect(point); // Передаем выбранную метку в родительский компонент
+    onMarkerSelect(point);
   };
 
   return (
@@ -18,7 +18,7 @@ const MarkerPanel = ({ points = [], onMarkerSelect }) => {
               <li
                 key={index}
                 className="marker-list-item"
-                onClick={() => handleMarkerClick(point)} // Вызываем при клике
+                onClick={() => handleMarkerClick(point)}
               >
                 <strong className="marker-item-title">{point.title}</strong>
                 <p className="marker-item-detail">

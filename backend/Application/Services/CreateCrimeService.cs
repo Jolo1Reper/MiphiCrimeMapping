@@ -42,7 +42,8 @@ namespace Application.Services
                     Location = request.Location,
                     CreateAt = DateTime.Now.ToUniversalTime(),
                     CrimeDate = DateTime.SpecifyKind(request.CrimeDate, DateTimeKind.Utc),
-                    WantedPersonId = await GetWantedPersonId(request.WantedPersonName, request.WantedPersonSurname, 
+                    WantedPersonId = await GetWantedPersonId(
+                        request.WantedPersonName, request.WantedPersonSurname, request.WantedPersonPatronymic,
                         DateTime.SpecifyKind(request.WantedPersonBirthDate.Value, DateTimeKind.Utc)),
                     Description = request.Description,
                     Point = new Point(request.PointLongitude, request.PointLatitude) { SRID = 4326 }
@@ -67,14 +68,14 @@ namespace Application.Services
             }
         }
 
-        private async Task<Guid> GetWantedPersonId(string name, string surname, DateTime birthDate)
+        private async Task<Guid> GetWantedPersonId(string name, string surname, string? patronymic, DateTime birthDate)
         {
-            if (!_wantedPersonRepository.ContainWantedPerson(name, surname, birthDate))
+            if (!_wantedPersonRepository.ContainWantedPerson(name, surname, patronymic, birthDate))
             {
-                WantedPerson person = new() { Name = name, Surname = surname, BirthDate = birthDate };
+                WantedPerson person = new() { Name = name, Surname = surname, Patronymic = patronymic, BirthDate = birthDate };
                 await _wantedPersonRepository.AddWantedPerson(person);
             }
-            return await _wantedPersonRepository.GetWantedPersonIdByData(name, surname, birthDate);
+            return await _wantedPersonRepository.GetWantedPersonIdByData(name, surname, patronymic, birthDate);
         }
     }
 }

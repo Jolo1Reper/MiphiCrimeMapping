@@ -7,6 +7,7 @@
         Guid? WantedPersonId,
         string? WantedPersonName,
         string? WantedPersonSurname,
+        string? WantedPersonPatronymic,
         DateTime? WantedPersonBirthDate,
         DateTime CreateAt,
         DateTime CrimeDate,

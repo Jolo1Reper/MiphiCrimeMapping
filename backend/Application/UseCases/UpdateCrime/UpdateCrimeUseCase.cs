@@ -23,8 +23,8 @@ namespace Application.UseCases.UpdateCrime
                 return null;
 
             CreateCrimeRequest createRequest = new CreateCrimeRequest(
-                request.CrimeTypeId,
-                request.WantedPersonId, request.WantedPersonName, request.WantedPersonSurname, request.WantedPersonBirthDate,
+                request.CrimeTypeId, request.WantedPersonId, 
+                request.WantedPersonName, request.WantedPersonSurname, request.WantedPersonPatronymic, request.WantedPersonBirthDate,
                 request.CrimeDate, request.Location, request.Description, request.PointLatitude, request.PointLongitude
             );
 

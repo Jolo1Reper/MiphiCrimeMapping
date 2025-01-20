@@ -108,6 +108,7 @@ const MapPage = () => {
       wantedPersonId: response.data.wantedPersonId,
       wantedPersonName: response.data.wantedPersonName,
       wantedPersonSurname: response.data.wantedPersonSurname,
+      wantedPersonPatronymic: response.data.wantedPersonPatronymic,
       wantedPersonBirthDate: response.data.wantedPersonBirthDate,
       crimeDate: response.data.crimeDate,
       location: response.data.location,
