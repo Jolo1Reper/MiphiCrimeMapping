@@ -1,4 +1,5 @@
-﻿using Domain.Interfaces;
+﻿using Application.Pagination;
+using Domain.Interfaces;
 
 namespace Application.UseCases.GetAllWantedPerson
 {
@@ -10,14 +11,23 @@ namespace Application.UseCases.GetAllWantedPerson
             _repo = repository;
         }
 
-        public async Task<IEnumerable<GetAllWantedPersonResponse>> Handle()
+        public async Task<PaginatedResult<GetAllWantedPersonResponse>> Handle(PaginationSearchParameters request)
         {
-            var wantedPersons = await _repo.GetAllWantedPersonsWithCounts();
+            var wantedPersons = await _repo.GetAllWantedPersonsWithCounts(request.SearchQuery, request.Page, request.PageSize);
+            var totalItems = await _repo.GetWantedPersonsCount(request.SearchQuery);
 
-            IEnumerable<GetAllWantedPersonResponse> personDtos = wantedPersons.Select(p => new GetAllWantedPersonResponse(p.WantedPerson.Id, 
-                p.WantedPerson.Name, p.WantedPerson.Surname, p.WantedPerson.Patronymic, p.WantedPerson.BirthDate,
-                p.WantedPerson.RegistrationAddress, p.WantedPerson.AddInfo, p.CrimeCount));
-            return personDtos;
+            IEnumerable<GetAllWantedPersonResponse> personDtos = wantedPersons.Select(p => new GetAllWantedPersonResponse(
+                p.WantedPerson.Id, 
+                p.WantedPerson.Name, 
+                p.WantedPerson.Surname, 
+                p.WantedPerson.Patronymic, 
+                p.WantedPerson.BirthDate,
+                p.WantedPerson.RegistrationAddress, 
+                p.WantedPerson.AddInfo, 
+                p.CrimeCount
+            ));
+
+            return new PaginatedResult<GetAllWantedPersonResponse>(personDtos, totalItems, request.PageSize);
         }
     }
 }

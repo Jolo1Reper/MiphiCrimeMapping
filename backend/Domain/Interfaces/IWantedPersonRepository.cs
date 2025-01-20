@@ -11,6 +11,7 @@ namespace Domain.Interfaces
         Task<WantedPerson?> GetWantedPersonById(Guid id);
         Task UpdateWantedPerson(WantedPerson person);
         Task<bool> DeleteWantedPerson(Guid id);
-        Task<IEnumerable<(WantedPerson WantedPerson, int CrimeCount)>> GetAllWantedPersonsWithCounts();
+        Task<IEnumerable<(WantedPerson WantedPerson, int CrimeCount)>> GetAllWantedPersonsWithCounts(string? search, int page, int pageSize);
+        Task<int> GetWantedPersonsCount(string? search);
     }
 }

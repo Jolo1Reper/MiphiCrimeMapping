@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./CrimeTypesListPage.css";
-import { Button, Form, Accordion, Modal } from "react-bootstrap";
+import { Button, Form, Accordion, Modal, Pagination } from "react-bootstrap";
 import api from "../api";
 import capitalizeFirstLetter from "../services/capitalizeFirstLetter";
 
@@ -18,10 +18,18 @@ const CrimeTypesListPage = () => {
     count: 0
   });
 
-  const fetchGetAllCrimeTypes = async () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize, setpageSize] = useState(1);
+  const [totalItems, setTotalItems] = useState(1);
+  const [search, setSearch] = useState("");
+
+  const fetchGetAllCrimeTypes = async (page = 1, pageSize = 10) => {
     try {
-      const response = await api.get("/api/crime-types");
-      const loadedCrimeTypes = response.data.map((item) => ({
+      const searchQuery = search;
+      const response = await api.get(`/api/crime-types?page=${page}&pageSize=${pageSize}&searchQuery=${searchQuery}`);
+      const { items, totalItems, totalPages } = response.data;
+      const loadedCrimeTypes = items.map((item) => ({
         id: item.id,
         title: item.title,
         description: item.description,
@@ -31,14 +39,19 @@ const CrimeTypesListPage = () => {
       }));
 
       setCrimeTypes(loadedCrimeTypes);
+      setTotalPages(totalPages);
+      setCurrentPage(page);
+      setpageSize(pageSize);
+      setTotalItems(totalItems);
+
     } catch(error) {
       console.error("Ошибка при загрузке типов преступлений:", error.response);
     }
   };
 
   useEffect(() => {
-      fetchGetAllCrimeTypes();
-  }, []);
+      fetchGetAllCrimeTypes(currentPage);
+  }, [currentPage]);
 
   const fetchAddCrimeType = async (crimeType) => {
     try {
@@ -101,15 +114,26 @@ const CrimeTypesListPage = () => {
 
   const handleAddCrimeType = async () => {
     const newCrimeType = await fetchAddCrimeType(formData);
-    setCrimeTypes([...crimeTypes, newCrimeType]);
+    const updatedcrimeTypes = [...crimeTypes, newCrimeType];
+    if(updatedcrimeTypes.length <= pageSize) {
+      setCrimeTypes(updatedcrimeTypes);
+    }
+    else {
+      const newTotalItems = totalItems + 1;
+      const updatedTotalPages = Math.ceil(newTotalItems / pageSize);
+      console.log(newTotalItems);
+      console.log(updatedTotalPages);
+      setTotalPages(updatedTotalPages);
+      setTotalItems(newTotalItems);
+    }
     setFormData({ title: "", description: "", link: "", color: "#1E90FF" });
   };
 
   const handleUpdateCrimeType = async (id) => {
-    const updateCrimeType = await fetchUpdateCrimeType(id, formData);
+    const updateCrimeTypes = await fetchUpdateCrimeType(id, formData);
     setCrimeTypes(
       crimeTypes.map((crimeType) =>
-        crimeType.id === id ? { ...crimeType, ...updateCrimeType } : crimeType
+        crimeType.id === id ? { ...crimeType, ...updateCrimeTypes } : crimeType
       )
     );
     setFormData({ title: "", description: "", link: "", color: "#1E90FF" });
@@ -122,7 +146,19 @@ const CrimeTypesListPage = () => {
       setIsEditingType(null);
       setFormData({ title: "", description: "", link: "" });
     }
-    setCrimeTypes(crimeTypes.filter((crimeType) => crimeType.id !== id));
+
+    const updateCrimeTypes = crimeTypes.filter((crimeType) => crimeType.id !== id);
+
+    if(updateCrimeTypes.length === 0) {
+      setCurrentPage(currentPage-1);
+    }
+    else {
+      const newTotalItems = totalItems - 1;
+      const updatedTotalPages = Math.ceil(newTotalItems / pageSize);
+      setTotalPages(updatedTotalPages);
+      setTotalItems(newTotalItems);
+      await fetchGetAllCrimeTypes(currentPage);
+    }
   };
 
   const handleEdit = (crimeType) => {
@@ -164,12 +200,48 @@ const CrimeTypesListPage = () => {
     setShowConfirm(false);
   };
 
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      fetchGetAllCrimeTypes(newPage);
+    }
+  };
+
+  const handleSearch = async(e) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    await fetchGetAllCrimeTypes(1);
+  };
+
+  const handleSearchChange = (e) => setSearch(e.target.value);
+
+
   return (
     <div className="crime-types-list-page">
       <header className="crime-types-header">
         <h2>Типы преступлений</h2>
       </header>
       <div className="crime-types-content">
+      <div className="filter-section">
+          <div className="search-container">
+            <input
+              type="text"
+              id="search"
+              className="filter-input"
+              value={search}
+              onChange={handleSearchChange}
+              placeholder="Поиск..."
+            />
+            <button className="search-button" onClick={(e) => handleSearch(e)}>
+              <img
+                src="/icons/search.png"
+                alt="Поиск"
+                className="search-icon"
+              />
+            </button>
+          </div>
+        </div>
+
         <Accordion>
         <Accordion.Item eventKey="0">
           <Accordion.Header>
@@ -241,6 +313,36 @@ const CrimeTypesListPage = () => {
         </Accordion.Item>
         )}
         </Accordion>
+        
+        <div className="pagination-container mt-3">
+          {totalPages > 1 && (
+            <Pagination>
+              <Pagination.Prev
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+              >
+                Предыдущая
+              </Pagination.Prev>
+
+              {Array.from({ length: totalPages }, (_, index) => (
+                <Pagination.Item
+                  key={index + 1}
+                  active={index + 1 === currentPage}
+                  onClick={() => handlePageChange(index + 1)}
+                >
+                  {index + 1}
+                </Pagination.Item>
+              ))}
+
+              <Pagination.Next
+                disabled={currentPage === totalPages}
+                onClick={() => handlePageChange(currentPage + 1)}
+              >
+                Следующая
+              </Pagination.Next>
+            </Pagination>
+          )}
+        </div>
       </div>
 
       <Modal show={showModal} onHide={handleCloseModal}>

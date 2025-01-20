@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./WantedPersonsPage.css";
-import { Button, Form, Accordion } from "react-bootstrap";
+import { Button, Form, Accordion, Pagination } from "react-bootstrap";
 import api from "../api";
 import capitalizeFirstLetter from "../services/capitalizeFirstLetter";
 import { Modal } from "react-bootstrap";
@@ -20,11 +20,18 @@ const WantedPersonsPage = () => {
     addInfo: "",
     count: 0
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize, setpageSize] = useState(1);
+  const [totalItems, setTotalItems] = useState(1);
+  const [search, setSearch] = useState("");
 
-  const fetchAllWantedPersons = async () => {
+  const fetchAllWantedPersons = async (page = 1, pageSize = 10) => {
     try {
-      const response = await api.get("/api/wanted-persons");
-      const loadedWantedPersons = response.data.map((item) => ({
+      const searchQuery = search;
+      const response = await api.get(`/api/wanted-persons?page=${page}&pageSize=${pageSize}&searchQuery=${searchQuery}`);
+      const { items, totalItems, totalPages } = response.data;
+      const loadedWantedPersons = items.map((item) => ({
         id: item.id,
         name: item.name,
         surname: item.surname,
@@ -36,14 +43,19 @@ const WantedPersonsPage = () => {
       }));
 
       setWantedPersons(loadedWantedPersons);
+      setTotalPages(totalPages);
+      setCurrentPage(page);
+      setpageSize(pageSize);
+      setTotalItems(totalItems);
+
     } catch(error) {
       console.error("Ошибка при загрузке информации об преступниках:", error.response);
     }
   };
 
   useEffect(() => {
-    fetchAllWantedPersons();
-  }, []);
+    fetchAllWantedPersons(currentPage);
+  }, [currentPage]);
 
   const fetchAddWantedPerson = async (wantedPerson) => {
     try {
@@ -64,6 +76,7 @@ const WantedPersonsPage = () => {
     
       return {
         id: response.data.id,
+        name: wantedPerson.name,
         surname: wantedPerson.surname,
         patronymic: wantedPerson.patronymic,
         birthDate: wantedPerson.birthDate,
@@ -98,10 +111,11 @@ const WantedPersonsPage = () => {
     
       return {
         id: id,
+        name: wantedPerson.name,
         surname: wantedPerson.surname,
         patronymic: wantedPerson.patronymic,
         birthDate: wantedPerson.birthDate,
-        registrationAddress: wantedPerson.address,
+        address: wantedPerson.address,
         addInfo: wantedPerson.addInfo
       };
 
@@ -127,14 +141,23 @@ const WantedPersonsPage = () => {
     handleCloseModal();
   };
 
-  const handleAddWantedPerson = () => {
-    const newWantedPerson = fetchAddWantedPerson(formData);
-    setWantedPersons([...wantedPersons, newWantedPerson]);
+  const handleAddWantedPerson = async() => {
+    const newWantedPerson = await fetchAddWantedPerson(formData);
+    const updatedWantedPersons = [...wantedPersons, newWantedPerson];
+    if(updatedWantedPersons.length <= pageSize) {
+      setWantedPersons(updatedWantedPersons);
+    }
+    else {
+      const newTotalItems = totalItems + 1;
+      const updatedTotalPages = Math.ceil(newTotalItems / pageSize);
+      setTotalPages(updatedTotalPages);
+      setTotalItems(newTotalItems);
+    }
     setFormData({ name: "", surname: "", patronymic: "", birthDate: "",  address: "", addInfo: "" });
   };
 
-  const handleUpdateWantedPerson = (id) => {
-    const updateWantedPerson = fetchUpdateWantedPerson(id, formData);
+  const handleUpdateWantedPerson = async(id) => {
+    const updateWantedPerson = await fetchUpdateWantedPerson(id, formData);
     setWantedPersons(
       wantedPersons.map((wantedPerson) =>
         wantedPerson.id === id ? { ...wantedPerson, ...updateWantedPerson } : wantedPerson
@@ -150,7 +173,19 @@ const WantedPersonsPage = () => {
        setIsEditingPerson(null);
        setFormData({ name: "", surname: "", patronymic: "", birthDate: "",  address: "", addInfo: "" });
      }
-    setWantedPersons(wantedPersons.filter((wantedPerson) => wantedPerson.id !== id));
+    
+    const updatedWantedPersons = wantedPersons.filter((wantedPerson) => wantedPerson.id !== id);
+    
+    if(updatedWantedPersons.length === 0) {
+      setCurrentPage(currentPage-1);
+    }
+    else {
+      const newTotalItems = totalItems - 1;
+      const updatedTotalPages = Math.ceil(newTotalItems / pageSize);
+      setTotalPages(updatedTotalPages);
+      setTotalItems(newTotalItems);
+      await fetchAllWantedPersons(currentPage);
+    }
   };
 
   const handleEdit = (person) => {
@@ -194,12 +229,47 @@ const WantedPersonsPage = () => {
     setShowConfirm(false);
   };
 
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      fetchAllWantedPersons(newPage);
+    }
+  };
+
+  const handleSearch = async(e) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    await fetchAllWantedPersons(1);
+  };
+
+  const handleSearchChange = (e) => setSearch(e.target.value);
+
   return (
     <div className="wanted-persons-page">
       <header className="wanted-persons-header">
         <h2>Разыскиваемые лица</h2>
       </header>
       <div className="wanted-persons-content">
+        <div className="filter-section">
+          <div className="search-container">
+            <input
+              type="text"
+              id="search"
+              className="filter-input"
+              value={search}
+              onChange={handleSearchChange}
+              placeholder="Поиск..."
+            />
+            <button className="search-button" onClick={(e) => handleSearch(e)}>
+              <img
+                src="/icons/search.png"
+                alt="Поиск"
+                className="search-icon"
+              />
+            </button>
+          </div>
+        </div>
+
         <Accordion>
           <Accordion.Item eventKey="0">
             <Accordion.Header>
@@ -249,6 +319,36 @@ const WantedPersonsPage = () => {
         </Accordion.Item>
         )}
         </Accordion>
+
+        <div className="pagination-container mt-3">
+          {totalPages > 1 && (
+            <Pagination>
+              <Pagination.Prev
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+              >
+                Предыдущая
+              </Pagination.Prev>
+
+              {Array.from({ length: totalPages }, (_, index) => (
+                <Pagination.Item
+                  key={index + 1}
+                  active={index + 1 === currentPage}
+                  onClick={() => handlePageChange(index + 1)}
+                >
+                  {index + 1}
+                </Pagination.Item>
+              ))}
+
+              <Pagination.Next
+                disabled={currentPage === totalPages}
+                onClick={() => handlePageChange(currentPage + 1)}
+              >
+                Следующая
+              </Pagination.Next>
+            </Pagination>
+          )}
+        </div>
       </div>
 
       <Modal show={showModal} onHide={handleCloseModal}>

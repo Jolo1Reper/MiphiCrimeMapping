@@ -22,8 +22,9 @@ using Application.UseCases.UpdateWantedPerson;
 using Application.UseCases.DeleteWantedPerson;
 using Application.UseCases.GetAllCrimeTypes;
 using Application.UseCases.GetAllWantedPerson;
-using Application.Filters;
-
+using Application.Filters.CrimeFilters;
+using Application.Filters.WantedPersonFilters;
+using Application.Filters.CrimeTypeFilters;
 var builder = WebApplication.CreateBuilder(args);
 
 string connection = Environment.GetEnvironmentVariable("CONNECTION_STRING") ?? builder.Configuration.GetConnectionString("DefaultConnection")!;
@@ -76,10 +77,13 @@ builder.Services.AddScoped<IUpdateWantedPersonUseCase, UpdateWantedPersonUseCase
 builder.Services.AddScoped<IDeleteWantedPersonUseCase, DeleteWantedPersonUseCase>();
 
 
-builder.Services.AddScoped<IFilter<Crime>, SearchQueryFilter>();
-builder.Services.AddScoped<IFilter<Crime>, CrimeTypeFilter>();
-builder.Services.AddScoped<IFilter<Crime>, RadiusFilter>();
-builder.Services.AddScoped<IFilter<Crime>, DateRangeFilter>();
+builder.Services.AddScoped<IRequestFilter<Crime>, SearchQueryFilter>();
+builder.Services.AddScoped<IRequestFilter<Crime>, CrimeTypeFilter>();
+builder.Services.AddScoped<IRequestFilter<Crime>, RadiusFilter>();
+builder.Services.AddScoped<IRequestFilter<Crime>, DateRangeFilter>();
+
+builder.Services.AddScoped<ISearchFilter<WantedPerson>, WantedPersonsSearchFilter>();
+builder.Services.AddScoped<ISearchFilter<CrimeType>, CrimeTypesSearchFilter>();
 
 var app = builder.Build();
 

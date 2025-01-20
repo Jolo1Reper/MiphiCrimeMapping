@@ -1,7 +1,9 @@
-﻿namespace Application.UseCases.GetAllCrimeTypes
+﻿using Application.Pagination;
+
+namespace Application.UseCases.GetAllCrimeTypes
 {
     public interface IGetAllCrimeTypesUseCase
     {
-        Task<IEnumerable<GetAllCrimeTypesResponse>> Handle();
+        Task<PaginatedResult<GetAllCrimeTypesResponse>> Handle(PaginationSearchParameters request);
     }
 }

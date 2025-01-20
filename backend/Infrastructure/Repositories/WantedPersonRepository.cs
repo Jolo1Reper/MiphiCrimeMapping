@@ -8,9 +8,11 @@ namespace Infrastructure.Repositories
     public class WantedPersonRepository : IWantedPersonRepository
     {
         private readonly AppCrimeMapContext _db;
-        public WantedPersonRepository(AppCrimeMapContext db)
+        private readonly ISearchFilter<WantedPerson> _filter;
+        public WantedPersonRepository(AppCrimeMapContext db, ISearchFilter<WantedPerson> filter)
         {
             _db = db;
+            _filter = filter;
         }
 
         public async Task<IEnumerable<WantedPerson>> GetAllWantedPersons()
@@ -80,14 +82,29 @@ namespace Infrastructure.Repositories
             return true;
         }
 
-        public async Task<IEnumerable<(WantedPerson WantedPerson, int CrimeCount)>> GetAllWantedPersonsWithCounts()
+        public async Task<IEnumerable<(WantedPerson WantedPerson, int CrimeCount)>> GetAllWantedPersonsWithCounts(string? search, int page, int pageSize)
         {
-            var result = await _db.WantedPersons
-            .Include(ct => ct.Crimes)
-            .Select(wantedPerson => new ValueTuple<WantedPerson, int>(wantedPerson, wantedPerson.Crimes.Count))
-            .ToListAsync();
+            IQueryable<WantedPerson> query = _db.Set<WantedPerson>();
+            if(search != null)
+                query = _filter.Apply(query, search);
+
+            var result = await query
+                .Include(ct => ct.Crimes)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(wantedPerson => new ValueTuple<WantedPerson, int>(wantedPerson, wantedPerson.Crimes.Count))
+                .ToListAsync();
 
             return result;
+        }
+
+        public async Task<int> GetWantedPersonsCount(string? search)
+        {
+            IQueryable<WantedPerson> query = _db.Set<WantedPerson>();
+            if (search != null)
+                query = _filter.Apply(query, search);
+
+            return await query.CountAsync();
         }
     }
 }

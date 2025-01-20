@@ -5,6 +5,7 @@ using Application.UseCases.GetWantedPerson;
 using Application.UseCases.UpdateWantedPerson;
 using Microsoft.AspNetCore.Mvc;
 using Application.UseCases.GetAllWantedPerson;
+using Application.Pagination;
 
 namespace Web.Controllers
 {
@@ -43,9 +44,9 @@ namespace Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllWantedPersons()
+        public async Task<IActionResult> GetAllWantedPersons([FromQuery] PaginationSearchParameters request)
         {
-            var response = await _getAllWantedPersons.Handle();
+            var response = await _getAllWantedPersons.Handle(request);
 
             return Ok(response);
         }

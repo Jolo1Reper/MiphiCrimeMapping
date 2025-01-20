@@ -8,9 +8,11 @@ namespace Infrastructure.Repositories
     public class CrimeTypeRepository : ICrimeTypeRepository
     {
         private readonly AppCrimeMapContext _db;
-        public CrimeTypeRepository(AppCrimeMapContext db)
+        private readonly ISearchFilter<CrimeType> _filter;
+        public CrimeTypeRepository(AppCrimeMapContext db, ISearchFilter<CrimeType> filter)
         {
             _db = db;
+            _filter = filter;
         }
 
         public async Task<IEnumerable<CrimeType>> GetAllCrimeTypes()
@@ -62,14 +64,29 @@ namespace Infrastructure.Repositories
             return true;
         }
 
-        public async Task<IEnumerable<(CrimeType CrimeType, int CrimeCount)>> GetAllCrimeTypesWithCounts()
+        public async Task<IEnumerable<(CrimeType CrimeType, int CrimeCount)>> GetAllCrimeTypesWithCounts(string? search, int page, int pageSize)
         {
-            var result = await _db.CrimeTypes
-                        .Include(ct => ct.Crimes)
-                        .Select(crimeType => new ValueTuple<CrimeType, int>(crimeType, crimeType.Crimes.Count))
-                        .ToListAsync();
+            IQueryable<CrimeType> query = _db.Set<CrimeType>();
+            if (search != null)
+                query = _filter.Apply(query, search);
+
+            var result = await query
+                .Include(ct => ct.Crimes)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(crimeType => new ValueTuple<CrimeType, int>(crimeType, crimeType.Crimes.Count))
+                .ToListAsync();
 
             return result;
+        }
+
+        public async Task<int> GetCrimeTypesCount(string? search)
+        {
+            IQueryable<CrimeType> query = _db.Set<CrimeType>();
+            if (search != null)
+                query = _filter.Apply(query, search);
+
+            return await query.CountAsync();
         }
     }
 }

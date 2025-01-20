@@ -1,4 +1,6 @@
-﻿using Domain.Interfaces;
+﻿using Application.Pagination;
+using Application.UseCases.GetAllWantedPerson;
+using Domain.Interfaces;
 
 namespace Application.UseCases.GetAllCrimeTypes
 {
@@ -10,13 +12,20 @@ namespace Application.UseCases.GetAllCrimeTypes
             _repo = repository;
         }
 
-        public async Task<IEnumerable<GetAllCrimeTypesResponse>> Handle()
+        public async Task<PaginatedResult<GetAllCrimeTypesResponse>> Handle(PaginationSearchParameters request)
         {
-            var crimeTypes = await _repo.GetAllCrimeTypesWithCounts();
+            var crimeTypes = await _repo.GetAllCrimeTypesWithCounts(request.SearchQuery, request.Page, request.PageSize);
+            var totalItems = await _repo.GetCrimeTypesCount(request.SearchQuery);
 
-            IEnumerable<GetAllCrimeTypesResponse> crimeTypeDtos = crimeTypes.Select(t => new GetAllCrimeTypesResponse(t.CrimeType.Id, 
-                t.CrimeType.Title, t.CrimeType.Description, t.CrimeType.Link, t.CrimeType.Color, t.CrimeCount));
-            return crimeTypeDtos;
+            IEnumerable<GetAllCrimeTypesResponse> crimeTypeDtos = crimeTypes.Select(t => new GetAllCrimeTypesResponse(
+                t.CrimeType.Id, 
+                t.CrimeType.Title, 
+                t.CrimeType.Description, 
+                t.CrimeType.Link, 
+                t.CrimeType.Color, 
+                t.CrimeCount));
+
+            return new PaginatedResult<GetAllCrimeTypesResponse>(crimeTypeDtos, totalItems, request.PageSize);
         }
     }
 }

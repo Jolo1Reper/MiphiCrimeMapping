@@ -9,8 +9,8 @@ namespace Infrastructure.Repositories
     public class CrimeMarkRepository : ICrimeMarkRepository
     {
         private readonly AppCrimeMapContext _db;
-        private readonly IEnumerable<IFilter<Crime>> _filters;
-        public CrimeMarkRepository(AppCrimeMapContext db, IEnumerable<IFilter<Crime>> filters) 
+        private readonly IEnumerable<IRequestFilter<Crime>> _filters;
+        public CrimeMarkRepository(AppCrimeMapContext db, IEnumerable<IRequestFilter<Crime>> filters) 
         {
             _db = db;
             _filters = filters;
@@ -37,9 +37,6 @@ namespace Infrastructure.Repositories
             }
 
             return await query.ToListAsync();
-
-            // IEnumerable<Crime> crimes = await _db.Crimes.Include(c => c.Type).Include(c => c.WantedPerson).AsNoTracking().ToListAsync();
-            // return crimes;
         }
 
         public async Task UpdateCrime(Guid id, Crime data)

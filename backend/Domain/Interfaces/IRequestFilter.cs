@@ -2,7 +2,7 @@
 
 namespace Domain.Interfaces
 {
-    public interface IFilter<T>
+    public interface IRequestFilter<T>
     {
         IQueryable<T> Apply(IQueryable<T> query, CrimeFilterRequest filterRequest);
     }

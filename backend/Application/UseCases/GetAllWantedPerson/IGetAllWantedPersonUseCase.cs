@@ -1,7 +1,9 @@
-﻿namespace Application.UseCases.GetAllWantedPerson
+﻿using Application.Pagination;
+
+namespace Application.UseCases.GetAllWantedPerson
 {
     public interface IGetAllWantedPersonUseCase
     {
-        Task<IEnumerable<GetAllWantedPersonResponse>> Handle();
+        Task<PaginatedResult<GetAllWantedPersonResponse>> Handle(PaginationSearchParameters request);
     }
 }

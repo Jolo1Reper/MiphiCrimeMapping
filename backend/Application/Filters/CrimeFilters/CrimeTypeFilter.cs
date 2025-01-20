@@ -2,9 +2,9 @@
 using Domain.Interfaces;
 using Domain.Models;
 
-namespace Application.Filters
+namespace Application.Filters.CrimeFilters
 {
-    public class CrimeTypeFilter : IFilter<Crime>
+    public class CrimeTypeFilter : IRequestFilter<Crime>
     {
         public IQueryable<Crime> Apply(IQueryable<Crime> query, CrimeFilterRequest filterRequest)
         {

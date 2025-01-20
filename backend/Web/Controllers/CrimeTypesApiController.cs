@@ -5,6 +5,7 @@ using Application.UseCases.GetCrimeType;
 using Application.UseCases.UpdateCrimeType;
 using Microsoft.AspNetCore.Mvc;
 using Application.UseCases.GetAllCrimeTypes;
+using Application.Pagination;
 
 namespace Web.Controllers
 {
@@ -43,9 +44,9 @@ namespace Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllCrimeTypes()
+        public async Task<IActionResult> GetAllCrimeTypes([FromQuery] PaginationSearchParameters request)
         {
-            var response = await _getAllCrimeTypes.Handle();
+            var response = await _getAllCrimeTypes.Handle(request);
 
             return Ok(response);
         }

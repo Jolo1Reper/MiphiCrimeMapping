@@ -11,6 +11,7 @@ namespace Domain.Interfaces
         Task AddCrimeType(CrimeType type);
         Task UpdateCrimeType(CrimeType type);
         Task<bool> DeleteCrimeType(Guid id);
-        Task<IEnumerable<(CrimeType CrimeType, int CrimeCount)>> GetAllCrimeTypesWithCounts();
+        Task<IEnumerable<(CrimeType CrimeType, int CrimeCount)>> GetAllCrimeTypesWithCounts(string? search, int page, int pageSize);
+        Task<int> GetCrimeTypesCount(string? search);
     }
 }

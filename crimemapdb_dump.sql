@@ -5,7 +5,7 @@
 -- Dumped from database version 16.1
 -- Dumped by pg_dump version 16.1
 
--- Started on 2025-01-20 21:23:15
+-- Started on 2025-01-21 02:02:27
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -197,6 +197,10 @@ COPY public."WantedPersons" ("Id", "Name", "Surname", "Patronymic", "BirthDate",
 3559cdf1-e821-484a-aa10-83962847d6c1	Сергей	Петров	\N	2000-12-21 03:00:00+03	\N	Подозревается в грабежах
 12654663-c462-44cf-847e-a626d4313b1c	Василий	Васильев	\N	1965-01-02 03:00:00+03	\N	Разыскивается за мошенничество
 019484f1-a1c3-76fb-86f8-2d883c79df10	Алексей	Попов	Васильевич	2003-12-12 03:00:00+03	\N	\N
+0194852d-1a70-7e3e-8c9c-dcb2c5045295	Кирилл	Петров	Дмитревич	1967-04-20 03:00:00+03	\N	\N
+0194859a-82b0-7352-aef0-2a97c794a86f	Ирина	Даринова	Николаевна	1974-01-19 03:00:00+03	Волгодонск	\N
+01948552-6486-7e89-b564-d0770903392f	Дарья	Калинова	Сергеевна	1996-02-05 03:00:00+03	Волгодонск	\N
+019485c2-4cdd-791d-8bfd-ef2a74cc8d98	Диана	Клинчук	Романовна	1999-09-08 04:00:00+04	\N	\N
 \.
 
 
@@ -359,7 +363,7 @@ ALTER TABLE ONLY public."Lawsuits"
     ADD CONSTRAINT "FK_Lawsuits_WantedPersons_PersonId" FOREIGN KEY ("PersonId") REFERENCES public."WantedPersons"("Id") ON DELETE CASCADE;
 
 
--- Completed on 2025-01-20 21:23:17
+-- Completed on 2025-01-21 02:02:27
 
 --
 -- PostgreSQL database dump complete
