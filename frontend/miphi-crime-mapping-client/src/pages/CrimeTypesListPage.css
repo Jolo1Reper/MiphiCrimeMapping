@@ -97,7 +97,8 @@
     color: #bbb;
 }
 
-.search-container {
+
+.crime-types-content .search-container {
     display: flex;
     align-items: center;
     width: 100%;
@@ -108,7 +109,7 @@
     overflow: hidden;
 }
 
-.filter-input {
+.crime-types-content .filter-input {
     flex-grow: 1;
     padding: 12px 18px;
     border: none;
@@ -118,13 +119,13 @@
     color: white;
 }
 
-.filter-input::placeholder {
+.crime-types-content .filter-input::placeholder {
     color: #bdc3c7;
     font-style: italic;
     font-size: 15px;
 }
 
-.search-button {
+.crime-types-content .search-button {
     border: none;
     padding: 10px 20px;
     cursor: pointer;
@@ -134,11 +135,11 @@
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.search-button:hover {
+.crime-types-content .search-button:hover {
     transform: scale(1.1);
 }
 
-.search-icon {
+.crime-types-content .search-icon {
     width: 20px;
     height: 20px;
     filter: brightness(1) saturate(0) invert(1);

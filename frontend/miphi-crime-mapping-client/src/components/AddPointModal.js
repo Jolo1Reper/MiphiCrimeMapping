@@ -73,11 +73,11 @@ const AddPointModal = ({
 
   const handleCancel = () => {
     setFormData(resetFormData());
-      onHide();
+    onHide();
   }
 
   return (
-    <Modal show={show} onHide={onHide} centered size="lg">
+    <Modal show={show} onHide={handleCancel} centered size="lg">
       <Modal.Header closeButton>
         <Modal.Title>Добавить метку</Modal.Title>
       </Modal.Header>

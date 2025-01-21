@@ -9,11 +9,13 @@ const FilterPanel = ({
   isSettingSearchCenter = false,
   searchCenter,
   radius = 1,
-  onSetRadius = () => {}
+  onSetRadius = () => {},
+  onShowStats = () => {}
 }) => {
   const [search, setSearch] = useState("");
   const [selectedCrimeTypeId, setSelectedCrimeTypeId] = useState("");
   const [dateRange, setDateRange] = useState({ from: "", to: "" });
+  const [isStatsVisible, setIsStatsVisible] = useState(false);
 
   const handleSearchChange = (e) => setSearch(e.target.value);
   const handleCrimeTypeChange = (e) => setSelectedCrimeTypeId(e.target.value);
@@ -34,6 +36,10 @@ const FilterPanel = ({
     setSelectedCrimeTypeId("");
     setDateRange({ from: "", to: "" });
     onResetFilters();
+  };
+
+  const handleToggleStats = () => {
+    setIsStatsVisible(prevState => !prevState);
   };
 
   return (
@@ -125,7 +131,6 @@ const FilterPanel = ({
             />
           </div>
         </div>
-
         <div className="filter-actions">
           <button className="apply-button" onClick={handleApplyFilters}>
             Применить
@@ -134,7 +139,24 @@ const FilterPanel = ({
             Сбросить
           </button>
         </div>
+
+        <div className="filter-section stats-section-div">
+          <button className="stats-button" onClick={onShowStats}>
+            Статистика
+          </button>
+        </div>
+
       </div>
+
+      {isStatsVisible && (
+        <div className="stats-overlay">
+          <div className="stats-window">
+            <h3>Статистика по меткам</h3>
+            <p>Здесь будет информация о метках с примененными фильтрами.</p>
+            <button className="close-stats" onClick={handleToggleStats}>Закрыть</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

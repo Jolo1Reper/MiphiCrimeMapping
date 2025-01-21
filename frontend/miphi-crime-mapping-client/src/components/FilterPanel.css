@@ -182,3 +182,70 @@
 .reset-button {
   background-color: #e74c3c;
 }
+
+.stats-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+}
+
+.stats-window {
+  background-color: #34495e;
+  color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.stats-window h3 {
+  margin-top: 0;
+  font-size: 20px;
+}
+
+.stats-window p {
+  font-size: 16px;
+  margin: 10px 0;
+}
+
+.close-stats {
+  background-color: #e74c3c;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.close-stats:hover {
+  background-color: #c0392b;
+}
+
+.stats-button {
+  background-color: #1abc9c;
+  border: none;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  text-align: center;
+}
+
+.stats-button:hover {
+  background-color: #16a085;
+}
+
+.stats-section-div {
+  margin-top: 30px;
+}

@@ -4,6 +4,7 @@ import FilterPanel from "../components/FilterPanel";
 import MarkerPanel from "../components/MarkerPanel";
 import AddPointModal from "../components/AddPointModal";
 import EditPointModal from "../components/EditPointModal";
+import StatsModal from "../components/StatsModal";
 import "./MapPage.css";
 import api from "../api";
 import axios from "axios";
@@ -26,6 +27,8 @@ const MapPage = () => {
   const [isSettingSearchCenter, setIsSettingSearchCenter] = useState(false);
   const [searchCenter, setSearchCenter] = useState({ latitude: null, longitude: null });
   const [radius, setRadius] = useState(1);
+
+  const [isStatsVisible, setIsStatsVisible] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -325,6 +328,12 @@ const MapPage = () => {
     setRadius(r);
   }
 
+  const handleToggleStats = () => {
+    // ..
+    // setStatsData(calculatedStats);
+    setIsStatsVisible((prevState) => !prevState);
+  };
+
   return (
         <div className="map-page">
         <div
@@ -340,6 +349,7 @@ const MapPage = () => {
           searchCenter={searchCenter}
           radius={radius}
           onSetRadius={onSetRadius}
+          onShowStats={handleToggleStats}
           />
 
         </div>
@@ -395,7 +405,12 @@ const MapPage = () => {
         />
         )}
         {notification && <div className="notification">{notification}</div>}
-
+        
+        {isStatsVisible && (
+        <StatsModal
+          onClose={handleToggleStats}
+        />
+        )}
       </div>
   );
 };
