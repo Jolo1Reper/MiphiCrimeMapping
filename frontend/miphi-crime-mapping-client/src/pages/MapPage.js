@@ -43,6 +43,8 @@ const MapPage = () => {
 
       const loadPoints = await fetchGetAllCrimeMarks(loadTypes);
       setPoints(loadPoints);
+
+      fetchConnect();
     };
 
     fetchData();
@@ -108,24 +110,27 @@ const MapPage = () => {
   };
 
   const fetchConnect = async () => {
-    if (!connection) {
-        const newConnection = new HubConnectionBuilder()
-            .withUrl(`${baseURL}/realhub`)
-            .withAutomaticReconnect()
-            .build();
-        setConnection(newConnection);
+    if (connection) {
+      try {
+        await connection.stop();
+      } catch (error) {
+        console.error("Error stopping the connection:", error);
+      }
+      setConnection(null);
     }
-};
+
+    const newConnection = new HubConnectionBuilder()
+      .withUrl(`${baseURL}/realhub`)
+      .withAutomaticReconnect()
+      .build();
+  
+    setConnection(newConnection);
+  };
 
   useEffect(() => {
     const setupConnection = async () => {
       if (connection) {
         try {
-          connection.off("Error");
-          connection.off("AddedCrime");
-          connection.off("UpdatedCrime");
-          connection.off("DeletedCrime");
-
           await connection.start();
           console.log("Connected to RealHub");
 
@@ -149,7 +154,6 @@ const MapPage = () => {
 
   const realCrimeAdded = (newCrime, senderId) => {
     if (senderId === connection.connectionId) return;
-    console.log("Добавление");
     const crimeType = crimeTypes.find((type) => type.id === newCrime.crimeTypeId);
     const newPoint = {
       id: newCrime.id,
@@ -165,7 +169,6 @@ const MapPage = () => {
   }
 
   const realCrimeUpdated = (updatedCrime) => {
-    console.log("Обновление");
     const crimeType = crimeTypes.find((type) => type.id === updatedCrime.crimeTypeId);
     const updatePoint = {
       id: updatedCrime.id,
@@ -183,7 +186,6 @@ const MapPage = () => {
   }
 
   const realCrimeDeleted = (deletedCrimeId) => {
-    console.log("Удаление");
     setPoints((prev) => prev.filter((p) => p.id !== deletedCrimeId));
   }
 
@@ -216,8 +218,9 @@ const MapPage = () => {
       console.log(response.data.message);
 
       const crimeType = crimeTypes.find((type) => type.id === point.crimeTypeId);
+      point.id = response.data.id;
       const newPoint = {
-        id: response.data.id,
+        id: point.id,
         title: crimeType.title,
         color: crimeType.color,
         crimeDate: point.crimeDate,

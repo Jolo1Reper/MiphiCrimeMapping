@@ -35,7 +35,7 @@ services:
       dockerfile: Dockerfile
     container_name: crime_map_client
     environment:
-      - REACT_APP_API_URL=https://localhost:8081
+      - REACT_APP_API_URL=http://localhost:8080
     depends_on:
       - api
     ports:
