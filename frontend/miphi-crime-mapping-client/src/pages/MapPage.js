@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { HubConnectionBuilder } from "@microsoft/signalr";
 import MapComponent from "../components/MapComponent";
 import FilterPanel from "../components/FilterPanel";
 import MarkerPanel from "../components/MarkerPanel";
@@ -7,9 +8,11 @@ import EditPointModal from "../components/EditPointModal";
 import StatsModal from "../components/StatsModal";
 import "./MapPage.css";
 import api from "../api";
+import { baseURL } from "../api";
 import axios from "axios";
 
 const MapPage = () => {
+  const [connection, setConnection] = useState(null);
   const [points, setPoints] = useState([]);
   const [currentPoint, setCurrentPoint] = useState(null);
   const [crimeTypes, setCrimeTypes] = useState([]);
@@ -44,7 +47,7 @@ const MapPage = () => {
 
     fetchData();
   }, []);
-  
+
   const fetchGetAllCrimeTypes = async () => {
     try {
       const response = await api.get("/api/crime-types/titles");
@@ -53,6 +56,7 @@ const MapPage = () => {
       console.error("Ошибка при загрузке типов преступлений:", error);
     }
   };
+
   
   const fetchGetAllWantedPersons = async () => {
     try {
@@ -96,11 +100,92 @@ const MapPage = () => {
           coords: [item.pointLatitude, item.pointLongitude],
         };
       });
+      
       return loadedPoints;
     } catch (error) {
       console.error("Ошибка при загрузке меток преступлений:", error);
     }
   };
+
+  const fetchConnect = async () => {
+    if (!connection) {
+        const newConnection = new HubConnectionBuilder()
+            .withUrl(`${baseURL}/realhub`)
+            .withAutomaticReconnect()
+            .build();
+        setConnection(newConnection);
+    }
+};
+
+  useEffect(() => {
+    const setupConnection = async () => {
+      if (connection) {
+        try {
+          connection.off("Error");
+          connection.off("AddedCrime");
+          connection.off("UpdatedCrime");
+          connection.off("DeletedCrime");
+
+          await connection.start();
+          console.log("Connected to RealHub");
+
+          connection.on("Error", (error) => {
+            console.error("Error:", error);
+          });
+        
+          connection.on("AddedCrime", realCrimeAdded);
+
+          connection.on("UpdatedCrime", realCrimeUpdated);
+
+          connection.on("DeletedCrime", realCrimeDeleted);
+        } catch (error) {
+            console.error("Connection failed: ", error);
+        }
+      }
+    };
+
+    setupConnection();
+  }, [connection]);
+
+  const realCrimeAdded = (newCrime, senderId) => {
+    if (senderId === connection.connectionId) return;
+    console.log("Добавление");
+    const crimeType = crimeTypes.find((type) => type.id === newCrime.crimeTypeId);
+    const newPoint = {
+      id: newCrime.id,
+      title: crimeType.title,
+      color: crimeType.color,
+      crimeDate: newCrime.crimeDate,
+      location: newCrime.location,
+      description: newCrime.description,
+      coords: [newCrime.pointLatitude, newCrime.pointLongitude],
+    };
+
+    setPoints((prev) => [...prev, newPoint]);
+  }
+
+  const realCrimeUpdated = (updatedCrime) => {
+    console.log("Обновление");
+    const crimeType = crimeTypes.find((type) => type.id === updatedCrime.crimeTypeId);
+    const updatePoint = {
+      id: updatedCrime.id,
+      title: crimeType.title,
+      color: crimeType.color,
+      crimeDate: updatedCrime.crimeDate,
+      location: updatedCrime.location,
+      description: updatedCrime.description,
+      coords: [updatedCrime.pointLatitude, updatedCrime.pointLongitude],
+    };
+
+    setPoints((prev) =>
+      prev.map((p) => (p.id === updatePoint.id ? updatePoint : p))
+    );
+  }
+
+  const realCrimeDeleted = (deletedCrimeId) => {
+    console.log("Удаление");
+    setPoints((prev) => prev.filter((p) => p.id !== deletedCrimeId));
+  }
 
   const fetchGetPoint = async (point) => {
     try {
@@ -140,11 +225,12 @@ const MapPage = () => {
         description: point.description,
         coords: [point.pointLatitude, point.pointLongitude],
       };
+
       setPoints((prev) => [...prev, newPoint]);
+      await connection.invoke("AddingCrime", point);
       setCurrentPoint(null);
       setIsModalOpen(false);
       showNotification("Метка успешно сохранена!");
-
     } catch(error) {
       console.error("Ошибка при сохранении метки:", error);
     } 
@@ -169,6 +255,8 @@ const MapPage = () => {
       setPoints((prev) =>
         prev.map((p) => (p.id === updatePoint.id ? updatePoint : p))
       );
+
+      await connection.invoke("UpdatingCrime", point);
       setEditPoint(null);
       showNotification("Изменения метки сохранены!");
     } catch (error) {
@@ -178,14 +266,27 @@ const MapPage = () => {
 
   const fetchDeletePoint = async (point) => {
     try {
-      const response = await api.delete(`/api/crime-marks/${point.id}`);
-      console.log(response.data.message);
+      await api.delete(`/api/crime-marks/${point.id}`);
+
       setPoints((prev) => prev.filter((p) => p.id !== point.id));
+      await connection.invoke("DeletingCrime", point.id);
       setEditPoint(null);
       showNotification("Метка успешно удалена!");
     } catch (error) {
       console.error("Ошибка при удалении метки:", error.response);
     }
+  };
+
+  const handleAddPoint = async (coords) => {
+    const geocodeData = await fetchAddressFromCoordinates(coords);
+  
+    if (geocodeData) {
+      const detailAddress = extractDetailedAddress(geocodeData).fullAddress;
+      setCurrentPoint({ location: detailAddress, coords: coords });
+    } else {
+      setCurrentPoint({ coords: coords });
+    }
+    setIsModalOpen(true);
   };
 
   const fetchAddressFromCoordinates = async (coords) => {
@@ -200,25 +301,6 @@ const MapPage = () => {
       console.error("Ошибка при запросе адреса:", error);
     }
   };
-
-  // const extractShortAddress = (data) => {
-  //   const featureMembers = data?.response?.GeoObjectCollection?.featureMember;
-  
-  //   if (featureMembers && featureMembers.length > 0) {
-  //     const firstGeoObject = featureMembers[0]?.GeoObject;
-  //     const components =
-  //       firstGeoObject?.metaDataProperty?.GeocoderMetaData?.Address?.Components;
-  
-  //     if (components) {
-  //       const city = components.find((comp) => comp.kind === "locality")?.name;
-  //       const street = components.find((comp) => comp.kind === "street")?.name;
-  //       const house = components.find((comp) => comp.kind === "house")?.name;
-  
-  //       return [city, street, house].filter(Boolean).join(", ") || "Адрес не найден";
-  //     }
-  //   }
-  //   return "-";
-  // };
 
   const extractDetailedAddress = (data) => {
     const featureMembers = data?.response?.GeoObjectCollection?.featureMember;
@@ -257,19 +339,6 @@ const MapPage = () => {
     };
   };
 
-  const handleAddPoint = async (coords) => {
-    const geocodeData = await fetchAddressFromCoordinates(coords);
-  
-    if (geocodeData) {
-      // const shortAddress = extractShortAddress(geocodeData);
-      const detailAddress = extractDetailedAddress(geocodeData).fullAddress;
-      setCurrentPoint({ location: detailAddress, coords: coords });
-    } else {
-      setCurrentPoint({ coords: coords });
-    }
-    setIsModalOpen(true);
-  };
-
   const handleCancelAddPoint = () => {
     setIsModalOpen(false);
     setCurrentPoint(null);
@@ -292,7 +361,7 @@ const MapPage = () => {
 
   const onApplyFilters = async({ search, selectedCrimeTypeId, searchCenter, radius, dateRange }) => {
     setPoints([]);
-    const loadedPoints = await fetchGetAllCrimeMarks( crimeTypes, search, selectedCrimeTypeId,
+    const loadedPoints = await fetchGetAllCrimeMarks(crimeTypes, search, selectedCrimeTypeId,
       searchCenter === null ? { latitude: null, longitude: null } 
       : { latitude: searchCenter.latitude, longitude: searchCenter.longitude },
       radius, { from: dateRange.from, to: dateRange.to }

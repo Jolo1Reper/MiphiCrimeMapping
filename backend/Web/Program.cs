@@ -25,6 +25,7 @@ using Application.UseCases.GetAllWantedPerson;
 using Application.Filters.CrimeFilters;
 using Application.Filters.WantedPersonFilters;
 using Application.Filters.CrimeTypeFilters;
+using Web.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 string connection = Environment.GetEnvironmentVariable("CONNECTION_STRING") ?? builder.Configuration.GetConnectionString("DefaultConnection")!;
@@ -34,6 +35,7 @@ var originsArray = allowedOrigins?.Split(',', StringSplitOptions.RemoveEmptyEntr
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR();
 
 builder.Services.AddCors(options =>
 {
@@ -41,7 +43,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(originsArray)
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -101,5 +104,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<RealHub>("/realhub");
 
 app.Run();

@@ -5,6 +5,8 @@ using Application.UseCases.CreateCrime;
 using Application.UseCases.UpdateCrime;
 using Application.UseCases.DeleteCrime;
 using Domain.Models;
+using Microsoft.AspNetCore.SignalR;
+using Web.Hubs;
 
 namespace Web.Controllers
 {
@@ -17,19 +19,22 @@ namespace Web.Controllers
         private readonly IGetCrimeUseCase _getCrime;
         private readonly IUpdateCrimeUseCase _updateCrime;
         private readonly IDeleteCrimeUseCase _deleteCrime;
+        private readonly IHubContext<RealHub> _hubContext;
 
         public CrimeMarkApiController(
             IGetAllCrimesUseCase getAllCrime, 
             ICreateCrimeUseCase createCrime, 
             IGetCrimeUseCase getCrime, 
             IUpdateCrimeUseCase updateCrime,
-            IDeleteCrimeUseCase deleteCrime)
+            IDeleteCrimeUseCase deleteCrime,
+            IHubContext<RealHub> hubContext)
         {
             _getAllCrimes = getAllCrime; 
             _createCrime = createCrime;
             _getCrime = getCrime;
             _updateCrime = updateCrime;
             _deleteCrime = deleteCrime;
+            _hubContext = hubContext;
         }
 
         [HttpGet]
