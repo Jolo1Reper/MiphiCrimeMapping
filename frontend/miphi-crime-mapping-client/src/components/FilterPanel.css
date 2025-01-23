@@ -73,6 +73,7 @@
   color: #2c3e50;
 }
 
+
 .filter-select {
   width: 100%;
   padding: 8px;
@@ -89,6 +90,7 @@
   background-color: #1abc9c;
   color: #2c3e50;
 }
+
 
 .filter-date-range {
   display: flex;
@@ -248,4 +250,8 @@
 
 .stats-section-div {
   margin-top: 30px;
+}
+
+.stats-button:focus {
+  outline: none;
 }

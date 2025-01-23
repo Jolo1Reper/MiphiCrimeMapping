@@ -81,7 +81,8 @@ builder.Services.AddScoped<IDeleteWantedPersonUseCase, DeleteWantedPersonUseCase
 
 
 builder.Services.AddScoped<IRequestFilter<Crime>, SearchQueryFilter>();
-builder.Services.AddScoped<IRequestFilter<Crime>, CrimeTypeFilter>();
+// builder.Services.AddScoped<IRequestFilter<Crime>, SelectCrimeByOneTypeFilter>(); // if select one type
+builder.Services.AddScoped<IRequestFilter<Crime>, SelectCrimesByMultipleTypesFilter>(); // if select more types
 builder.Services.AddScoped<IRequestFilter<Crime>, RadiusFilter>();
 builder.Services.AddScoped<IRequestFilter<Crime>, DateRangeFilter>();
 

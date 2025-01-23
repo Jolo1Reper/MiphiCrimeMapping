@@ -5,7 +5,7 @@ import FilterPanel from "../components/FilterPanel";
 import MarkerPanel from "../components/MarkerPanel";
 import AddPointModal from "../components/AddPointModal";
 import EditPointModal from "../components/EditPointModal";
-import StatsModal from "../components/StatsModal";
+import Statistic from "../components/Statistic";
 import "./MapPage.css";
 import api from "../api";
 import { baseURL } from "../api";
@@ -72,23 +72,24 @@ const MapPage = () => {
   const fetchGetAllCrimeMarks = async(
     crimeTypes = [],
     search = "",
-    selectedCrimeTypeId = null,
+    selectedCrimeTypeIds = [],
     center = { latitude: null, longitude: null },
     radius = null,
     dateRange = { from: null, to: null }
   ) => {
     try {
-      const params = {
-        searchQuery: search || "",
-        crimeTypeId: selectedCrimeTypeId || "",
-        latitude: center?.latitude || "",
-        longitude: center?.longitude || "",
-        radius: radius || "",
-        startDate: dateRange?.from  ? new Date (dateRange?.from).toISOString() : "",
-        endDate: dateRange?.to ? new Date(dateRange?.to).toISOString() : ""
-      };
-
-      const response = await api.get(`/api/crime-marks?SearchQuery=${params.searchQuery}&CrimeTypeId=${params.crimeTypeId}&Latitude=${params.latitude}&Longitude=${params.longitude}&Radius=${params.radius}&StartDate=${params.startDate}&EndDate=${params.endDate}`);
+      const params = new URLSearchParams();
+      if (search) params.append("SearchQuery", search);
+      if (selectedCrimeTypeIds.length > 0) {
+        selectedCrimeTypeIds.forEach((id) => params.append("CrimeTypeIds", id));
+      }
+      if (center.latitude) params.append("Latitude", center.latitude);
+      if (center.longitude) params.append("Longitude", center.longitude);
+      if (radius) params.append("Radius", radius);
+      if (dateRange.from) params.append("StartDate", new Date(dateRange.from).toISOString());
+      if (dateRange.to) params.append("EndDate", new Date(dateRange.to).toISOString());
+  
+      const response = await api.get(`/api/crime-marks?${params.toString()}`);
       
       const loadedPoints = response.data.map((item) => {
         const crimeType = crimeTypes.find((type) => type.id === item.crimeTypeId);
@@ -361,9 +362,9 @@ const MapPage = () => {
     setSelectedPoint(point);
   } 
 
-  const onApplyFilters = async({ search, selectedCrimeTypeId, searchCenter, radius, dateRange }) => {
+  const onApplyFilters = async({ search, selectedCrimeTypeIds, searchCenter, radius, dateRange }) => {
     setPoints([]);
-    const loadedPoints = await fetchGetAllCrimeMarks(crimeTypes, search, selectedCrimeTypeId,
+    const loadedPoints = await fetchGetAllCrimeMarks(crimeTypes, search, selectedCrimeTypeIds,
       searchCenter === null ? { latitude: null, longitude: null } 
       : { latitude: searchCenter.latitude, longitude: searchCenter.longitude },
       radius, { from: dateRange.from, to: dateRange.to }
@@ -410,7 +411,6 @@ const MapPage = () => {
         <div
           className={`filter-panel ${isFilterPanelVisible ? "" : "collapsed"}`}
         >
-
           <FilterPanel
           crimeTypes={crimeTypes}
           onApplyFilters={onApplyFilters}
@@ -422,7 +422,6 @@ const MapPage = () => {
           onSetRadius={onSetRadius}
           onShowStats={handleToggleStats}
           />
-
         </div>
 
         <div
@@ -478,8 +477,10 @@ const MapPage = () => {
         {notification && <div className="notification">{notification}</div>}
         
         {isStatsVisible && (
-        <StatsModal
+        <Statistic
           onClose={handleToggleStats}
+          statsData={points}
+          crimeTypes={crimeTypes}
         />
         )}
       </div>

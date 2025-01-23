@@ -4,7 +4,7 @@ using Domain.Models;
 
 namespace Application.Filters.CrimeFilters
 {
-    public class CrimeTypeFilter : IRequestFilter<Crime>
+    public class SelectCrimeByOneTypeFilter : IRequestFilter<Crime>
     {
         public IQueryable<Crime> Apply(IQueryable<Crime> query, CrimeFilterRequest filterRequest)
         {

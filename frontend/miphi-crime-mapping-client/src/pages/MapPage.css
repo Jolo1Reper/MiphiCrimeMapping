@@ -9,8 +9,8 @@
 }
 
 .panel-toggle {
-  position: absolute;
-  top: 50%;
+  position: fixed;
+  top: 55%;
   transform: translateY(-50%);
   display: flex;
   align-items: center;

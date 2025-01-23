@@ -67,6 +67,7 @@ const WantedPersonsPage = () => {
 
   const fetchAllWantedPersons = async (page = 1, pageSize = PAGE_SIZE) => {
     try {
+      console.log("load");
       const searchQuery = search;
       const response = await api.get(`/api/wanted-persons?page=${page}&pageSize=${pageSize}&searchQuery=${searchQuery}`);
       const { items, totalItems, totalPages } = response.data;
@@ -353,20 +354,18 @@ const WantedPersonsPage = () => {
               />
             </button>
           </div>
+          <button className="refresh-button" onClick={() => fetchAllWantedPersons(currentPage)}>
+            Обновить
+          </button>
         </div>
 
+        <div className="add-block">
+          <button className="add-button" onClick={handleOpenModal}>
+            Добавить разыскиваемого
+          </button>
+        </div>
+        
         <Accordion>
-          <Accordion.Item eventKey="0">
-            <Accordion.Header>
-              <Button
-                variant="link"
-                className="w-100 text-start text-decoration-none d-flex justify-content-start align-items-center"
-                onClick={handleOpenModal}
-              >
-                Добавить разыскиваемого
-              </Button>
-            </Accordion.Header>
-          </Accordion.Item>
           {wantedPersons.length > 0 ? (wantedPersons.map((wantedPerson) => (
           <Accordion.Item eventKey={wantedPerson.id} key={wantedPerson.id}>
             <Accordion.Header>

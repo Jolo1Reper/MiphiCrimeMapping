@@ -14,7 +14,7 @@ namespace Application.UseCases.GetAllCrimeTypes
 
         public async Task<PaginatedResult<GetAllCrimeTypesResponse>> Handle(PaginationSearchParameters request)
         {
-            var crimeTypes = await _repo.GetAllCrimeTypesWithCounts(request.SearchQuery, request.Page, request.PageSize);
+            var crimeTypes = await _repo.GetAllCrimeTypesWithCountAndFilters(request.SearchQuery, request.Page, request.PageSize);
             var totalItems = await _repo.GetCrimeTypesCount(request.SearchQuery);
 
             IEnumerable<GetAllCrimeTypesResponse> crimeTypeDtos = crimeTypes.Select(t => new GetAllCrimeTypesResponse(
