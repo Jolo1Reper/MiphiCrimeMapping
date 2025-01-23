@@ -152,8 +152,7 @@ const MapPage = () => {
     setupConnection();
   }, [connection]);
 
-  const realCrimeAdded = (newCrime, senderId) => {
-    if (senderId === connection.connectionId) return;
+  const realCrimeAdded = (newCrime) => {
     const crimeType = crimeTypes.find((type) => type.id === newCrime.crimeTypeId);
     const newPoint = {
       id: newCrime.id,

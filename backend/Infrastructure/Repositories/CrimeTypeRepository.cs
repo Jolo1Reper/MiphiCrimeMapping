@@ -72,6 +72,7 @@ namespace Infrastructure.Repositories
 
             var result = await query
                 .Include(ct => ct.Crimes)
+                .OrderBy(ct => ct.CreateAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(crimeType => new ValueTuple<CrimeType, int>(crimeType, crimeType.Crimes.Count))
