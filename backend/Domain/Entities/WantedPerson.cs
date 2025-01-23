@@ -9,5 +9,6 @@
         public string? RegistrationAddress { get; set; }
         public string? AddInfo { get; set; }
         public List<Crime> Crimes { get; set; } = new List<Crime>();
+        public DateTime CreateAt { get; set; } = DateTime.Now.ToUniversalTime();
     }
 }

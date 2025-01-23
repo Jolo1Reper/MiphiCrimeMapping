@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { HubConnectionBuilder } from "@microsoft/signalr";
 import "./CrimeTypesListPage.css";
 import { Button, Form, Accordion, Modal, Pagination } from "react-bootstrap";
 import api from "../api";
+import { baseURL } from "../api";
 import capitalizeFirstLetter from "../services/capitalizeFirstLetter";
 
 const CrimeTypesListPage = () => {
+  const [connection, setConnection] = useState(null);
   const [crimeTypes, setCrimeTypes] = useState([]);
   const [isEditingType, setIsEditingType] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -20,12 +23,49 @@ const CrimeTypesListPage = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [pageSize, setpageSize] = useState(1);
+  const PAGE_SIZE = 10;
   const [totalItems, setTotalItems] = useState(1);
   const [search, setSearch] = useState("");
 
-  const fetchGetAllCrimeTypes = async (page = 1, pageSize = 10) => {
+  useEffect(() => {
+    fetchGetAllCrimeTypes(currentPage);
+  }, [currentPage]);
+
+  useEffect(() => {
+    fetchConnect();
+  }, []);
+
+  useEffect(() => {
+    if (connection) {
+      const setupConnection = async () => {
+        try {
+          await connection.start();
+          console.log("Connected to RealHub");
+          
+          connection.on("Error", (error) => console.log(error));
+          connection.on("AddedType", realTypeAdded);
+          connection.on("UpdatedType", realTypeUpdated);
+          connection.on("DeletedType", realTypeDeleted);
+        } catch (error) {
+          console.error("Connection failed:", error);
+        }
+      };
+  
+      setupConnection();
+    } else {
+      console.log("No connection established yet");
+    }
+  
+    return () => {
+      if (connection) {
+        connection.stop();
+      }
+    };
+  }, [connection]);
+
+  const fetchGetAllCrimeTypes = async (page = 1, pageSize = PAGE_SIZE) => {
     try {
+      console.log(page);
       const searchQuery = search;
       const response = await api.get(`/api/crime-types?page=${page}&pageSize=${pageSize}&searchQuery=${searchQuery}`);
       const { items, totalItems, totalPages } = response.data;
@@ -41,7 +81,6 @@ const CrimeTypesListPage = () => {
       setCrimeTypes(loadedCrimeTypes);
       setTotalPages(totalPages);
       setCurrentPage(page);
-      setpageSize(pageSize);
       setTotalItems(totalItems);
 
     } catch(error) {
@@ -49,9 +88,78 @@ const CrimeTypesListPage = () => {
     }
   };
 
-  useEffect(() => {
-      fetchGetAllCrimeTypes(currentPage);
-  }, [currentPage]);
+  const fetchConnect = async () => {
+    if (!connection) {
+      const newConnection = new HubConnectionBuilder()
+        .withUrl(`${baseURL}/realhub`)
+        .withAutomaticReconnect()
+        .build();
+  
+      setConnection(newConnection);
+    }
+  };
+
+  const realTypeAdded = (newType) => {
+    setCrimeTypes((prevCrimeTypes) => {
+      const countItem = prevCrimeTypes.length + 1;
+  
+      if (currentPage === totalPages && countItem <= PAGE_SIZE) {
+        return [...prevCrimeTypes, newType];
+      }
+  
+      return prevCrimeTypes;
+    });
+  
+    setTotalItems((prevTotalItems) => {
+      const newTotalItems = prevTotalItems + 1;
+  
+      setTotalPages(Math.ceil(newTotalItems / PAGE_SIZE));
+  
+      return newTotalItems;
+    });
+  };
+  
+    const realTypeUpdated = (updatedType) => {
+      setCrimeTypes((prev) =>
+        prev.map((ct) => (ct.id === updatedType.id ? updatedType : ct))
+      );
+    }
+
+  const realTypeDeleted = (deletedTypeId) => {
+    setCrimeTypes((prev) => prev.filter((crimeType) => crimeType.id !== deletedTypeId));
+    setTotalItems((prevTotalItems) => {
+      const newTotalItems = prevTotalItems - 1;
+  
+      setTotalPages(Math.ceil(newTotalItems / PAGE_SIZE));
+  
+      return newTotalItems;
+    });
+  }
+
+  const handleSave = () => {
+    if (isEditingType) {
+      handleUpdateCrimeType(isEditingType.id);
+    } else {
+      handleAddCrimeType();
+    }
+    handleCloseModal();
+  };
+
+  const handleAddCrimeType = async () => {
+    const newCrimeType = await fetchAddCrimeType(formData);
+    const updatedcrimeTypes = [...crimeTypes, newCrimeType];
+    if(updatedcrimeTypes.length <= PAGE_SIZE) {
+      setCrimeTypes(updatedcrimeTypes);
+    }
+    else {
+      const newTotalItems = totalItems + 1;
+      const updatedTotalPages = Math.ceil(newTotalItems / PAGE_SIZE);
+      setTotalPages(updatedTotalPages);
+      setTotalItems(newTotalItems);
+    }
+    await connection.invoke("AddingType", newCrimeType);
+    setFormData({ title: "", description: "", link: "", color: "#1E90FF" });
+  };
 
   const fetchAddCrimeType = async (crimeType) => {
     try {
@@ -76,6 +184,16 @@ const CrimeTypesListPage = () => {
     }
   };
 
+  const handleUpdateCrimeType = async (id) => {
+    const updateCrimeType = await fetchUpdateCrimeType(id, formData);
+    setCrimeTypes((prev) =>
+      prev.map((ct) => (ct.id === updateCrimeType.id ? updateCrimeType : ct))
+    );
+    await connection.invoke("UpdatingType", updateCrimeType);
+    setFormData({ title: "", description: "", link: "", color: "#1E90FF" });
+    setIsEditingType(null);
+  };
+
   const fetchUpdateCrimeType = async (id, crimeType) => {
     try {
       crimeType.title = capitalizeFirstLetter(crimeType.title);
@@ -88,11 +206,32 @@ const CrimeTypesListPage = () => {
       }
       const response = await api.patch("/api/crime-types", payload);
       console.log(response.data.message);
-    
-      return payload;
+
+      return { ...payload, count: isEditingType.count };
     } catch(error) {
       console.error("Ошибка при редактировании типа преступления:", error.response);
     }
+  };
+
+  const handleDeleteCrimeType = async (id) => {
+    await fetchDeleteCrimeType(id);
+    if(isEditingType !== null && isEditingType.id === id){
+      setIsEditingType(null);
+      setFormData({ title: "", description: "", link: "" });
+    }
+    const updateCrimeTypes = crimeTypes.filter((crimeType) => crimeType.id !== id);
+
+    if(updateCrimeTypes.length === 0) {
+      setCurrentPage(currentPage-1);
+    }
+    else {
+      const newTotalItems = totalItems - 1;
+      const updatedTotalPages = Math.ceil(newTotalItems / PAGE_SIZE);
+      setTotalPages(updatedTotalPages);
+      setTotalItems(newTotalItems);
+      await fetchGetAllCrimeTypes(currentPage);
+    }
+    await connection.invoke("DeletingType", id);
   };
 
   const fetchDeleteCrimeType = async (id) => {
@@ -102,64 +241,6 @@ const CrimeTypesListPage = () => {
       console.error("Ошибка при удалении типа преступления:", error.response);
     }
   }
-
-  const handleSave = () => {
-    if (isEditingType) {
-      handleUpdateCrimeType(isEditingType.id);
-    } else {
-      handleAddCrimeType();
-    }
-    handleCloseModal();
-  };
-
-  const handleAddCrimeType = async () => {
-    const newCrimeType = await fetchAddCrimeType(formData);
-    const updatedcrimeTypes = [...crimeTypes, newCrimeType];
-    if(updatedcrimeTypes.length <= pageSize) {
-      setCrimeTypes(updatedcrimeTypes);
-    }
-    else {
-      const newTotalItems = totalItems + 1;
-      const updatedTotalPages = Math.ceil(newTotalItems / pageSize);
-      console.log(newTotalItems);
-      console.log(updatedTotalPages);
-      setTotalPages(updatedTotalPages);
-      setTotalItems(newTotalItems);
-    }
-    setFormData({ title: "", description: "", link: "", color: "#1E90FF" });
-  };
-
-  const handleUpdateCrimeType = async (id) => {
-    const updateCrimeTypes = await fetchUpdateCrimeType(id, formData);
-    setCrimeTypes(
-      crimeTypes.map((crimeType) =>
-        crimeType.id === id ? { ...crimeType, ...updateCrimeTypes } : crimeType
-      )
-    );
-    setFormData({ title: "", description: "", link: "", color: "#1E90FF" });
-    setIsEditingType(null);
-  };
-
-  const handleDeleteCrimeType = async (id) => {
-    await fetchDeleteCrimeType(id);
-    if(isEditingType !== null && isEditingType.id === id){
-      setIsEditingType(null);
-      setFormData({ title: "", description: "", link: "" });
-    }
-
-    const updateCrimeTypes = crimeTypes.filter((crimeType) => crimeType.id !== id);
-
-    if(updateCrimeTypes.length === 0) {
-      setCurrentPage(currentPage-1);
-    }
-    else {
-      const newTotalItems = totalItems - 1;
-      const updatedTotalPages = Math.ceil(newTotalItems / pageSize);
-      setTotalPages(updatedTotalPages);
-      setTotalItems(newTotalItems);
-      await fetchGetAllCrimeTypes(currentPage);
-    }
-  };
 
   const handleEdit = (crimeType) => {
     setIsEditingType(crimeType);
@@ -214,7 +295,6 @@ const CrimeTypesListPage = () => {
   };
 
   const handleSearchChange = (e) => setSearch(e.target.value);
-
 
   return (
     <div className="crime-types-list-page">

@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
+import { HubConnectionBuilder } from "@microsoft/signalr";
 import "./WantedPersonsPage.css";
 import { Button, Form, Accordion, Pagination } from "react-bootstrap";
 import api from "../api";
+import { baseURL } from "../api";
 import capitalizeFirstLetter from "../services/capitalizeFirstLetter";
 import { Modal } from "react-bootstrap";
 
 const WantedPersonsPage = () => {
+  const [connection, setConnection] = useState(null);
   const [wantedPersons, setWantedPersons] = useState([]);
   const [isEditingPerson, setIsEditingPerson] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -22,11 +25,47 @@ const WantedPersonsPage = () => {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [pageSize, setpageSize] = useState(1);
+  const PAGE_SIZE  = 10;
   const [totalItems, setTotalItems] = useState(1);
   const [search, setSearch] = useState("");
 
-  const fetchAllWantedPersons = async (page = 1, pageSize = 10) => {
+  useEffect(() => {
+    fetchAllWantedPersons(currentPage);
+  }, [currentPage]);
+
+  useEffect(() => {
+    fetchConnect();
+  }, []);
+
+    useEffect(() => {
+      if (connection) {
+        const setupConnection = async () => {
+          try {
+            await connection.start();
+            console.log("Connected to RealHub");
+
+            connection.on("Error", (error) => console.log(error));
+            connection.on("AddedWantedPerson", realWantedPersonAdded);
+            connection.on("UpdatedWantedPerson", realWantedPersonUpdated);
+            connection.on("DeletedWantedPerson", realWantedPersonDeleted);
+          } catch (error) {
+            console.error("Connection failed:", error);
+          }
+        };
+    
+        setupConnection();
+      } else {
+        console.log("No connection established yet");
+      }
+    
+      return () => {
+        if (connection) {
+          connection.stop();
+        }
+      };
+    }, [connection]);
+
+  const fetchAllWantedPersons = async (page = 1, pageSize = PAGE_SIZE) => {
     try {
       const searchQuery = search;
       const response = await api.get(`/api/wanted-persons?page=${page}&pageSize=${pageSize}&searchQuery=${searchQuery}`);
@@ -45,7 +84,6 @@ const WantedPersonsPage = () => {
       setWantedPersons(loadedWantedPersons);
       setTotalPages(totalPages);
       setCurrentPage(page);
-      setpageSize(pageSize);
       setTotalItems(totalItems);
 
     } catch(error) {
@@ -53,9 +91,79 @@ const WantedPersonsPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchAllWantedPersons(currentPage);
-  }, [currentPage]);
+  const fetchConnect = async () => {
+    if (!connection) {
+      const newConnection = new HubConnectionBuilder()
+        .withUrl(`${baseURL}/realhub`)
+        .withAutomaticReconnect()
+        .build();
+  
+      setConnection(newConnection);
+    }
+  };
+  
+  const realWantedPersonAdded = (newPerson) => {
+    const addPerson = {...newPerson, birthDate: newPerson.birthDate?.split("T")[0] || ""}
+    setWantedPersons((prevWantedPersons) => {
+      const countItem = prevWantedPersons.length + 1;
+  
+      if (currentPage === totalPages && countItem <= PAGE_SIZE) {
+        return [...prevWantedPersons, addPerson];
+      }
+  
+      return prevWantedPersons;
+    });
+  
+    setTotalItems((prevTotalItems) => {
+      const newTotalItems = prevTotalItems + 1;
+  
+      setTotalPages(Math.ceil(newTotalItems / PAGE_SIZE));
+  
+      return newTotalItems;
+    });
+  };
+  
+    const realWantedPersonUpdated = (updatedPerson) => {
+      setWantedPersons((prev) =>
+        prev.map((wp) => (wp.id === updatedPerson.id ? updatedPerson : wp))
+      );
+    }
+
+  const realWantedPersonDeleted = (deletedPersonId) => {
+    setWantedPersons((prev) => prev.filter((wantedPerson) => wantedPerson.id !== deletedPersonId));
+    setTotalItems((prevTotalItems) => {
+      const newTotalItems = prevTotalItems - 1;
+  
+      setTotalPages(Math.ceil(newTotalItems / PAGE_SIZE));
+  
+      return newTotalItems;
+    });
+  }
+
+  const handleSave = () => {
+    if (isEditingPerson) {
+      handleUpdateWantedPerson(isEditingPerson.id);
+    } else {
+      handleAddWantedPerson();
+    }
+    handleCloseModal();
+  };
+
+  const handleAddWantedPerson = async() => {
+    const newWantedPerson = await fetchAddWantedPerson(formData);
+    const updatedWantedPersons = [...wantedPersons, newWantedPerson];
+    if(updatedWantedPersons.length <= PAGE_SIZE) {
+      setWantedPersons(updatedWantedPersons);
+    }
+    else {
+      const newTotalItems = totalItems + 1;
+      const updatedTotalPages = Math.ceil(newTotalItems / PAGE_SIZE);
+      setTotalPages(updatedTotalPages);
+      setTotalItems(newTotalItems);
+    }
+    await connection.invoke("AddingWantedPerson", newWantedPerson);
+    setFormData({ name: "", surname: "", patronymic: "", birthDate: "",  address: "", addInfo: "" });
+  };
 
   const fetchAddWantedPerson = async (wantedPerson) => {
     try {
@@ -79,7 +187,7 @@ const WantedPersonsPage = () => {
         name: wantedPerson.name,
         surname: wantedPerson.surname,
         patronymic: wantedPerson.patronymic,
-        birthDate: wantedPerson.birthDate,
+        birthDate: wantedPerson.birthDate?.split("T")[0] || "",
         registrationAddress: wantedPerson.address,
         addInfo: wantedPerson.addInfo,
         count: 0
@@ -88,6 +196,16 @@ const WantedPersonsPage = () => {
     } catch(error) {
       console.error("Ошибка при добавлении преступника:", error.response);
     }
+  };
+
+  const handleUpdateWantedPerson = async(id) => {
+    const updateWantedPerson = await fetchUpdateWantedPerson(id, formData);
+    setWantedPersons((prev) =>
+      prev.map((wp) => (wp.id === updateWantedPerson.id ? updateWantedPerson : wp))
+    );
+    await connection.invoke("UpdatingWantedPerson", updateWantedPerson);
+    setFormData({ name: "", surname: "", patronymic: "", birthDate: "",  address: "", addInfo: "" });
+    setIsEditingPerson(null);
   };
 
   const fetchUpdateWantedPerson = async (id, wantedPerson) => {
@@ -116,55 +234,13 @@ const WantedPersonsPage = () => {
         patronymic: wantedPerson.patronymic,
         birthDate: wantedPerson.birthDate,
         address: wantedPerson.address,
-        addInfo: wantedPerson.addInfo
+        addInfo: wantedPerson.addInfo,
+        count: isEditingPerson.count
       };
 
     } catch(error) {
       console.error("Ошибка при редактировании преступника:", error.response);
     }
-  };
-
-  const fetchDeleteWantedPerson = async (id) => {
-    try {
-      await api.delete(`/api/wanted-persons/${id}`);
-    } catch(error) {
-      console.error("Ошибка при удалении преступления:", error.response);
-    }
-  }
-
-  const handleSave = () => {
-    if (isEditingPerson) {
-      handleUpdateWantedPerson(isEditingPerson.id);
-    } else {
-      handleAddWantedPerson();
-    }
-    handleCloseModal();
-  };
-
-  const handleAddWantedPerson = async() => {
-    const newWantedPerson = await fetchAddWantedPerson(formData);
-    const updatedWantedPersons = [...wantedPersons, newWantedPerson];
-    if(updatedWantedPersons.length <= pageSize) {
-      setWantedPersons(updatedWantedPersons);
-    }
-    else {
-      const newTotalItems = totalItems + 1;
-      const updatedTotalPages = Math.ceil(newTotalItems / pageSize);
-      setTotalPages(updatedTotalPages);
-      setTotalItems(newTotalItems);
-    }
-    setFormData({ name: "", surname: "", patronymic: "", birthDate: "",  address: "", addInfo: "" });
-  };
-
-  const handleUpdateWantedPerson = async(id) => {
-    const updateWantedPerson = await fetchUpdateWantedPerson(id, formData);
-    setWantedPersons(
-      wantedPersons.map((wantedPerson) =>
-        wantedPerson.id === id ? { ...wantedPerson, ...updateWantedPerson } : wantedPerson
-      )
-    );
-    setFormData({ name: "", surname: "", patronymic: "", birthDate: "",  address: "", addInfo: "" });
-    setIsEditingPerson(null);
   };
 
   const handleDeleteWantedPerson = async (id) => {
@@ -181,12 +257,21 @@ const WantedPersonsPage = () => {
     }
     else {
       const newTotalItems = totalItems - 1;
-      const updatedTotalPages = Math.ceil(newTotalItems / pageSize);
+      const updatedTotalPages = Math.ceil(newTotalItems / PAGE_SIZE);
       setTotalPages(updatedTotalPages);
       setTotalItems(newTotalItems);
       await fetchAllWantedPersons(currentPage);
     }
+    await connection.invoke("DeletingWantedPerson", id);
   };
+
+  const fetchDeleteWantedPerson = async (id) => {
+    try {
+      await api.delete(`/api/wanted-persons/${id}`);
+    } catch(error) {
+      console.error("Ошибка при удалении преступления:", error.response);
+    }
+  }
 
   const handleEdit = (person) => {
     setIsEditingPerson(person);

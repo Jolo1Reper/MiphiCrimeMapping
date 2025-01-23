@@ -49,7 +49,6 @@ const MapComponent = ({
           mapInstance.getZoom()
         );
         const screenPosition = mapInstance.converter.globalToPage(globalPixels);
-        console.log("Screen position:", screenPosition);
         setHoveredPoint({
           ...point,
           screenPosition,

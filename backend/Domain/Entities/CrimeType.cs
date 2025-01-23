@@ -7,5 +7,6 @@
         public string? Link { get; set; }
         public string? Color { get; set; }
         public List<Crime> Crimes { get; set; } = new List<Crime>();
+        public DateTime CreateAt { get; set; } = DateTime.Now.ToUniversalTime();
     }
 }

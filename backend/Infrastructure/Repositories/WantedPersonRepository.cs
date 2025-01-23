@@ -89,7 +89,8 @@ namespace Infrastructure.Repositories
                 query = _filter.Apply(query, search);
 
             var result = await query
-                .Include(ct => ct.Crimes)
+                .Include(p => p.Crimes)
+                .OrderBy(p => p.CreateAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(wantedPerson => new ValueTuple<WantedPerson, int>(wantedPerson, wantedPerson.Crimes.Count))
