@@ -13,7 +13,7 @@ namespace Application.UseCases.GetAllWantedPerson
 
         public async Task<PaginatedResult<GetAllWantedPersonResponse>> Handle(PaginationSearchParameters request)
         {
-            var wantedPersons = await _repo.GetAllWantedPersonsWithCounts(request.SearchQuery, request.Page, request.PageSize);
+            var wantedPersons = await _repo.GetAllWantedPersonsWithCountAndFilters(request.SearchQuery, request.Page, request.PageSize);
             var totalItems = await _repo.GetWantedPersonsCount(request.SearchQuery);
 
             IEnumerable<GetAllWantedPersonResponse> personDtos = wantedPersons.Select(p => new GetAllWantedPersonResponse(

@@ -82,7 +82,7 @@ namespace Infrastructure.Repositories
             return true;
         }
 
-        public async Task<IEnumerable<(WantedPerson WantedPerson, int CrimeCount)>> GetAllWantedPersonsWithCounts(string? search, int page, int pageSize)
+        public async Task<IEnumerable<(WantedPerson WantedPerson, int CrimeCount)>> GetAllWantedPersonsWithCountAndFilters(string? search, int page, int pageSize)
         {
             IQueryable<WantedPerson> query = _db.Set<WantedPerson>();
             if(search != null)

@@ -64,7 +64,7 @@ namespace Infrastructure.Repositories
             return true;
         }
 
-        public async Task<IEnumerable<(CrimeType CrimeType, int CrimeCount)>> GetAllCrimeTypesWithCounts(string? search, int page, int pageSize)
+        public async Task<IEnumerable<(CrimeType CrimeType, int CrimeCount)>> GetAllCrimeTypesWithCountAndFilters(string? search, int page, int pageSize)
         {
             IQueryable<CrimeType> query = _db.Set<CrimeType>();
             if (search != null)

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./FilterPanel.css";
 
 const FilterPanel = ({
@@ -13,12 +13,17 @@ const FilterPanel = ({
   onShowStats = () => {}
 }) => {
   const [search, setSearch] = useState("");
-  const [selectedCrimeTypeId, setSelectedCrimeTypeId] = useState("");
+  // const [selectedCrimeTypeId, setSelectedCrimeTypeId] = useState("");
   const [dateRange, setDateRange] = useState({ from: "", to: "" });
   const [isStatsVisible, setIsStatsVisible] = useState(false);
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedCrimeTypeIds, setSelectedCrimeTypeIds] = useState([]);
+
+  const dropdownRef = useRef(null);
+
   const handleSearchChange = (e) => setSearch(e.target.value);
-  const handleCrimeTypeChange = (e) => setSelectedCrimeTypeId(e.target.value);
+  // const handleCrimeTypeChange = (e) => setSelectedCrimeTypeId(e.target.value);
   const handleRadiusChange = (e) => onSetRadius(e.target.value);
   const handleDateRangeChange = (field, value) =>
     setDateRange((prev) => ({ ...prev, [field]: value }));
@@ -28,12 +33,13 @@ const FilterPanel = ({
   };
 
   const handleApplyFilters = () => {
-    onApplyFilters({ search, selectedCrimeTypeId, searchCenter, radius, dateRange });
+    onApplyFilters({ search, selectedCrimeTypeIds, searchCenter, radius, dateRange });
   };
 
   const handleResetFilters = () => {
     setSearch("");
-    setSelectedCrimeTypeId("");
+    // setSelectedCrimeTypeId("");
+    setSelectedCrimeTypeIds([]);
     setDateRange({ from: "", to: "" });
     onResetFilters();
   };
@@ -41,6 +47,29 @@ const FilterPanel = ({
   const handleToggleStats = () => {
     setIsStatsVisible(prevState => !prevState);
   };
+
+  const handleCheckboxChange = (id) => {
+    setSelectedCrimeTypeIds((prev) =>
+      prev.includes(id) ? prev.filter((typeId) => typeId !== id) : [...prev, id]
+    );
+  };
+
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setIsDropdownOpen(false); // Закрыть, если кликнули вне
+    }
+  };
+
+  useEffect(() => {
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    // Удаляем обработчик при размонтировании
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isDropdownOpen]);
 
   return (
     <div className="filter-panel">
@@ -69,7 +98,7 @@ const FilterPanel = ({
           </div>
         </div>
 
-        <div className="filter-section">
+        {/* <div className="filter-section">
           <label htmlFor="crimeType">Вид преступления</label>
           <select
             id="crimeType"
@@ -88,6 +117,33 @@ const FilterPanel = ({
               <option disabled>Нет доступных типов преступлений</option>
             )}
           </select>
+        </div> */}
+
+        <div className="filter-section">
+          <div className="stats-filter-dropdown" ref={dropdownRef}>
+            <button
+              className="dropdown-toggle"
+              onClick={() => setIsDropdownOpen((prev) => !prev)}
+            >
+              Выберите типы преступлений
+            </button>
+            {isDropdownOpen && (
+              <ul className="dropdown-list">
+                {crimeTypes.map((type) => (
+                  <li key={type.id} className="dropdown-item">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={selectedCrimeTypeIds.includes(type.id)}
+                        onChange={() => handleCheckboxChange(type.id)}
+                      />
+                      {type.title}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
 
         <div className="filter-section">
