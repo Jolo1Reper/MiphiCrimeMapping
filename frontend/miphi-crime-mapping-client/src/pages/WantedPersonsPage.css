@@ -84,11 +84,14 @@
   color: #bbb;
 }
 
+.wanted-persons-content .filter-section {
+  display: flex;
+}
 
 .wanted-persons-content .search-container {
   display: flex;
   align-items: center;
-  width: 100%;
+  width: 85%;
   margin: 0 auto;
   background-color: #2c3e50;
   border: 1px solid #1abc9c;
@@ -130,4 +133,52 @@
   width: 20px;
   height: 20px;
   filter: brightness(1) saturate(0) invert(1);
+}
+
+.wanted-persons-content .refresh-button {
+  margin-left: 10px;
+  padding: 10px 15px;
+  background-color: #2c3e50;
+  border: none;
+  color: white;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  width: 15%;
+}
+
+.wanted-persons-content .refresh-button:hover {
+  background-color: #16a085;
+  transform: scale(1.05);
+}
+
+.wanted-persons-content .refresh-button:active {
+  background-color: #138d75;
+}
+
+.wanted-persons-content .add-block {
+  margin: 10px;
+}
+
+.wanted-persons-content .add-button {
+  padding: 10px 15px;
+  background-color: #2c3e50;
+  border: none;
+  color: white;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.wanted-persons-content .add-button:hover {
+  background-color: #16a085;
+  transform: scale(1.05);
+}
+
+.wanted-persons-content .add-button:active {
+  background-color: #138d75;
 }

@@ -320,20 +320,18 @@ const CrimeTypesListPage = () => {
               />
             </button>
           </div>
+          <button className="refresh-button" onClick={() => fetchGetAllCrimeTypes(currentPage)}>
+            Обновить
+          </button>
+        </div>
+
+        <div className="add-block">
+          <button className="add-button" onClick={handleOpenModal}>
+            Добавить тип преступления
+          </button>
         </div>
 
         <Accordion>
-        <Accordion.Item eventKey="0">
-          <Accordion.Header>
-            <Button
-              variant="link"
-              className="w-100 text-start text-decoration-none d-flex justify-content-start align-items-center"
-              onClick={handleOpenModal}
-            >
-              Добавить тип преступления
-            </Button>
-          </Accordion.Header>
-        </Accordion.Item>
         {crimeTypes.length > 0 ? (crimeTypes.map((crimeType) => (
         <Accordion.Item eventKey={crimeType.id} key={crimeType.id}>
           <Accordion.Header>
