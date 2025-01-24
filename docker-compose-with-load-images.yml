@@ -1,7 +1,7 @@
 # does not depend on files(except crimemapdb_dump.sql), all images are downloaded from docker hub
 services:
   database:
-    image: postgis/postgis:16-3.5
+    image: postgis/postgis:16-3.5-alpine
     container_name: crime_map_db
     environment:
       POSTGRES_USER: postgres
@@ -14,7 +14,7 @@ services:
       - "5432:5432"
 
   api:
-    image: turbo821/miphi-crime-mapping-api:01-18.2
+    image: turbo821/miphi-crime-mapping-api:01-24
     container_name: crime_map_api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
@@ -27,7 +27,7 @@ services:
       - "8081:8081"
      
   client:
-    image: turbo821/miphi-crime-mapping-client:01-18
+    image: turbo821/miphi-crime-mapping-client:01-24
     container_name: crime_map_client
     environment:
       - REACT_APP_API_URL=http://localhost:8080
