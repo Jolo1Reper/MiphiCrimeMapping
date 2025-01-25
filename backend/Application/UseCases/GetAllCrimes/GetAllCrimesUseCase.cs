@@ -16,8 +16,11 @@ namespace Application.UseCases.GetAllCrimes
         {
             IEnumerable<Crime> crimes = await _repo.GetFilteredCrimes(filterRequest);
             IEnumerable<ShowOnMapCrimeResponse> crimeDtos = crimes.Select(c => new ShowOnMapCrimeResponse(
-                    c.Id, c.TypeId,
-                    c.Location, c.Description, c.CrimeDate, c.Point.Y,
+                    c.Id, c.TypeId, c.WantedPersonId,
+                    c.Location, 
+                    c.Description, 
+                    c.CrimeDate,
+                    c.Point.Y,
                     c.Point.X)
             );
 

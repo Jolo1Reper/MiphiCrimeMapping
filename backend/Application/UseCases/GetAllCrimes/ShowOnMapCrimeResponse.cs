@@ -3,6 +3,7 @@
     public record ShowOnMapCrimeResponse(
         Guid Id,
         Guid CrimeTypeId,
+        Guid? WantedPersonId,
         string? Location,
         string? Description,
         DateTime CrimeDate,

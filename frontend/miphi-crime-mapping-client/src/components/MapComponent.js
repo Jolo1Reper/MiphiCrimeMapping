@@ -88,7 +88,7 @@ const MapComponent = ({
             <>
             <Circle
             onClick={handleMapClick}
-            geometry={[[searchCenter.latitude, searchCenter.longitude], Number(radius)*1000]}
+            geometry={[[searchCenter.latitude, searchCenter.longitude], Number(radius)]}
             options={{
               draggable: false,
               fillColor: "#1E90FF33",
