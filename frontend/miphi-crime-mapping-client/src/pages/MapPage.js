@@ -29,7 +29,7 @@ const MapPage = () => {
 
   const [isSettingSearchCenter, setIsSettingSearchCenter] = useState(false);
   const [searchCenter, setSearchCenter] = useState({ latitude: null, longitude: null });
-  const [radius, setRadius] = useState(1);
+  const [radiusInMeters, setRadiusInMeters] = useState(500);
 
   const [isStatsVisible, setIsStatsVisible] = useState(false);
 
@@ -73,6 +73,7 @@ const MapPage = () => {
     crimeTypes = [],
     search = "",
     selectedCrimeTypeIds = [],
+    selectedWantedPersonIds = [],
     center = { latitude: null, longitude: null },
     radius = null,
     dateRange = { from: null, to: null }
@@ -83,9 +84,15 @@ const MapPage = () => {
       if (selectedCrimeTypeIds.length > 0) {
         selectedCrimeTypeIds.forEach((id) => params.append("CrimeTypeIds", id));
       }
+      if (selectedWantedPersonIds.length > 0) {
+        selectedWantedPersonIds.forEach((id) => params.append("WantedPersonIds", id));
+      }
       if (center.latitude) params.append("Latitude", center.latitude);
       if (center.longitude) params.append("Longitude", center.longitude);
-      if (radius) params.append("Radius", radius);
+      if (radius) {
+        const radiusInKilometers = radius/1000;
+        params.append("Radius", radiusInKilometers);
+      } 
       if (dateRange.from) params.append("StartDate", new Date(dateRange.from).toISOString());
       if (dateRange.to) params.append("EndDate", new Date(dateRange.to).toISOString());
   
@@ -96,6 +103,7 @@ const MapPage = () => {
         return {
           id: item.id,
           title: crimeType.title,
+          wantedPersonId: item?.wantedPersonId,
           color: crimeType?.color || null,
           crimeDate: item.crimeDate,
           location: item.location,
@@ -125,7 +133,7 @@ const MapPage = () => {
       .withAutomaticReconnect()
       .build();
   
-    setConnection(newConnection);
+      setConnection(newConnection);
   };
 
   useEffect(() => {
@@ -159,6 +167,7 @@ const MapPage = () => {
       id: newCrime.id,
       title: crimeType.title,
       color: crimeType.color,
+      wantedPersonId: newCrime?.wantedPersonId,
       crimeDate: newCrime.crimeDate,
       location: newCrime.location,
       description: newCrime.description,
@@ -173,6 +182,7 @@ const MapPage = () => {
     const updatePoint = {
       id: updatedCrime.id,
       title: crimeType.title,
+      wantedPersonId: updatedCrime?.wantedPersonId,
       color: crimeType.color,
       crimeDate: updatedCrime.crimeDate,
       location: updatedCrime.location,
@@ -222,6 +232,7 @@ const MapPage = () => {
       const newPoint = {
         id: point.id,
         title: crimeType.title,
+        wantedPersonId: point?.wantedPersonId,
         color: crimeType.color,
         crimeDate: point.crimeDate,
         location: point.location,
@@ -230,7 +241,7 @@ const MapPage = () => {
       };
 
       setPoints((prev) => [...prev, newPoint]);
-      await connection.invoke("AddingCrime", point);
+      if(connection) await connection.invoke("AddingCrime", point);
       setCurrentPoint(null);
       setIsModalOpen(false);
       showNotification("Метка успешно сохранена!");
@@ -249,6 +260,7 @@ const MapPage = () => {
       const updatePoint = {
         id: response.data.id,
         title: crimeType.title,
+        wantedPersonId: point?.wantedPersonId,
         color: crimeType.color,
         crimeDate: point.crimeDate,
         location: point.location,
@@ -259,7 +271,7 @@ const MapPage = () => {
         prev.map((p) => (p.id === updatePoint.id ? updatePoint : p))
       );
 
-      await connection.invoke("UpdatingCrime", point);
+      if(connection) await connection.invoke("UpdatingCrime", point);
       setEditPoint(null);
       showNotification("Изменения метки сохранены!");
     } catch (error) {
@@ -272,7 +284,7 @@ const MapPage = () => {
       await api.delete(`/api/crime-marks/${point.id}`);
 
       setPoints((prev) => prev.filter((p) => p.id !== point.id));
-      await connection.invoke("DeletingCrime", point.id);
+      if(connection) await connection.invoke("DeletingCrime", point.id);
       setEditPoint(null);
       showNotification("Метка успешно удалена!");
     } catch (error) {
@@ -362,9 +374,10 @@ const MapPage = () => {
     setSelectedPoint(point);
   } 
 
-  const onApplyFilters = async({ search, selectedCrimeTypeIds, searchCenter, radius, dateRange }) => {
+  const onApplyFilters = async({ search, selectedCrimeTypeIds, selectedWantedPersonIds, searchCenter, radius, dateRange }) => {
     setPoints([]);
-    const loadedPoints = await fetchGetAllCrimeMarks(crimeTypes, search, selectedCrimeTypeIds,
+    const loadedPoints = await fetchGetAllCrimeMarks(crimeTypes, search, 
+      selectedCrimeTypeIds, selectedWantedPersonIds,
       searchCenter === null ? { latitude: null, longitude: null } 
       : { latitude: searchCenter.latitude, longitude: searchCenter.longitude },
       radius, { from: dateRange.from, to: dateRange.to }
@@ -374,7 +387,7 @@ const MapPage = () => {
   }
 
   const onResetFilters = async() => {
-    setRadius(1);
+    setRadiusInMeters(500);
     setSearchCenter({ latitude: null, longitude: null });
     setPoints([]);
     const loadedPoints = await fetchGetAllCrimeMarks(crimeTypes);
@@ -397,7 +410,7 @@ const MapPage = () => {
   }
 
   const onSetRadius = (r) => {
-    setRadius(r);
+    setRadiusInMeters(r);
   }
 
   const handleToggleStats = () => {
@@ -413,12 +426,13 @@ const MapPage = () => {
         >
           <FilterPanel
           crimeTypes={crimeTypes}
+          wantedPersons={wantedPersons}
           onApplyFilters={onApplyFilters}
           onResetFilters={onResetFilters}
           onToggleSearchCenter={onToggleSearchCenter}
           isSettingSearchCenter={isSettingSearchCenter}
           searchCenter={searchCenter}
-          radius={radius}
+          radius={radiusInMeters}
           onSetRadius={onSetRadius}
           onShowStats={handleToggleStats}
           />
@@ -439,7 +453,7 @@ const MapPage = () => {
         selectedPoint={selectedPoint}
         isSettingSearchCenter={isSettingSearchCenter}
         searchCenter={searchCenter}
-        radius={radius}
+        radius={radiusInMeters}
         onAddSearchCenter={onAddSearchCenter}
         />
 
@@ -481,6 +495,7 @@ const MapPage = () => {
           onClose={handleToggleStats}
           statsData={points}
           crimeTypes={crimeTypes}
+          wantedPersons={wantedPersons}
         />
         )}
       </div>

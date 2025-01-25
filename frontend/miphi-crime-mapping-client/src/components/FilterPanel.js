@@ -3,6 +3,7 @@ import "./FilterPanel.css";
 
 const FilterPanel = ({
   crimeTypes = [],
+  wantedPersons = [],
   onApplyFilters = () => {},
   onResetFilters = () => {},
   onToggleSearchCenter = () => {},
@@ -13,17 +14,18 @@ const FilterPanel = ({
   onShowStats = () => {}
 }) => {
   const [search, setSearch] = useState("");
-  // const [selectedCrimeTypeId, setSelectedCrimeTypeId] = useState("");
   const [dateRange, setDateRange] = useState({ from: "", to: "" });
   const [isStatsVisible, setIsStatsVisible] = useState(false);
 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDropdownOpenTypes, setIsDropdownOpenTypes] = useState(false);
+  const [isDropdownOpenPersons, setIsDropdownOpenPersons] = useState(false);
   const [selectedCrimeTypeIds, setSelectedCrimeTypeIds] = useState([]);
+  const [selectedWantedPersonIds, setSelectedWantedPersoIds] = useState([]);
 
-  const dropdownRef = useRef(null);
+  const dropdownTypesRef = useRef(null);
+  const dropdownPersonsRef = useRef(null);
 
   const handleSearchChange = (e) => setSearch(e.target.value);
-  // const handleCrimeTypeChange = (e) => setSelectedCrimeTypeId(e.target.value);
   const handleRadiusChange = (e) => onSetRadius(e.target.value);
   const handleDateRangeChange = (field, value) =>
     setDateRange((prev) => ({ ...prev, [field]: value }));
@@ -33,13 +35,13 @@ const FilterPanel = ({
   };
 
   const handleApplyFilters = () => {
-    onApplyFilters({ search, selectedCrimeTypeIds, searchCenter, radius, dateRange });
+    onApplyFilters({ search, selectedCrimeTypeIds, selectedWantedPersonIds, searchCenter, radius, dateRange });
   };
 
   const handleResetFilters = () => {
     setSearch("");
-    // setSelectedCrimeTypeId("");
     setSelectedCrimeTypeIds([]);
+    setSelectedWantedPersoIds([]);
     setDateRange({ from: "", to: "" });
     onResetFilters();
   };
@@ -48,28 +50,50 @@ const FilterPanel = ({
     setIsStatsVisible(prevState => !prevState);
   };
 
-  const handleCheckboxChange = (id) => {
+  const handleCheckboxChangeTypes = (id) => {
     setSelectedCrimeTypeIds((prev) =>
       prev.includes(id) ? prev.filter((typeId) => typeId !== id) : [...prev, id]
     );
   };
 
-  const handleClickOutside = (event) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setIsDropdownOpen(false); // Закрыть, если кликнули вне
+  const handleClickOutsideTypes = (event) => {
+    if (dropdownTypesRef.current && !dropdownTypesRef.current.contains(event.target)) {
+      setIsDropdownOpenTypes(false);
+    }
+  };
+
+  const handleCheckboxChangePersons = (id) => {
+    setSelectedWantedPersoIds((prev) =>
+      prev.includes(id) ? prev.filter((personId) => personId !== id) : [...prev, id]
+    );
+  };
+
+  const handleClickOutsidePersons = (event) => {
+    if (dropdownPersonsRef.current && !dropdownPersonsRef.current.contains(event.target)) {
+      setIsDropdownOpenPersons(false);
     }
   };
 
   useEffect(() => {
-    if (isDropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+    if (isDropdownOpenTypes) {
+      document.addEventListener("mousedown", handleClickOutsideTypes);
     } else {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutsideTypes);
     }
 
-    // Удаляем обработчик при размонтировании
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isDropdownOpen]);
+    return () => document.removeEventListener("mousedown", handleClickOutsideTypes);
+  }, [isDropdownOpenTypes]);
+
+  useEffect(() => {
+    if (isDropdownOpenPersons) {
+      document.addEventListener("mousedown", handleClickOutsidePersons);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutsidePersons);
+    }
+
+    return () => document.removeEventListener("mousedown", handleClickOutsidePersons);
+  }, [isDropdownOpenPersons]);
+
 
   return (
     <div className="filter-panel">
@@ -98,36 +122,15 @@ const FilterPanel = ({
           </div>
         </div>
 
-        {/* <div className="filter-section">
-          <label htmlFor="crimeType">Вид преступления</label>
-          <select
-            id="crimeType"
-            className="filter-select"
-            value={selectedCrimeTypeId}
-            onChange={handleCrimeTypeChange}
-          >
-            {crimeTypes.length > 0 ? (
-              <>
-                <option value="">Все</option>
-                {crimeTypes.map((type, index) => (
-                  <option key={index} value={type.id}>{type.title}</option>
-                ))}
-              </>
-            ) : (
-              <option disabled>Нет доступных типов преступлений</option>
-            )}
-          </select>
-        </div> */}
-
         <div className="filter-section">
-          <div className="stats-filter-dropdown" ref={dropdownRef}>
+          <div className="stats-filter-dropdown" ref={dropdownTypesRef}>
             <button
               className="dropdown-toggle"
-              onClick={() => setIsDropdownOpen((prev) => !prev)}
+              onClick={() => setIsDropdownOpenTypes((prev) => !prev)}
             >
               Выберите типы преступлений
             </button>
-            {isDropdownOpen && (
+            {isDropdownOpenTypes && (
               <ul className="dropdown-list">
                 {crimeTypes.map((type) => (
                   <li key={type.id} className="dropdown-item">
@@ -135,7 +138,7 @@ const FilterPanel = ({
                       <input
                         type="checkbox"
                         checked={selectedCrimeTypeIds.includes(type.id)}
-                        onChange={() => handleCheckboxChange(type.id)}
+                        onChange={() => handleCheckboxChangeTypes(type.id)}
                       />
                       {type.title}
                     </label>
@@ -147,7 +150,44 @@ const FilterPanel = ({
         </div>
 
         <div className="filter-section">
-          <label htmlFor="radius">Радиус (км)</label>
+          <div className="stats-filter-dropdown" ref={dropdownPersonsRef}>
+            <button
+              className="dropdown-toggle"
+              onClick={() => setIsDropdownOpenPersons((prev) => !prev)}
+            >
+              Выберите преступников
+            </button>
+            {isDropdownOpenPersons && (
+              <ul className="dropdown-list">
+                <li key={"00000000-0000-0000-0000-000000000000"} className="dropdown-item">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={selectedWantedPersonIds.includes("00000000-0000-0000-0000-000000000000")}
+                      onChange={() => handleCheckboxChangePersons("00000000-0000-0000-0000-000000000000")}
+                    />
+                    Неизвестно
+                  </label>
+                </li>
+                {wantedPersons.map((person) => (
+                  <li key={person.id} className="dropdown-item">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={selectedWantedPersonIds.includes(person.id)}
+                        onChange={() => handleCheckboxChangePersons(person.id)}
+                      />
+                      {person.surname} {person.name} {person.patronymic ?? ""}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+
+        <div className="filter-section">
+          <label htmlFor="radius">Радиус (в метрах)</label>
           <div className="radius-container">
             <input
               type="number"
