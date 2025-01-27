@@ -14,7 +14,7 @@ services:
       - "5432:5432"
 
   api:
-    image: turbo821/miphi-crime-mapping-api:01-24
+    image: turbo821/miphi-crime-mapping-api:01-27
     container_name: crime_map_api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
@@ -27,7 +27,7 @@ services:
       - "8081:8081"
      
   client:
-    image: turbo821/miphi-crime-mapping-client:01-24
+    image: turbo821/miphi-crime-mapping-client:01-27
     container_name: crime_map_client
     environment:
       - REACT_APP_API_URL=http://localhost:8080
