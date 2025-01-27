@@ -56,6 +56,28 @@
 
 .stats-chart {
   margin: 0 auto;
+  overflow-x: auto;
+}
+
+.bar-div {
+  height: 500px;
+}
+
+.stats-chart::-webkit-scrollbar {
+  width: 1px;
+}
+
+.stats-chart::-webkit-scrollbar-track {
+  background: none;
+}
+
+.stats-chart::-webkit-scrollbar-thumb {
+  background-color: #1abc9c;
+  border-radius: 5px;
+}
+
+.stats-chart::-webkit-scrollbar-thumb:hover {
+  background-color: #16a085;
 }
 
 .stats-list {
@@ -156,4 +178,8 @@
 
 .sort-button:hover {
   background-color: #16a085;
+}
+
+.bar-div {
+  width: 100%;
 }

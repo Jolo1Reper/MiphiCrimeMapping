@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import "./WantedPersonsPage.css";
-import { Button, Form, Accordion, Pagination } from "react-bootstrap";
+import { Form, Accordion, Pagination } from "react-bootstrap";
 import api from "../api";
 import { baseURL } from "../api";
 import capitalizeFirstLetter from "../services/capitalizeFirstLetter";
 import { Modal } from "react-bootstrap";
+
+const resetFormData = () => {
+  return { name: "", surname: "", patronymic: "", birthDate: "",  address: "", addInfo: "" };
+}
 
 const WantedPersonsPage = () => {
   const [connection, setConnection] = useState(null);
@@ -15,12 +19,7 @@ const WantedPersonsPage = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmDeletePerson, setConfirmDeletePerson] = useState(null);
   const [formData, setFormData] = useState({
-    name: "",
-    surname: "",
-    patronymic: "",
-    birthDate: "",
-    address: "",
-    addInfo: "",
+    ...resetFormData(),
     count: 0
   });
   const [currentPage, setCurrentPage] = useState(1);
@@ -28,6 +27,7 @@ const WantedPersonsPage = () => {
   const PAGE_SIZE  = 10;
   const [totalItems, setTotalItems] = useState(1);
   const [search, setSearch] = useState("");
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     fetchAllWantedPersons(currentPage);
@@ -67,7 +67,6 @@ const WantedPersonsPage = () => {
 
   const fetchAllWantedPersons = async (page = 1, pageSize = PAGE_SIZE) => {
     try {
-      console.log("load");
       const searchQuery = search;
       const response = await api.get(`/api/wanted-persons?page=${page}&pageSize=${pageSize}&searchQuery=${searchQuery}`);
       const { items, totalItems, totalPages } = response.data;
@@ -141,17 +140,34 @@ const WantedPersonsPage = () => {
     });
   }
 
-  const handleSave = () => {
+  const handleSave = async() => {
+    let success;
     if (isEditingPerson) {
-      handleUpdateWantedPerson(isEditingPerson.id);
+      success = await handleUpdateWantedPerson(isEditingPerson.id);
     } else {
-      handleAddWantedPerson();
+      success = await handleAddWantedPerson();
     }
-    handleCloseModal();
+    if(success) handleCloseModal();
   };
 
   const handleAddWantedPerson = async() => {
-    const newWantedPerson = await fetchAddWantedPerson(formData);
+    const valid = validateForm();
+    if (!valid) {
+      console.log("No valid");
+      return false;
+    }
+    
+    const payload = {
+      name: formData.name || null,
+      surname: formData.surname || null,
+      patronymic: formData.patronymic || null,
+      birthDate: formData.birthDate || null,
+      registrationAddress: formData.address || null,
+      addInfo: formData.addInfo || null,
+    }
+
+    const newWantedPerson = await fetchAddWantedPerson(payload);
+    if(!newWantedPerson) return false;
     const updatedWantedPersons = [...wantedPersons, newWantedPerson];
     if(updatedWantedPersons.length <= PAGE_SIZE) {
       setWantedPersons(updatedWantedPersons);
@@ -163,7 +179,8 @@ const WantedPersonsPage = () => {
       setTotalItems(newTotalItems);
     }
     await connection.invoke("AddingWantedPerson", newWantedPerson);
-    setFormData({ name: "", surname: "", patronymic: "", birthDate: "",  address: "", addInfo: "" });
+    setFormData(resetFormData());
+    return true;
   };
 
   const fetchAddWantedPerson = async (wantedPerson) => {
@@ -172,17 +189,13 @@ const WantedPersonsPage = () => {
       wantedPerson.surname = capitalizeFirstLetter(wantedPerson.surname);
       wantedPerson.patronymic = capitalizeFirstLetter(wantedPerson.patronymic);
 
-      const payload = {
-        name: wantedPerson.name,
-        surname: wantedPerson.surname,
-        patronymic: wantedPerson.patronymic !== "" ? wantedPerson.patronymic : null,
-        birthDate: wantedPerson.birthDate,
-        registrationAddress: wantedPerson.address !== "" ? wantedPerson.address : null,
-        addInfo: wantedPerson.addInfo !== "" ? wantedPerson.addInfo : null,
-      }
-      const response = await api.post("/api/wanted-persons", payload);
+      const response = await api.post("/api/wanted-persons", wantedPerson);
       console.log(response.data.message);
-    
+
+      if (response.status >= 400) {
+        return;
+      }
+
       return {
         id: response.data.id,
         name: wantedPerson.name,
@@ -200,36 +213,47 @@ const WantedPersonsPage = () => {
   };
 
   const handleUpdateWantedPerson = async(id) => {
-    const updateWantedPerson = await fetchUpdateWantedPerson(id, formData);
+    const valid = validateForm();
+    if (!valid) {
+      console.log("No valid");
+      return false;
+    }
+
+    const payload = {
+      id: id,
+      name: formData.name || null,
+      surname: formData.surname || null,
+      patronymic: formData.patronymic || null,
+      birthDate: formData.birthDate || null,
+      registrationAddress: formData.address || null,
+      addInfo: formData.addInfo || null,
+    }
+
+    const updateWantedPerson = await fetchUpdateWantedPerson(payload);
+    if(!updateWantedPerson) return false;
     setWantedPersons((prev) =>
       prev.map((wp) => (wp.id === updateWantedPerson.id ? updateWantedPerson : wp))
     );
     await connection.invoke("UpdatingWantedPerson", updateWantedPerson);
-    setFormData({ name: "", surname: "", patronymic: "", birthDate: "",  address: "", addInfo: "" });
+    setFormData(resetFormData());
     setIsEditingPerson(null);
+    return true;
   };
 
-  const fetchUpdateWantedPerson = async (id, wantedPerson) => {
+  const fetchUpdateWantedPerson = async (wantedPerson) => {
     try {
       wantedPerson.name = capitalizeFirstLetter(wantedPerson.name);
       wantedPerson.surname = capitalizeFirstLetter(wantedPerson.surname);
       wantedPerson.patronymic = capitalizeFirstLetter(wantedPerson.patronymic);
 
-      const payload = {
-        id: id,
-        name: wantedPerson.name,
-        surname: wantedPerson.surname,
-        patronymic: wantedPerson.patronymic !== "" ? wantedPerson.patronymic : null,
-        birthDate: wantedPerson.birthDate,
-        registrationAddress: wantedPerson.address !== "" ? wantedPerson.address : null,
-        addInfo: wantedPerson.addInfo !== "" ? wantedPerson.addInfo : null,
+      const response = await api.patch("/api/wanted-persons", wantedPerson);
+      console.log(response.data.message);
+      if (response.status >= 400) {
+        return;
       }
 
-      const response = await api.patch("/api/wanted-persons", payload);
-      console.log(response.data.message);
-    
       return {
-        id: id,
+        id: response.data.id,
         name: wantedPerson.name,
         surname: wantedPerson.surname,
         patronymic: wantedPerson.patronymic,
@@ -248,7 +272,7 @@ const WantedPersonsPage = () => {
     await fetchDeleteWantedPerson(id);
      if(isEditingPerson !== null && isEditingPerson.id === id){
        setIsEditingPerson(null);
-       setFormData({ name: "", surname: "", patronymic: "", birthDate: "",  address: "", addInfo: "" });
+       setFormData(resetFormData());
      }
     
     const updatedWantedPersons = wantedPersons.filter((wantedPerson) => wantedPerson.id !== id);
@@ -289,13 +313,13 @@ const WantedPersonsPage = () => {
 
   const handleOpenModal = () => {
     setIsEditingPerson(null);
-    setFormData({ name: "", surname: "", patronymic: "", birthDate: "",  address: "", addInfo: "" });
+    setFormData(resetFormData());
     setShowModal(true);
   };
 
   const handleCloseModal = () => {
     setIsEditingPerson(null);
-    setFormData({ name: "", surname: "", patronymic: "", birthDate: "",  address: "", addInfo: "" });
+    setFormData(resetFormData());
     setShowModal(false);
   };
 
@@ -330,10 +354,32 @@ const WantedPersonsPage = () => {
 
   const handleSearchChange = (e) => setSearch(e.target.value);
 
+  const handleInputChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+    setErrors((prevErrors) => ({ ...prevErrors, [field]: "" }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.surname) {
+      newErrors.surname = "Укажите фамилию преступника.";
+    }
+    if (!formData.name) {
+      newErrors.name = "Укажите имя преступника.";
+    }
+    if (!formData.birthDate) {
+      newErrors.birthDate = "Укажите дату рождения преступника.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   return (
     <div className="wanted-persons-page">
       <header className="wanted-persons-header">
-        <h2>Разыскиваемые лица</h2>
+        <h2>Информация о преступниках</h2>
       </header>
       <div className="wanted-persons-content">
         <div className="filter-section">
@@ -361,7 +407,7 @@ const WantedPersonsPage = () => {
 
         <div className="add-block">
           <button className="add-button" onClick={handleOpenModal}>
-            Добавить разыскиваемого
+            Добавить преступника
           </button>
         </div>
         
@@ -383,12 +429,12 @@ const WantedPersonsPage = () => {
               <strong>Описание:</strong> {wantedPerson.addInfo === null || wantedPerson.addInfo === "" ? "-" : <p> {wantedPerson.addInfo} </p>}
               <p><strong>Количество совершенных преступлений:</strong> {wantedPerson.count}</p>
               <div className="button-group">
-                <Button variant="primary" size="sm" onClick={() => handleEdit(wantedPerson)}>
+                <button className="apply-button" onClick={() => handleEdit(wantedPerson)}>
                   Изменить
-                </Button>
-                <Button variant="danger" size="sm" onClick={() => handleDeleteClick(wantedPerson)}>
+                </button>
+                <button className="reset-button" onClick={() => handleDeleteClick(wantedPerson)}>
                   Удалить
-                </Button>
+                </button>
               </div>
             </Accordion.Body>
           </Accordion.Item>
@@ -439,8 +485,8 @@ const WantedPersonsPage = () => {
         <Modal.Header closeButton>
         <Modal.Title>
               {isEditingPerson 
-              ? `Изменение для разыскиваемого "${isEditingPerson.name } ${isEditingPerson.surname} ${isEditingPerson.birthDate}"`
-              : "Добавление разыскиваемого"}
+              ? `Изменение для ${isEditingPerson.name } ${isEditingPerson.surname} ${isEditingPerson.birthDate}`
+              : "Добавление преступника"}
             </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -449,16 +495,20 @@ const WantedPersonsPage = () => {
             <Form.Control
               type="text"
               value={formData.surname}
-              onChange={(e) => setFormData({ ...formData, surname: e.target.value })}
+              onChange={(e) => handleInputChange("surname", e.target.value)}
+              isInvalid={!!errors.surname}
             />
+            {errors.surname && <Form.Text className="text-danger">{errors.surname}<br/></Form.Text>}
           </Form.Group>
           <Form.Group>
             <Form.Label>Имя</Form.Label>
             <Form.Control
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) => handleInputChange("name", e.target.value)}
+              isInvalid={!!errors.name}
             />
+            {errors.name && <Form.Text className="text-danger">{errors.name}<br/></Form.Text>}
           </Form.Group>
           <Form.Group>
             <Form.Label>Отчество (при наличии)</Form.Label>
@@ -481,8 +531,10 @@ const WantedPersonsPage = () => {
             <Form.Control
               type="date"
               value={formData.birthDate}
-              onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+              onChange={(e) => handleInputChange("birthDate", e.target.value)}
+              isInvalid={!!errors.birthDate}
             />
+            {errors.birthDate && <Form.Text className="text-danger">{errors.birthDate}<br/></Form.Text>}
           </Form.Group>
           <Form.Group>
             <Form.Label>Описание (необязательно)</Form.Label>
@@ -495,12 +547,12 @@ const WantedPersonsPage = () => {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button className="me-2" onClick={handleSave}>
+          <button className="apply-button" onClick={handleSave}>
             Сохранить
-          </Button>
-          <Button className="btn btn-secondary me-2" onClick={handleCloseModal}>
+          </button>
+          <button className="cansel-button" onClick={handleCloseModal}>
             Отменить
-          </Button>
+          </button>
         </Modal.Footer>
       </Modal>
 
@@ -509,15 +561,15 @@ const WantedPersonsPage = () => {
           <Modal.Title>Подтвердите удаление</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Вы уверены, что хотите удалить разыскиваемого {confirmDeletePerson?.surname} {confirmDeletePerson?.name} {confirmDeletePerson?.patronymic} {confirmDeletePerson?.birthDate}?
+          Вы уверены, что хотите удалить {confirmDeletePerson?.surname} {confirmDeletePerson?.name} {confirmDeletePerson?.patronymic} {confirmDeletePerson?.birthDate}?
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="danger" onClick={confirmDeleteClick}>
+          <button className="reset-button" onClick={confirmDeleteClick}>
             Удалить
-          </Button>
-          <Button variant="secondary" onClick={cancelDeleteClick}>
+          </button>
+          <button className="cansel-button" onClick={cancelDeleteClick}>
             Отмена
-          </Button>
+          </button>
         </Modal.Footer>
       </Modal>
     </div>

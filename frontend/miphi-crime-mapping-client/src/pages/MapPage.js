@@ -241,7 +241,7 @@ const MapPage = () => {
       };
 
       setPoints((prev) => [...prev, newPoint]);
-      if(connection) await connection.invoke("AddingCrime", point);
+      if(connection?.state === "Connected") await connection.invoke("AddingCrime", point);
       setCurrentPoint(null);
       setIsModalOpen(false);
       showNotification("Метка успешно сохранена!");
@@ -252,7 +252,6 @@ const MapPage = () => {
 
   const fetchUpdatePoint = async (point) => {
     try {
-
       const response = await api.patch(`/api/crime-marks`, point);
       console.log(response.data.message);
       const crimeType = crimeTypes.find((type) => type.id === point.crimeTypeId);
@@ -271,7 +270,7 @@ const MapPage = () => {
         prev.map((p) => (p.id === updatePoint.id ? updatePoint : p))
       );
 
-      if(connection) await connection.invoke("UpdatingCrime", point);
+      if(connection?.state === "Connected") await connection.invoke("UpdatingCrime", point);
       setEditPoint(null);
       showNotification("Изменения метки сохранены!");
     } catch (error) {
@@ -284,7 +283,7 @@ const MapPage = () => {
       await api.delete(`/api/crime-marks/${point.id}`);
 
       setPoints((prev) => prev.filter((p) => p.id !== point.id));
-      if(connection) await connection.invoke("DeletingCrime", point.id);
+      if(connection?.state === "Connected") await connection.invoke("DeletingCrime", point.id);
       setEditPoint(null);
       showNotification("Метка успешно удалена!");
     } catch (error) {

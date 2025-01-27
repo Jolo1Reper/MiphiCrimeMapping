@@ -17,7 +17,12 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<WantedPerson>> GetAllWantedPersons()
         {
-            return await _db.WantedPersons.AsNoTracking().ToListAsync();
+            return await _db.WantedPersons
+                .AsNoTracking()
+                .OrderBy(p => p.Surname)
+                .ThenBy(p => p.Name)
+                .ThenBy(p => p.Patronymic)
+                .ToListAsync();
         }
 
         public bool ContainWantedPerson(string name, string surname, string? patronymic, DateTime birthDate)
@@ -90,7 +95,9 @@ namespace Infrastructure.Repositories
 
             var result = await query
                 .Include(p => p.Crimes)
-                .OrderBy(p => p.CreateAt)
+                .OrderBy(p => p.Surname)
+                .ThenBy(p => p.Name)
+                .ThenBy(p => p.Patronymic)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(wantedPerson => new ValueTuple<WantedPerson, int>(wantedPerson, wantedPerson.Crimes.Count))

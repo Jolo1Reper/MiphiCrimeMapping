@@ -9,7 +9,7 @@ namespace Domain.Entities
         public CrimeType Type { get; set; } = null!;
         public Guid? WantedPersonId { get; set; }
         public WantedPerson? WantedPerson { get; set; }
-        public string? Location { get; set; }
+        public string Location { get; set; } = null!;
         public DateTime CreateAt { get; set; }
         public DateTime CrimeDate { get; set; }
         public string? Description { get; set; }

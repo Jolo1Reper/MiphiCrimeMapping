@@ -7,17 +7,11 @@ ChartJS.register(ArcElement, Tooltip, Legend, BarElement,  CategoryScale, Linear
 
 const Statistic = ({ onClose, statsData = [], crimeTypes = [], wantedPersons = [] }) => {
 
-  const [selectedCrimeTypeIds, setSelectedCrimeTypeIds] = useState(
-    crimeTypes.map((type) => type.id)
-  );
+  const [selectedCrimeTypeIds, setSelectedCrimeTypeIds] = useState([]);
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("desc");
-  const [selectedPersonIds, setSelectedPersonIds] = useState([
-      ...wantedPersons.map((person) => person.id),
-      "unknown"
-    ]
-  );
+  const [selectedPersonIds, setSelectedPersonIds] = useState([]);
   const [viewMode, setViewMode] = useState("crimeTypes");
 
   const dropdownRef = useRef(null);
@@ -58,12 +52,9 @@ const Statistic = ({ onClose, statsData = [], crimeTypes = [], wantedPersons = [
   };
 
   const handleResetFilters = () => {
-    setSelectedCrimeTypeIds(crimeTypes.map((type) => type.id));
+    setSelectedCrimeTypeIds([]);
     setDateRange({ start: "", end: "" });
-    setSelectedPersonIds([
-      ...wantedPersons.map((person) => person.id),
-      "unknown"
-    ]);
+    setSelectedPersonIds([]);
     setSortOrder("desc");
   };
 
@@ -77,7 +68,8 @@ const Statistic = ({ onClose, statsData = [], crimeTypes = [], wantedPersons = [
     );
   };
 
-  const filteredDataForTypes = statsData.filter((stat) => {
+  const filteredDataForTypes = selectedCrimeTypeIds.length !== 0
+  ? statsData.filter((stat) => {
     const isInType =
       selectedCrimeTypeIds.includes(
         crimeTypes.find((type) => type.title === stat.title)?.id
@@ -88,11 +80,19 @@ const Statistic = ({ onClose, statsData = [], crimeTypes = [], wantedPersons = [
       (!dateRange.end || new Date(stat.crimeDate) <= new Date(dateRange.end));
 
     return isInType && isInDateRange;
+  })
+  : statsData.filter((stat) => {
+    const isInDateRange =
+      (!dateRange.start || new Date(stat.crimeDate) >= new Date(dateRange.start)) &&
+      (!dateRange.end || new Date(stat.crimeDate) <= new Date(dateRange.end));
+
+    return isInDateRange;
   });
 
-  const filteredCrimeTypes = crimeTypes.filter((type) =>
+  const filteredCrimeTypes = selectedCrimeTypeIds.length !== 0
+  ? crimeTypes.filter((type) =>
     selectedCrimeTypeIds.includes(type.id)
-  );
+  ) : crimeTypes;
 
   const labelsCrimeTypes = filteredCrimeTypes.map((type) => type.title);
   const dataCrimeTypes = filteredCrimeTypes.map((type) => {
@@ -149,9 +149,9 @@ const Statistic = ({ onClose, statsData = [], crimeTypes = [], wantedPersons = [
     },
   ];
 
-  const filteredPersons = fullPersons.filter(
+  const filteredPersons = selectedPersonIds.length !==0 ? fullPersons.filter(
     (person) => person.crimeCount > 0 && selectedPersonIds.includes(person.id)
-  );
+  ) : fullPersons.filter((person) => person.crimeCount > 0);
   
   const sortedPersons = [...filteredPersons].sort((a, b) => {
     return sortOrder === "desc"
@@ -180,7 +180,11 @@ const Statistic = ({ onClose, statsData = [], crimeTypes = [], wantedPersons = [
   };
 
   const chartOptionsWantedPersons = {
+    responsive: true, // График будет адаптивным
+    maintainAspectRatio: false,
     plugins: {
+      responsive: true,
+      maintainAspectRatio: false,
       legend: {
         labels: {
           color: "white",
@@ -196,6 +200,8 @@ const Statistic = ({ onClose, statsData = [], crimeTypes = [], wantedPersons = [
           color: "rgba(255, 255, 255, 0.2)",
         },
       },
+      min: 0,
+      max: 15,
       y: {
         ticks: {
           color: "white",
@@ -203,6 +209,11 @@ const Statistic = ({ onClose, statsData = [], crimeTypes = [], wantedPersons = [
         grid: {
           color: "rgba(255, 255, 255, 0.2)",
         },
+      },
+    },
+    datasets: {
+      bar: {
+        maxBarThickness: 50,
       },
     },
   };
@@ -338,8 +349,10 @@ const Statistic = ({ onClose, statsData = [], crimeTypes = [], wantedPersons = [
         </div>
         <div className="stats-content">
           {sortedPersons.length > 0 ? (
-            <div className="stats-chart">
-              <Bar data={chartDataWantedPersons} options={chartOptionsWantedPersons}/>
+            <div className="stats-chart bar-chart">
+                <div className="bar-div" style={{ minWidth: `${chartDataWantedPersons.labels.length * 60}px` }}>
+                  <Bar data={chartDataWantedPersons} options={chartOptionsWantedPersons}/>
+                </div>
             </div>
           ) : (
             <p>Нет данных для отображения статистики по преступникам.</p>

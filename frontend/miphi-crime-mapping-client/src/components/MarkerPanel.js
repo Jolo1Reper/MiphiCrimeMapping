@@ -9,7 +9,7 @@ const MarkerPanel = ({ points = [], onMarkerSelect }) => {
   return (
     <div className="marker-panel">
       <div className="marker-header">
-        <h3 className="marker-title">Метки</h3>
+        <h3 className="marker-title">Метки преступлений</h3>
       </div>
       <div className="marker-content">
         {points.length > 0 ? (

@@ -5,6 +5,7 @@ import MapPage from "./pages/MapPage";
 import WantedPersonsPage from "./pages/WantedPersonsPage";
 import CrimeTypesListPage from "./pages/CrimeTypesListPage";
 import AboutPage from "./pages/AboutPage";
+import "./App.css";
 
 const App = () => {
   return (

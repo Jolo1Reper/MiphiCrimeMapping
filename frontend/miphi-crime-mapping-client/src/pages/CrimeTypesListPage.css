@@ -50,9 +50,11 @@
     padding: 0;
 }
 
-.button-group {
+.crime-types-content .button-group {
+    margin: auto;
+    width: 80%;
     display: flex;
-    gap: 10px;
+    gap: 30px;
 }
 
 .search-bar {
@@ -122,6 +124,12 @@
     color: white;
 }
 
+.crime-types-content .filter-input:focus {
+    border-color: #1abc9c;
+    background-color: #1abc9c;
+    color: #2c3e50;
+}
+
 .crime-types-content .filter-input::placeholder {
     color: #bdc3c7;
     font-style: italic;
@@ -135,12 +143,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.crime-types-content .search-button:hover {
-    transform: scale(1.1);
-}
 
 .crime-types-content .search-icon {
     width: 20px;
@@ -157,13 +161,12 @@
     border-radius: 30px;
     cursor: pointer;
     font-size: 16px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: background-color 0.3s ease;
     width: 15%;
   }
   
   .crime-types-content .refresh-button:hover {
     background-color: #16a085;
-    transform: scale(1.05);
 }
   
 .crime-types-content .refresh-button:active {
@@ -182,7 +185,7 @@
     border-radius: 30px;
     cursor: pointer;
     font-size: 16px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: background-color 0.3s ease;
     width: 100%;
     text-align: center;
 }
@@ -194,3 +197,8 @@
 .crime-types-content .add-button:active {
     background-color: #138d75;
 }
+
+.crime-types-content .add-button:focus {
+    outline: none;
+}
+

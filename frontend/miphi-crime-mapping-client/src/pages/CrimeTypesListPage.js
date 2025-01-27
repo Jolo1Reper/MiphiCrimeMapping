@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import "./CrimeTypesListPage.css";
-import { Button, Form, Accordion, Modal, Pagination } from "react-bootstrap";
+import { Form, Accordion, Modal, Pagination } from "react-bootstrap";
 import api from "../api";
 import { baseURL } from "../api";
 import capitalizeFirstLetter from "../services/capitalizeFirstLetter";
 
+function getRandomColor() {
+  return `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+}
+
+const resetFormData = () => {
+  return { title: "", description: "", link: "", color: getRandomColor() };
+
+}
 const CrimeTypesListPage = () => {
   const [connection, setConnection] = useState(null);
   const [crimeTypes, setCrimeTypes] = useState([]);
@@ -14,10 +22,7 @@ const CrimeTypesListPage = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmDeleteType, setConfirmDeleteType] = useState(null);
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    link: "",
-    color: "#1E90FF",
+    ...resetFormData(),
     count: 0
   });
 
@@ -26,6 +31,7 @@ const CrimeTypesListPage = () => {
   const PAGE_SIZE = 10;
   const [totalItems, setTotalItems] = useState(1);
   const [search, setSearch] = useState("");
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     fetchGetAllCrimeTypes(currentPage);
@@ -84,7 +90,7 @@ const CrimeTypesListPage = () => {
       setTotalItems(totalItems);
 
     } catch(error) {
-      console.error("Ошибка при загрузке типов преступлений:", error.response);
+      console.error("Ошибка при загрузке типов преступлений:", error);
     }
   };
 
@@ -136,17 +142,32 @@ const CrimeTypesListPage = () => {
     });
   }
 
-  const handleSave = () => {
+  const handleSave = async() => {
+    let success;
     if (isEditingType) {
-      handleUpdateCrimeType(isEditingType.id);
+      success = await handleUpdateCrimeType(isEditingType.id);
     } else {
-      handleAddCrimeType();
+      success = await handleAddCrimeType();
     }
-    handleCloseModal();
+    if(success) handleCloseModal();
   };
 
   const handleAddCrimeType = async () => {
-    const newCrimeType = await fetchAddCrimeType(formData);
+    const valid = validateForm();
+    if (!valid) {
+      console.log("No valid");
+      return false;
+    }
+    
+    const payload = {
+      title: formData.title || null,
+      description: formData.description || null,
+      link: formData.link || null,
+      color: formData.color || null,
+    };
+
+    const newCrimeType = await fetchAddCrimeType(payload);
+    if(!newCrimeType) return false;
     const updatedcrimeTypes = [...crimeTypes, newCrimeType];
     if(updatedcrimeTypes.length <= PAGE_SIZE) {
       setCrimeTypes(updatedcrimeTypes);
@@ -157,59 +178,72 @@ const CrimeTypesListPage = () => {
       setTotalPages(updatedTotalPages);
       setTotalItems(newTotalItems);
     }
-    await connection.invoke("AddingType", newCrimeType);
-    setFormData({ title: "", description: "", link: "", color: "#1E90FF" });
+    if(connection?.state === "Connected") await connection.invoke("AddingType", newCrimeType);
+    setFormData(resetFormData());
+    return true;
   };
 
   const fetchAddCrimeType = async (crimeType) => {
     try {
       crimeType.title = capitalizeFirstLetter(crimeType.title);
-      const payload ={
-        title: crimeType.title,
-        description: crimeType.description || null,
-        link: crimeType.link || null,
-        color: crimeType.color || null
-      }
-      const response = await api.post("/api/crime-types", payload);
+
+      const response = await api.post("/api/crime-types", crimeType);
       console.log(response.data.message);
     
+      if (response.status >= 400) {
+        return;
+      }
+
       return {
         id: response.data.id,
-        ...payload,
+        ...crimeType,
         count: 0,
       };
 
     } catch(error) {
-      console.error("Ошибка при добавлении типа преступления:", error.response);
+      console.error("Ошибка при запросе на добавление типа преступления:", error);
     }
   };
 
   const handleUpdateCrimeType = async (id) => {
-    const updateCrimeType = await fetchUpdateCrimeType(id, formData);
+    const valid = validateForm();
+    if (!valid) {
+      console.log("No valid");
+      return false;
+    }
+    
+    const payload = {
+      id: id,
+      title: formData.title || null,
+      description: formData.description || null,
+      link: formData.link || null,
+      color: formData.color || null,
+    }
+
+    const updateCrimeType = await fetchUpdateCrimeType(payload);
+    if(!updateCrimeType) return false;
     setCrimeTypes((prev) =>
       prev.map((ct) => (ct.id === updateCrimeType.id ? updateCrimeType : ct))
     );
-    await connection.invoke("UpdatingType", updateCrimeType);
-    setFormData({ title: "", description: "", link: "", color: "#1E90FF" });
+    if(connection?.state === "Connected") await connection.invoke("UpdatingType", updateCrimeType);
+    setFormData(resetFormData());
     setIsEditingType(null);
+    return true;
   };
 
-  const fetchUpdateCrimeType = async (id, crimeType) => {
+  const fetchUpdateCrimeType = async (crimeType) => {
     try {
       crimeType.title = capitalizeFirstLetter(crimeType.title);
-      const payload = {
-        id: id,
-        title: crimeType.title,
-        description: crimeType.description || null,
-        link: crimeType.link || null,
-        color: crimeType.color || null,
-      }
-      const response = await api.patch("/api/crime-types", payload);
-      console.log(response.data.message);
 
-      return { ...payload, count: isEditingType.count };
+      const response = await api.patch("/api/crime-types", crimeType);
+      console.log(response.data.message);
+      if (response.status >= 400) {
+        return;
+      }
+
+      return { ...crimeType, count: isEditingType.count };
     } catch(error) {
-      console.error("Ошибка при редактировании типа преступления:", error.response);
+      console.error("Ошибка при редактировании типа преступления:", error);
     }
   };
 
@@ -217,7 +251,7 @@ const CrimeTypesListPage = () => {
     await fetchDeleteCrimeType(id);
     if(isEditingType !== null && isEditingType.id === id){
       setIsEditingType(null);
-      setFormData({ title: "", description: "", link: "" });
+      setFormData(resetFormData());
     }
     const updateCrimeTypes = crimeTypes.filter((crimeType) => crimeType.id !== id);
 
@@ -231,38 +265,39 @@ const CrimeTypesListPage = () => {
       setTotalItems(newTotalItems);
       await fetchGetAllCrimeTypes(currentPage);
     }
-    await connection.invoke("DeletingType", id);
+    if(connection?.state === "Connected") await connection.invoke("DeletingType", id);
   };
 
   const fetchDeleteCrimeType = async (id) => {
     try {
       await api.delete(`/api/crime-types/${id}`);
     } catch(error) {
-      console.error("Ошибка при удалении типа преступления:", error.response);
+      console.error("Ошибка при удалении типа преступления:", error);
     }
   }
 
   const handleEdit = (crimeType) => {
     setIsEditingType(crimeType);
     setFormData({
-      title: crimeType.title,
+      title: crimeType.title || "",
       description: crimeType.description || "",
       link: crimeType.link || "",
-      color: crimeType.color || "#1E90FF",
+      color: crimeType.color,
     });
     setShowModal(true);
   };
 
   const handleOpenModal = () => {
     setIsEditingType(null);
-    setFormData({ title: "", description: "", link: "", color: "#1E90FF" });
+    setFormData(resetFormData());
     setShowModal(true);
   };
 
   const handleCloseModal = () => {
     setIsEditingType(null);
-    setFormData({ title: "", description: "", link: "", color: "#1E90FF" });
+    setFormData((prev) => ({...resetFormData(), color: prev.color}));
     setShowModal(false);
+    setErrors({});
   };
 
   const handleDeleteClick = (type) => {
@@ -296,10 +331,29 @@ const CrimeTypesListPage = () => {
 
   const handleSearchChange = (e) => setSearch(e.target.value);
 
+  const handleInputChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+    setErrors((prevErrors) => ({ ...prevErrors, [field]: "" }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.title) {
+      newErrors.title = "Название типа преступления обязательно.";
+    }
+    if (!formData.color) {
+      newErrors.color = "Цвет обязателен.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   return (
     <div className="crime-types-list-page">
       <header className="crime-types-header">
-        <h2>Типы преступлений</h2>
+        <h2>Информация о типах преступлений</h2>
       </header>
       <div className="crime-types-content">
       <div className="filter-section">
@@ -371,12 +425,12 @@ const CrimeTypesListPage = () => {
                 ></span>
               </p>
               <div className="button-group">
-                <Button variant="primary" size="sm" onClick={() => handleEdit(crimeType)}>
+                <button className="apply-button" onClick={() => handleEdit(crimeType)}>
                     Изменить
-                </Button>
-                <Button variant="danger" size="sm" onClick={() => handleDeleteClick(crimeType)}>
+                </button>
+                <button className="reset-button" onClick={() => handleDeleteClick(crimeType)}>
                     Удалить
-                </Button>
+                </button>
               </div>
           </Accordion.Body>
         </Accordion.Item>
@@ -437,8 +491,10 @@ const CrimeTypesListPage = () => {
             <Form.Control
               type="text"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) => handleInputChange("title", e.target.value)}
+              isInvalid={!!errors.title}
             />
+            {errors.title && <Form.Text className="text-danger">{errors.title}</Form.Text>}
           </Form.Group>
           <Form.Group>
             <Form.Label>Ссылка на статью (необязательно)</Form.Label>
@@ -462,17 +518,19 @@ const CrimeTypesListPage = () => {
             <Form.Control
               type="color"
               value={formData.color}
-              onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+              onChange={(e) => handleInputChange("color", e.target.value)}
+              isInvalid={!!errors.color}
             />
+            {errors.color && <Form.Text className="text-danger">{errors.color}</Form.Text>}
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" onClick={handleSave}>
+          <button className="apply-button" onClick={handleSave}>
             Сохранить
-          </Button>
-          <Button variant="secondary" onClick={handleCloseModal}>
+          </button>
+          <button className="cansel-button" onClick={handleCloseModal}>
             Отменить
-          </Button>
+          </button>
         </Modal.Footer>
       </Modal>
 
@@ -484,12 +542,12 @@ const CrimeTypesListPage = () => {
           Вы уверены, что хотите удалить тип преступления <strong>{confirmDeleteType?.title}</strong>?
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="danger" onClick={confirmDeleteClick}>
+          <button className="reset-button" onClick={confirmDeleteClick}>
             Удалить
-          </Button>
-          <Button variant="secondary" onClick={cancelDeleteClick}>
+          </button>
+          <button className="cansel-button" onClick={cancelDeleteClick}>
             Отмена
-          </Button>
+          </button>
         </Modal.Footer>
       </Modal>
     </div>
