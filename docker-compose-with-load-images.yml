@@ -18,7 +18,7 @@ services:
     container_name: crime_map_api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ALLOWED_ORIGINS=http://localhost:3000,https://localhost:3000
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:80,https://localhost:443,https://localhost:3000
       - CONNECTION_STRING=Host=database;Port=5432;Database=crimemapdb;Username=postgres;Password=postgres
     depends_on:
       - database
@@ -27,11 +27,9 @@ services:
       - "8081:8081"
      
   client:
-    image: turbo821/miphi-crime-mapping-client:01-27
+    image: turbo821/miphi-crime-mapping-client:01-29
     container_name: crime_map_client
-    environment:
-      - REACT_APP_API_URL=http://localhost:8080
     depends_on:
       - api
     ports:
-      - "3000:3000"
+      - "80:80"
