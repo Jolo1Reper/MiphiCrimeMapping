@@ -1,5 +1,8 @@
 # MephiCrimeMapping
 
+## Релокация
+С 2025-02-13 репозиторий переехал на https://github.com/turbo821/MythCrimeMapping
+
 ## Как запустить в Docker
 
 Перейдя в директорию репозитория написать команду:
